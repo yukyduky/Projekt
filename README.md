@@ -4,7 +4,7 @@ DirectX
 What techniques to implement:
 
 CORE TECHNIQUES(1):
-Deferred Rendering\n
+Deferred Rendering
 Skeletal Animation (om vi får tid över)
 
 GEOMETRY(2):
