@@ -69,7 +69,7 @@ bool GameManager::InitScene()
 
 void GameManager::Update()
 {
-
+	//HAHA JAG ÄR BÄST //GANON
 }
 
 
