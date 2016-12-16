@@ -1,9 +1,11 @@
 #include "GameManager.h"
-// lelelel
 
 
 GameManager::GameManager()
 {
+	world = XMMatrixIdentity();
+	view = XMMatrixIdentity();
+	proj = XMMatrixIdentity();
 }
 
 
@@ -14,10 +16,10 @@ GameManager::~GameManager()
 
 bool GameManager::InitializeDirectX(HINSTANCE hInstance, HWND hwnd)
 {
-	//Describe our Buffer
+	// Describe the Buffer
 	DXGI_MODE_DESC bufferDesc;
 
-	ZeroMemory(&bufferDesc, sizeof(DXGI_MODE_DESC));
+	memset(&bufferDesc, 0, sizeof(DXGI_MODE_DESC));
 
 	bufferDesc.Width = WIDTH;
 	bufferDesc.Height = HEIGHT;
@@ -27,10 +29,10 @@ bool GameManager::InitializeDirectX(HINSTANCE hInstance, HWND hwnd)
 	bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	bufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
-	//Describe our SwapChain
+	// Describe the SwapChain
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 
-	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
+	memset(&swapChainDesc, 0, sizeof(DXGI_SWAP_CHAIN_DESC));
 
 	swapChainDesc.BufferDesc = bufferDesc;
 	swapChainDesc.SampleDesc.Count = 1;
@@ -42,20 +44,19 @@ bool GameManager::InitializeDirectX(HINSTANCE hInstance, HWND hwnd)
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
 
-	//Create our SwapChain
-	D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL,
-		D3D11_SDK_VERSION, &swapChainDesc, &SwapChain, &gDevice, NULL, &gDevCon);
+	// Create the SwapChain
+	D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, NULL, nullptr, NULL, D3D11_SDK_VERSION, &swapChainDesc, &SwapChain, &gDevice, nullptr, &gDevCon);
 
-	//Create our BackBuffer
+	// Create the BackBuffer
 	ID3D11Texture2D* BackBuffer;
 	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);
 
-	//Create our Render Target
-	gDevice->CreateRenderTargetView(BackBuffer, NULL, &gRenderTargetView);
+	// Create the Render Target
+	gDevice->CreateRenderTargetView(BackBuffer, nullptr, &gRenderTargetView);
 	BackBuffer->Release();
 
-	//Set our Render Target
-	gDevCon->OMSetRenderTargets(1, &gRenderTargetView, NULL);
+	// Set the Render Target
+	gDevCon->OMSetRenderTargets(1, &gRenderTargetView, nullptr);
 
 	return true;
 }
@@ -69,25 +70,27 @@ bool GameManager::InitScene()
 
 void GameManager::Update()
 {
-	//HAHA JAG ÄR BÄST //GANON
+
 }
 
 
 void GameManager::Render()
 {
-	// Clear the backbuffer
 	Color bgColor(255, 0, 255, 1.0f);
-
+	// Clear the backbuffer
 	gDevCon->ClearRenderTargetView(gRenderTargetView, bgColor);
 
-	//Present the backbuffer to the screen
+
+
+	// Present the backbuffer to the screen
 	SwapChain->Present(0, 0);
 }
 
 
 void GameManager::Release()
 {
-	SwapChain->Release();
 	gDevice->Release();
 	gDevCon->Release();
+	SwapChain->Release();
+	gRenderTargetView->Release();
 }

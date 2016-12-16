@@ -32,6 +32,11 @@ private:
 	ID3D11Device* gDevice;
 	ID3D11DeviceContext* gDevCon;
 	ID3D11RenderTargetView* gRenderTargetView;
+
+	// Matrices
+	Matrix world;
+	Matrix view;
+	Matrix proj;
 };
 
 #endif
