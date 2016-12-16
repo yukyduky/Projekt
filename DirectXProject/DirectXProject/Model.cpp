@@ -6,8 +6,3 @@ Model::Model()
 {
 	world = XMMatrixIdentity();
 }
-
-
-Model::~Model()
-{
-}

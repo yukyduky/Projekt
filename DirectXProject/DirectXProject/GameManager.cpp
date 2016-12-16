@@ -45,11 +45,11 @@ bool GameManager::InitializeDirectX(HINSTANCE hInstance, HWND hwnd)
 
 
 	// Create the SwapChain
-	D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, NULL, nullptr, NULL, D3D11_SDK_VERSION, &swapChainDesc, &SwapChain, &gDevice, nullptr, &gDevCon);
+	D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, NULL, nullptr, NULL, D3D11_SDK_VERSION, &swapChainDesc, &gSwapChain, &gDevice, nullptr, &gDevCon);
 
 	// Create the BackBuffer
 	ID3D11Texture2D* BackBuffer;
-	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);
+	gSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);
 
 	// Create the Render Target
 	gDevice->CreateRenderTargetView(BackBuffer, nullptr, &gRenderTargetView);
@@ -62,8 +62,32 @@ bool GameManager::InitializeDirectX(HINSTANCE hInstance, HWND hwnd)
 }
 
 
+void GameManager::SetViewport()
+{
+	D3D11_VIEWPORT viewport;
+	memset(&viewport, 0, sizeof(D3D11_VIEWPORT));
+
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = WIDTH;
+	viewport.Height = HEIGHT;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	// Set the Viewport
+	gDevCon->RSSetViewports(1, &viewport);
+}
+
 bool GameManager::InitScene()
 {
+	if (!shaderForward.CreateShaders(gDevice))
+		return false;
+
+	shaderForward.InitScene(gDevCon);
+
+	if (!box.InitScene(gDevCon, gDevice))
+		return false;
+	
 	return true;
 }
 
@@ -80,10 +104,10 @@ void GameManager::Render()
 	// Clear the backbuffer
 	gDevCon->ClearRenderTargetView(gRenderTargetView, bgColor);
 
-
+	box.Render(gDevCon);
 
 	// Present the backbuffer to the screen
-	SwapChain->Present(0, 0);
+	gSwapChain->Present(0, 0);
 }
 
 
@@ -91,6 +115,8 @@ void GameManager::Release()
 {
 	gDevice->Release();
 	gDevCon->Release();
-	SwapChain->Release();
+	gSwapChain->Release();
 	gRenderTargetView->Release();
+	box.Release();
+	shaderForward.Release();
 }

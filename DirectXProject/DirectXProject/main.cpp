@@ -32,12 +32,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		return 0;
 	}
 
-	// Initializes the scene
-	if (!gm.InitScene())    //Initialize our scene
+	// Initializes the Scene
+	if (!gm.InitScene())
 	{
 		MessageBox(0, "Scene Initialization - Failed", "Error", MB_OK);
 		return 0;
 	}
+
+	// Sets the viewport
+	gm.SetViewport();
 
 	// Game Loop!
 	while (true)
@@ -62,6 +65,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	// Release the memory
 	gm.Release();
+	//DestroyWindow(wm.getWinHandle());
 
-	return 0;
+	return (int)msg.wParam;
 }

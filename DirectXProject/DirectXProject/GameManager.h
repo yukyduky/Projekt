@@ -5,6 +5,8 @@
 #include <d3d11.h>
 #include <SimpleMath.h>
 #include "globals.h"
+#include "Box.h"
+#include "ForwardShader.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -18,6 +20,8 @@ public:
 	// Initializes DirectX
 	bool InitializeDirectX(HINSTANCE hInstance, HWND hwnd);
 	// Initializes the scene
+	void SetViewport();
+	// Initialize the scene
 	bool InitScene();
 	// Update
 	void Update();
@@ -28,7 +32,7 @@ public:
 
 private:
 	// COM Objects
-	IDXGISwapChain* SwapChain;
+	IDXGISwapChain* gSwapChain;
 	ID3D11Device* gDevice;
 	ID3D11DeviceContext* gDevCon;
 	ID3D11RenderTargetView* gRenderTargetView;
@@ -37,6 +41,10 @@ private:
 	Matrix world;
 	Matrix view;
 	Matrix proj;
+
+	// Objects
+	Box box;
+	ForwardShader shaderForward;
 };
 
 #endif
