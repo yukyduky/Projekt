@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "Box.h"
 #include "ForwardShader.h"
+#include "Camera.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -31,11 +32,18 @@ public:
 	void Release();
 
 private:
+	// Functions
+	bool CreateConstBuffer();
+	bool CreateDepthStencilView();
+
 	// COM Objects
 	IDXGISwapChain* gSwapChain;
 	ID3D11Device* gDevice;
 	ID3D11DeviceContext* gDevCon;
 	ID3D11RenderTargetView* gRenderTargetView;
+	ID3D11Buffer* gObjBuffer;
+	ID3D11DepthStencilView* gDepthStencilView;
+	ID3D11Texture2D* gDepthStencilBuffer;
 
 	// Matrices
 	Matrix world;
@@ -45,6 +53,17 @@ private:
 	// Objects
 	Box box;
 	ForwardShader shaderForward;
+	Camera cam;
+
+	// Constant buffer
+	struct cbObject
+	{
+		Matrix wvp;
+	};
+	cbObject cbObj;
+
+	// Error handling
+	HRESULT hr;
 };
 
 #endif

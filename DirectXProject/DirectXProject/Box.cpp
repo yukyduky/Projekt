@@ -4,7 +4,7 @@
 
 Box::Box()
 {
-
+	rot = 0;
 }
 
 Box::~Box()
@@ -22,74 +22,70 @@ bool Box::PositionData(ID3D11Device* gDevice)
 
 	Vertex v[] =
 	{	
-		-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		/*// Vertices
+		// Vertices
 		// ---Position---|---------Color---------|--Texture--
 		// Front Face
 		-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
 		1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,		// TopRight
-		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,	// BottomLeft
+		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
 		1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
 
 		// Right Face
-		1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
+		1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
 		1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
-		1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
-		1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
+		1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
+		1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
 
 		// Left Face
 		-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
-		-1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
-		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,	// BottomLeft
-		-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
+		-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
+		-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,	// BottomLeft
+		-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
 
 		// Back Face
-		1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
-		-1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,	// TopRight
-		1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
-		-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
+		1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
+		-1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
+		1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
+		-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
 
 		// Top Face
-		-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
-		-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
-		1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
+		-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
+		1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
+		-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
+		1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
 
 		// Bottom Face
-		-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
-		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
-		1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight*/
+		-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
+		1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
+		-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
+		1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
 	};
 
 	// Index of how to draw the vertices
 	DWORD indices[] = {
-		0, 1, 2,
-		/*// Front Face
+		// Front Face
 		0,  1,  2,
 		2,  1,  3,
 
-		// Back Face
+		// Right Face
 		4,  5,  6,
 		6,  5,  7,
 
-		// Top Face
+		// Left Face
 		8,  9, 10,
-		12, 9, 11,
+		10, 9, 11,
 
-		// Bottom Face
+		// Back Face
 		12, 13, 14,
 		14, 13, 15,
 
-		// Left Face
+		// Top Face
 		16, 17, 18,
 		18, 17, 19,
 
-		// Right Face
+		// Bottom Face
 		20, 21, 22,
-		22, 21, 23*/
+		22, 21, 23
 	};
 
 	// Describe the index buffer
@@ -159,8 +155,8 @@ bool Box::InitScene(ID3D11DeviceContext * gDevCon, ID3D11Device* gDevice)
 	if (!PositionData(gDevice))
 		return false;
 
-	if (!SetTexture(gDevice))
-		return false;
+	//if (!SetTexture(gDevice))
+		//return false;
 
 	// Set the index buffer
 	gDevCon->IASetIndexBuffer(gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -174,21 +170,27 @@ bool Box::InitScene(ID3D11DeviceContext * gDevCon, ID3D11Device* gDevice)
 
 void Box::Update()
 {
+	rot += 0.0001;
+	if (rot >= 6.28)
+		rot = 0;
 
+	rotate = rotate.CreateRotationY(rot);
+
+	world = rotate;
 }
 
 void Box::Render(ID3D11DeviceContext* gDevCon)
 {
 	// Update the pixel shader with the texure
 	//gDevCon->PSSetShaderResources(0, 1, &gTextureRV);
-	gDevCon->DrawIndexed(3, 0, 0);
+	gDevCon->DrawIndexed(36, 0, 0);
 }
 
 void Box::Release()
 {
 	gIndexBuffer->Release();
 	gVertBuffer->Release();
-	gTextureRV->Release();
+	//gTextureRV->Release();
 }
 
 Matrix Box::getWorldMatrix() const

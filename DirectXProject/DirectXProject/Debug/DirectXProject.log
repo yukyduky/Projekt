@@ -1,2 +1,3 @@
 ﻿  Box.cpp
+c:\users\jacob\dropbox\programmering\3d labbar\projekt\projekt\directxproject\directxproject\box.cpp(173): warning C4305: '+=': truncation from 'double' to 'float'
   DirectXProject.vcxproj -> C:\Users\Jacob\Dropbox\Programmering\3D Labbar\Projekt\Projekt\DirectXProject\Debug\DirectXProject.exe

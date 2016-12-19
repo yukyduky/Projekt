@@ -25,9 +25,13 @@ private:
 	ID3D11Buffer* gVertBuffer;
 	ID3D11ShaderResourceView* gTextureRV;
 
+	// Matrices
+	Matrix rotate;
+
 	// Variables
 	UINT stride;
 	UINT offset;
+	float rot;
 
 	// Error handling
 	HRESULT hr;

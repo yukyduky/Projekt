@@ -1,3 +1,8 @@
+cbuffer cbObject : register(b0)
+{
+	float4x4 wvp;
+};
+
 struct VS_OUT
 {
 	float4 pos : SV_POSITION;
@@ -16,7 +21,7 @@ VS_OUT VS(VS_IN input)
 {
 	VS_OUT output;
 
-	output.pos = float4(input.pos, 1);
+	output.pos = mul(float4(input.pos, 1), wvp);
 	output.color = input.color;
 	output.texCoord = input.texCoord;
 
