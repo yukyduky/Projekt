@@ -155,9 +155,6 @@ bool Box::InitScene(ID3D11DeviceContext * gDevCon, ID3D11Device* gDevice)
 	if (!PositionData(gDevice))
 		return false;
 
-	//if (!SetTexture(gDevice))
-		//return false;
-
 	// Set the index buffer
 	gDevCon->IASetIndexBuffer(gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	// Set the vertex buffer
@@ -168,9 +165,9 @@ bool Box::InitScene(ID3D11DeviceContext * gDevCon, ID3D11Device* gDevice)
 	return true;
 }
 
-void Box::Update()
+void Box::Update(double dt)
 {
-	rot += 0.0001;
+	rot += 1 * dt;
 	if (rot >= 6.28)
 		rot = 0;
 

@@ -8,6 +8,7 @@
 #include "Box.h"
 #include "ForwardShader.h"
 #include "Camera.h"
+#include "Time.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -54,6 +55,10 @@ private:
 	Box box;
 	ForwardShader shaderForward;
 	Camera cam;
+	Time time;
+
+	// Variables
+	double dt;
 
 	// Constant buffer
 	struct cbObject

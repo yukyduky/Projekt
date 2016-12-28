@@ -21,7 +21,6 @@ public:
 	Matrix getWorldMatrix() const;
 	Matrix getViewMatrix() const;
 	Matrix getProjMatrix() const;
-	Matrix getWVPMatrix() const;
 
 
 private:
@@ -29,7 +28,6 @@ private:
 	Matrix world;
 	Matrix view;
 	Matrix proj;
-	Matrix wvp;
 
 	// Vectors
 	Vector4 pos;

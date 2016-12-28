@@ -161,6 +161,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Time.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +209,7 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Time.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,10 @@ GameManager::GameManager()
 	world = XMMatrixIdentity();
 	view = XMMatrixIdentity();
 	proj = XMMatrixIdentity();
+
+	time.StartTimer();
+
+	dt = 0.0f;
 }
 
 
@@ -16,70 +20,6 @@ GameManager::~GameManager()
 
 bool GameManager::InitializeDirectX(HINSTANCE hInstance, HWND hwnd)
 {
-	/*//Describe our SwapChain Buffer
-	DXGI_MODE_DESC bufferDesc;
-
-	ZeroMemory(&bufferDesc, sizeof(DXGI_MODE_DESC));
-
-	bufferDesc.Width = WIDTH;
-	bufferDesc.Height = HEIGHT;
-	bufferDesc.RefreshRate.Numerator = 60;
-	bufferDesc.RefreshRate.Denominator = 1;
-	bufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	bufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-
-	//Describe our SwapChain
-	DXGI_SWAP_CHAIN_DESC swapChainDesc;
-
-	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
-
-	swapChainDesc.BufferDesc = bufferDesc;
-	swapChainDesc.SampleDesc.Count = 1;
-	swapChainDesc.SampleDesc.Quality = 0;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferCount = 1;
-	swapChainDesc.OutputWindow = hwnd;
-	swapChainDesc.Windowed = TRUE;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
-
-	//Create our SwapChain
-	hr = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, NULL, NULL,
-		D3D11_SDK_VERSION, &swapChainDesc, &gSwapChain, &gDevice, NULL, &gDevCon);
-
-	//Create our BackBuffer
-	ID3D11Texture2D* BackBuffer;
-	hr = gSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);
-
-	//Create our Render Target
-	hr = gDevice->CreateRenderTargetView(BackBuffer, NULL, &gRenderTargetView);
-	BackBuffer->Release();
-
-	//Describe our Depth/Stencil Buffer
-	D3D11_TEXTURE2D_DESC depthStencilDesc;
-
-	depthStencilDesc.Width = WIDTH;
-	depthStencilDesc.Height = HEIGHT;
-	depthStencilDesc.MipLevels = 1;
-	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.SampleDesc.Count = 1;
-	depthStencilDesc.SampleDesc.Quality = 0;
-	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthStencilDesc.CPUAccessFlags = 0;
-	depthStencilDesc.MiscFlags = 0;
-
-	//Create the Depth/Stencil View
-	gDevice->CreateTexture2D(&depthStencilDesc, NULL, &gDepthStencilBuffer);
-	gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &gDepthStencilView);
-
-	//Set our Render Target
-	gDevCon->OMSetRenderTargets(1, &gRenderTargetView, gDepthStencilView);
-
-	return true;*/
-
 	// Describe the Buffer
 	DXGI_MODE_DESC bufferDesc;
 
@@ -117,7 +57,12 @@ bool GameManager::InitializeDirectX(HINSTANCE hInstance, HWND hwnd)
 
 	// Create the BackBuffer
 	ID3D11Texture2D* BackBuffer;
-	gSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);
+	hr = gSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Swapchain backbuffer - Failed", "Error", MB_OK);
+		return false;
+	}
 
 	// Create the Render Target
 	hr = gDevice->CreateRenderTargetView(BackBuffer, nullptr, &gRenderTargetView);
@@ -164,15 +109,10 @@ bool GameManager::InitScene()
 	// Initialize the box
 	if (!box.InitScene(gDevCon, gDevice))
 		return false;
-
-	// Initialize the camera
-	cam.InitScene();
 	
 	// Get the matrices
-	world = cam.getWorldMatrix();
 	view = cam.getViewMatrix();
 	proj = cam.getProjMatrix();
-	//cbObj.wvp = cam.getWVPMatrix().Transpose();
 
 	// Creates the buffer for the shaders
 	if (!CreateConstBuffer())
@@ -184,7 +124,9 @@ bool GameManager::InitScene()
 
 void GameManager::Update()
 {
-	box.Update();
+	dt = time.GetFrameTime();
+
+	box.Update(dt);
 
 	world = box.getWorldMatrix();
 
@@ -202,15 +144,15 @@ void GameManager::Render()
 	// Clear the depth/Stencil view
 	gDevCon->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	/*// Map constant buffer so that we can write to it.
+	// Map constant buffer so that we can write to it.
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
 	gDevCon->Map(gObjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
 	// copy memory from CPU to GPU the entire struct
 	memcpy(dataPtr.pData, &cbObj, sizeof(cbObject));
 	// UnMap constant buffer so that we can use it again in the GPU
-	gDevCon->Unmap(gObjBuffer, 0);*/
+	gDevCon->Unmap(gObjBuffer, 0);
 
-	gDevCon->UpdateSubresource(gObjBuffer, 0, nullptr, &cbObj, 0, 0);
+	//gDevCon->UpdateSubresource(gObjBuffer, 0, nullptr, &cbObj, 0, 0);
 	// Set resource to Vertex Shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gObjBuffer);
 
@@ -237,13 +179,14 @@ void GameManager::Release()
 
 bool GameManager::CreateConstBuffer()
 {
+	// Describes the constant buffer
 	D3D11_BUFFER_DESC cbBufferDesc;
 	memset(&cbBufferDesc, 0, sizeof(D3D11_BUFFER_DESC));
 
-	cbBufferDesc.Usage = D3D11_USAGE_DEFAULT; //D3D11_USAGE_DYNAMIC;
+	cbBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	cbBufferDesc.ByteWidth = sizeof(cbObject);
 	cbBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbBufferDesc.CPUAccessFlags = 0; // D3D11_CPU_ACCESS_WRITE;
+	cbBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cbBufferDesc.MiscFlags = 0;
 
 	hr = gDevice->CreateBuffer(&cbBufferDesc, nullptr, &gObjBuffer);

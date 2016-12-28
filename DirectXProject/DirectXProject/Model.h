@@ -18,7 +18,7 @@ public:
 	virtual bool PositionData(ID3D11Device* gDevice) = 0;
 	virtual bool SetTexture(ID3D11Device* gDevice) = 0;
 	virtual bool InitScene(ID3D11DeviceContext* gDevCon, ID3D11Device* gDevice) = 0;
-	virtual void Update() = 0;
+	virtual void Update(double dt) = 0;
 	virtual void Render(ID3D11DeviceContext* gDevCon) = 0;
 	virtual void Release() = 0;
 
