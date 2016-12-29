@@ -16,7 +16,7 @@ public:
 	~Camera();
 	
 	void InitScene();
-	void Update();
+	void Update(bool* keys, Vector2 mouseOffset, float dt);
 
 	Matrix getWorldMatrix() const;
 	Matrix getViewMatrix() const;
@@ -24,15 +24,24 @@ public:
 
 
 private:
+	// Functions
+	void ProcessKeyboard(bool* keys, float dt);
+	void ProcessMouse(Vector2 mouseOffset, float dt);
+
 	// Matrices
 	Matrix world;
 	Matrix view;
 	Matrix proj;
 
 	// Vectors
-	Vector4 pos;
-	Vector4 target;
-	Vector4 up;
+	Vector3 up;
+	Vector3 forward;
+	Vector3 right;
+	Vector3 pos;
+
+	// Variables
+	float yaw;
+	float pitch;
 };
 
 #endif

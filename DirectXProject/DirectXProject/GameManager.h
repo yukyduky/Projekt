@@ -9,6 +9,7 @@
 #include "ForwardShader.h"
 #include "Camera.h"
 #include "Time.h"
+#include "Input.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -31,6 +32,8 @@ public:
 	void Render();
 	// Release the memory
 	void Release();
+	// HandleInput
+	void HandleInput();
 
 private:
 	// Functions
@@ -50,15 +53,20 @@ private:
 	Matrix world;
 	Matrix view;
 	Matrix proj;
+	
+	// Vectors
+	Vector2 mouseOffset;
 
 	// Objects
 	Box box;
 	ForwardShader shaderForward;
 	Camera cam;
 	Time time;
+	Input input;
 
 	// Variables
-	double dt;
+	float dt;
+	bool keys[NUM_KEYS];
 
 	// Constant buffer
 	struct cbObject

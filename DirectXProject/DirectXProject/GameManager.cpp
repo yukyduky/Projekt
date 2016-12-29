@@ -7,9 +7,15 @@ GameManager::GameManager()
 	view = XMMatrixIdentity();
 	proj = XMMatrixIdentity();
 
+	mouseOffset.x = 0;
+	mouseOffset.y = 0;
+
 	time.StartTimer();
 
 	dt = 0.0f;
+
+	for (int i = 0; i < NUM_KEYS; i++)
+		keys[i] = false;
 }
 
 
@@ -38,11 +44,11 @@ bool GameManager::InitializeDirectX(HINSTANCE hInstance, HWND hwnd)
 
 	memset(&swapChainDesc, 0, sizeof(DXGI_SWAP_CHAIN_DESC));
 
-	swapChainDesc.BufferCount = 1;                                    // one back buffer
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;     // use 32-bit color
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;      // how swap chain is to be used
-	swapChainDesc.OutputWindow = hwnd;                           // the window to be used
-	swapChainDesc.SampleDesc.Count = 1;                               // how many multisamples
+	swapChainDesc.BufferCount = 1;                                  // one back buffer
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;   // use 32-bit color
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;    // how swap chain is to be used
+	swapChainDesc.OutputWindow = hwnd;								// the window to be used
+	swapChainDesc.SampleDesc.Count = 1;                             // how many multisamples
 	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.Windowed = TRUE;
 
@@ -124,10 +130,18 @@ bool GameManager::InitScene()
 
 void GameManager::Update()
 {
-	dt = time.GetFrameTime();
+	// Get time since last frame
+	dt = float(time.GetFrameTime());
 
+	// Handle keyboard & mouse
+	input.HandleInput(keys, mouseOffset);
+
+	//Update the camera
+	cam.Update(keys, mouseOffset, dt);
+	view = cam.getViewMatrix();
+
+	// Update the box
 	box.Update(dt);
-
 	world = box.getWorldMatrix();
 
 	cbObj.wvp = world * view * proj;
@@ -175,6 +189,11 @@ void GameManager::Release()
 
 	box.Release();
 	shaderForward.Release();
+}
+
+void GameManager::HandleInput()
+{
+
 }
 
 bool GameManager::CreateConstBuffer()

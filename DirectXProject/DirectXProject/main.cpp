@@ -8,6 +8,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	WindowManager wm;
 	GameManager gm;
 
+	POINT p = { WIDTH / 2, HEIGHT / 2 };
+
 	MSG msg;
 	memset(&msg, 0, sizeof(MSG));
 
@@ -35,6 +37,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	// Sets the viewport
 	gm.SetViewport();
 
+	// Make cursor invisible
+	ShowCursor(false);
+	// Converts the window coordinates to screen coordinates
+	ClientToScreen(wm.getWinHandle(), &p);
+
+	SetCursorPos(p.x, p.y);
+	
 	// Game Loop!
 	while (true)
 	{
@@ -46,13 +55,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-		}
 
+			switch (msg.message)
+			{
+			case WM_KEYDOWN:
+				gm.HandleInput();
+				break;
+			}
+		}
 		else
 		{
 			// Update & Render
 			gm.Update();
 			gm.Render();
+
+			// Sets the cursor position every frame to make sure it doesnt leave the window
+			SetCursorPos(p.x, p.y);
 		}
 	}
 

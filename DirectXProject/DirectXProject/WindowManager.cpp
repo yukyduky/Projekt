@@ -4,13 +4,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 WindowManager::WindowManager()
 {
-
 }
 
 
 WindowManager::~WindowManager()
 {
-
 }
 
 
@@ -30,7 +28,6 @@ bool WindowManager::InitializeWindow(HINSTANCE hInstance, int ShowWnd, int width
 	wc.lpszMenuName = nullptr;						// Name of the menu attached to the window if we had one
 	wc.lpszClassName = WndClassName;				// Name of the windows class
 	wc.hIconSm = LoadIcon(nullptr, IDI_WINLOGO);	// Taskbar icon
-
 													// Error checking
 	if (!RegisterClassEx(&wc))
 	{
@@ -62,7 +59,7 @@ bool WindowManager::InitializeWindow(HINSTANCE hInstance, int ShowWnd, int width
 	// Display and update the window
 	ShowWindow(hwnd, ShowWnd);
 	UpdateWindow(hwnd);
-
+	
 	return true;
 }
 

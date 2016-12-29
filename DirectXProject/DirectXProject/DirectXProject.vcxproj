@@ -159,6 +159,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ForwardShader.cpp" />
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Time.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="ForwardShader.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="WindowManager.h" />

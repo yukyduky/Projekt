@@ -165,7 +165,7 @@ bool Box::InitScene(ID3D11DeviceContext * gDevCon, ID3D11Device* gDevice)
 	return true;
 }
 
-void Box::Update(double dt)
+void Box::Update(float dt)
 {
 	rot += 1 * dt;
 	if (rot >= 6.28)
