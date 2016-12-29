@@ -55,13 +55,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-
-			switch (msg.message)
-			{
-			case WM_KEYDOWN:
-				gm.HandleInput();
-				break;
-			}
 		}
 		else
 		{

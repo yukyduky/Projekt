@@ -32,8 +32,6 @@ public:
 	void Render();
 	// Release the memory
 	void Release();
-	// HandleInput
-	void HandleInput();
 
 private:
 	// Functions

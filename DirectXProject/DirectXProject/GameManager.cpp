@@ -136,16 +136,17 @@ void GameManager::Update()
 	// Handle keyboard & mouse
 	input.HandleInput(keys, mouseOffset);
 
-	//Update the camera
+	// Update the camera
 	cam.Update(keys, mouseOffset, dt);
+	// Update the view matrix
 	view = cam.getViewMatrix();
 
 	// Update the box
 	box.Update(dt);
 	world = box.getWorldMatrix();
 
+	// Update the constant buffer matrix
 	cbObj.wvp = world * view * proj;
-
 	cbObj.wvp = cbObj.wvp.Transpose();
 }
 
@@ -189,11 +190,6 @@ void GameManager::Release()
 
 	box.Release();
 	shaderForward.Release();
-}
-
-void GameManager::HandleInput()
-{
-
 }
 
 bool GameManager::CreateConstBuffer()

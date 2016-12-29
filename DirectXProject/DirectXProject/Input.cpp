@@ -45,9 +45,12 @@ void Input::ProcessMouse(Vector2 &mouseOffset)
 {
 	POINT p;
 
+	// Gets the cursors current screen position
 	GetCursorPos(&p);
+	// Converts from screen to window coords
 	ScreenToClient(GetActiveWindow(), &p);
 
+	// Calculates the offset from the center of the window
 	mouseOffset.x = (WIDTH / 2) - p.x;
 	mouseOffset.y = (HEIGHT / 2) - p.y;
 }

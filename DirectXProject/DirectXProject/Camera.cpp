@@ -59,6 +59,7 @@ void Camera::ProcessKeyboard(bool * keys, float dt)
 {
 	float velocity = 10.0f * dt;
 
+	// Change the position according to the key pressed
 	if (keys[W])
 		pos += forward * velocity;
 	if (keys[A])
@@ -73,6 +74,7 @@ void Camera::ProcessMouse(Vector2 mouseOffset, float dt)
 {
 	float sensitivity = 1000.0f;
 
+	// Change the yaw and pitch depending on the mouse offset since the last frame
 	yaw += mouseOffset.x * sensitivity * dt;
 	pitch += mouseOffset.y * sensitivity * dt;
 
