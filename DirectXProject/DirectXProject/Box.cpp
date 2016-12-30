@@ -1,7 +1,6 @@
 #include "Box.h"
 
 
-
 Box::Box()
 {
 	rot = 0;

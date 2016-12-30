@@ -8,6 +8,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	WindowManager wm;
 	GameManager gm;
 
+
 	POINT p = { WIDTH / 2, HEIGHT / 2 };
 
 	MSG msg;
@@ -21,7 +22,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	}
 
 	// Initializes DirectX
-	if (!gm.InitializeDirectX(hInstance, wm.getWinHandle()))
+	if (!gm.InitializeDirectX(wm.getWinHandle()))
 	{
 		MessageBox(0, "Direct3D Initialization - Failed", "Error", MB_OK);
 		return 0;
@@ -33,9 +34,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		MessageBox(0, "Scene Initialization - Failed", "Error", MB_OK);
 		return 0;
 	}
-
-	// Sets the viewport
-	gm.SetViewport();
 
 	// Make cursor invisible
 	ShowCursor(false);
@@ -60,7 +58,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		{
 			// Update & Render
 			gm.Update();
-			gm.Render();
+			if (!gm.Render())
+				return 0;
 
 			// Sets the cursor position every frame to make sure it doesnt leave the window
 			SetCursorPos(p.x, p.y);

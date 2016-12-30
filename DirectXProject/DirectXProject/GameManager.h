@@ -6,10 +6,11 @@
 #include <SimpleMath.h>
 #include "globals.h"
 #include "Box.h"
-#include "ForwardShader.h"
+//#include "ForwardShader.h"
 #include "Camera.h"
 #include "Time.h"
 #include "Input.h"
+#include "DeferredRenderer.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -21,57 +22,45 @@ public:
 	~GameManager();
 
 	// Initializes DirectX
-	bool InitializeDirectX(HINSTANCE hInstance, HWND hwnd);
-	// Initializes the scene
-	void SetViewport();
+	bool InitializeDirectX(HWND hwnd);
 	// Initialize the scene
 	bool InitScene();
 	// Update
 	void Update();
 	// Render
-	void Render();
+	bool Render();
 	// Release the memory
 	void Release();
 
 private:
 	// Functions
-	bool CreateConstBuffer();
-	bool CreateDepthStencilView();
+	bool CreateSwapChain(HWND hwnd);
 
-	// COM Objects
-	IDXGISwapChain* gSwapChain;
+	// COMS
 	ID3D11Device* gDevice;
 	ID3D11DeviceContext* gDevCon;
-	ID3D11RenderTargetView* gRenderTargetView;
-	ID3D11Buffer* gObjBuffer;
-	ID3D11DepthStencilView* gDepthStencilView;
-	ID3D11Texture2D* gDepthStencilBuffer;
+	IDXGISwapChain* gSwapChain;
 
 	// Matrices
 	Matrix world;
 	Matrix view;
 	Matrix proj;
+	Matrix wvp;
 	
 	// Vectors
 	Vector2 mouseOffset;
 
 	// Objects
 	Box box;
-	ForwardShader shaderForward;
+	//ForwardShader shaderForward;
 	Camera cam;
 	Time time;
 	Input input;
+	DeferredRenderer dr;
 
 	// Variables
 	float dt;
 	bool keys[NUM_KEYS];
-
-	// Constant buffer
-	struct cbObject
-	{
-		Matrix wvp;
-	};
-	cbObject cbObj;
 
 	// Error handling
 	HRESULT hr;
