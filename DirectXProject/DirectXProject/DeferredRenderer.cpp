@@ -4,7 +4,6 @@
 
 DeferredRenderer::DeferredRenderer()
 {
-
 }
 
 
@@ -12,112 +11,134 @@ DeferredRenderer::~DeferredRenderer()
 {
 }
 
-bool DeferredRenderer::InitializeDirectX(ID3D11Device* gDevice, IDXGISwapChain* gSwapChain)
+bool DeferredRenderer::InitializeDirectX(HWND hwnd)
 {
+	// Create Swapchain
+	if (!CreateSwapChain(hwnd))
+		return false;
+
 	// Create the Rendertargetview with a backbuffer
-	if (!CreateBackBufferRTV(gDevice, gSwapChain))
+	if (!CreateBackBufferRTV())
 		return false;
 
 	// Create the Depthstencilview
-	if (!CreateDepthStencilView(gDevice))
+	if (!CreateDepthStencilView())
 		return false;
 
 	return true;
 }
 
-bool DeferredRenderer::InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon)
+bool DeferredRenderer::InitScene()
 {
 	// Set the viewport
-	SetViewPort(gDevCon);
+	SetViewPort();
+
+	// Set the render target to the deferred RTV
+	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);
 
 	// Create the shaders
-	if (!CreateShaders(gDevice))
+	if (!CreateShaders())
 		return false;
 
+	
+
 	// Create the gGeoObjBuffer for the shaders
-	if (!CreateConstBuffer(gDevice, &gGeoObjBuffer, sizeof(cbGeoObject)))
+	if (!CreateConstBuffer(&gGeoObjBuffer, sizeof(cbGeoObject)))
 		return false;
 
 	// Create the gGeoLightBuffer for the shaders
-	if (!CreateConstBuffer(gDevice, &gGeoLightBuffer, sizeof(cbGeoLighting)))
+	/*if (!CreateConstBuffer(&gGeoLightBuffer, sizeof(cbGeoLighting)))
 		return false;
 
 	// Create the gLightLightBuffer for the shaders
-	if (!CreateConstBuffer(gDevice, &gLightLightBuffer, sizeof(cbLightLighting)))
-		return false;
+	if (!CreateConstBuffer(&gLightLightBuffer, sizeof(cbLightLighting)))
+		return false;*/
 
 	// Create the sampler for the textures
-	if (!CreateSampler(gDevice))
+	/*if (!CreateSampler())
+		return false;*/
+
+	// Set the GeoShaders to the current shaders
+	SetGeoShaders();
+
+	if (!gm.InitScene(gDevice, gDevCon))
 		return false;
 
 	return true;
 }
 
-void DeferredRenderer::Update(Matrix world, Matrix wvp)
+void DeferredRenderer::Update()
 {
+	gm.Update();
+
 	// Update the matrices
-	cbGeoObj.world = world;
-	cbGeoObj.wvp = wvp;
+	cbGeoObj.world = gm.getMatrixWorld();
+	cbGeoObj.wvp = gm.getMatrixWVP();
 }
 
-bool DeferredRenderer::Render(ID3D11DeviceContext* gDevCon)
+bool DeferredRenderer::Render()
 {
 	Color bgColor(255, 0, 255, 1.0f);
 	// Clear the backbuffer
 	gDevCon->ClearRenderTargetView(gFinalRTV, bgColor);
+	gDevCon->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	// Generic pointer
 	void* cbPtr = nullptr;
 
-	// Set the GeoShaders to the current shaders
-	SetGeoShaders(gDevCon);
-	// Set the render target to the deferred RTV
-	gDevCon->OMSetRenderTargets(4, gDeferredRTV, gDepthStencilView);
-
-	// Draw?
-
 	// Map the GeoObject constant buffer
 	cbPtr = &cbGeoObj;
-	if (!MapBuffer(gDevCon, &gGeoObjBuffer, cbPtr))
+	if (!MapBuffer(&gGeoObjBuffer, cbPtr))
 		return false;
 	// Set the constant buffer for the current vertex shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 	// Map the GeoLight constant buffer
-	cbPtr = &cbGeoLight;
-	if (!MapBuffer(gDevCon, &gGeoLightBuffer, cbPtr))
+	/*cbPtr = &cbGeoLight;
+	if (!MapBuffer(&gGeoLightBuffer, cbPtr))
 		return false;
 	// Set the constant buffer for the current pixel shader
-	gDevCon->PSSetConstantBuffers(0, 1, &gGeoLightBuffer);
+	gDevCon->PSSetConstantBuffers(0, 1, &gGeoLightBuffer);*/
 
-	// Set the LightShaders to the current shaders
-	SetLightShaders(gDevCon);
+	// Draw
+	gm.Render(gDevCon);
+
+	/*// Set the LightShaders to the current shaders
+	SetLightShaders();
 	// Set the Render Target to the final RTV
-	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);
+	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);*/
 
 
 	// Map the LightLight constant buffer
-	cbPtr = &cbLightLight;
-	if (!MapBuffer(gDevCon, &gLightLightBuffer, cbPtr))
+	/*cbPtr = &cbLightLight;
+	if (!MapBuffer(&gLightLightBuffer, cbPtr))
 		return false;
 	// Set the constant buffer for the current pixel shader
-	gDevCon->PSSetConstantBuffers(0, 1, &gLightLightBuffer);
+	gDevCon->PSSetConstantBuffers(0, 1, &gLightLightBuffer);*/
+
+	// Present the backbuffer to the screen
+	gSwapChain->Present(0, 0);
 
 	return true;
 }
 
 void DeferredRenderer::Release()
 {
+	gDevice->Release();
+	gDevCon->Release();
+	gSwapChain->Release();
 	gDepthStencilView->Release();
 	gDepthStencilBuffer->Release();
 	//gDiffuseMap->Release();
 	//gNormalMap->Release();
-	gAnisoSampler->Release();
+	//gAnisoSampler->Release();
 	gGeoObjBuffer->Release();
-	gGeoLightBuffer->Release();
-	gLightLightBuffer->Release();
+	//gGeoLightBuffer->Release();
+	//gLightLightBuffer->Release();
+
+	gm.Release();
 }
 
-bool DeferredRenderer::CreateShaders(ID3D11Device* gDevice)
+bool DeferredRenderer::CreateShaders()
 {
 	// Create the GeoPass Shaders
 	if (!GeoShader.CreateShaders(gDevice, fileNameGeoVertex, fileNameGeoPixel, geoInputDesc, GEO_INPUT_DESC_SIZE))
@@ -130,19 +151,19 @@ bool DeferredRenderer::CreateShaders(ID3D11Device* gDevice)
 	return true;
 }
 
-void DeferredRenderer::SetGeoShaders(ID3D11DeviceContext* gDevCon)
+void DeferredRenderer::SetGeoShaders()
 {
 	// Set the GeoShaders
 	GeoShader.SetShaders(gDevCon);
 }
 
-void DeferredRenderer::SetLightShaders(ID3D11DeviceContext* gDevCon)
+void DeferredRenderer::SetLightShaders()
 {
 	// Set the LightShaders
 	LightShader.SetShaders(gDevCon);
 }
 
-bool DeferredRenderer::CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize)
+bool DeferredRenderer::CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize)
 {
 	// Describes the constant buffer
 	D3D11_BUFFER_DESC cbBufferDesc;
@@ -164,7 +185,7 @@ bool DeferredRenderer::CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** g
 	return true;
 }
 
-bool DeferredRenderer::CreateSampler(ID3D11Device* gDevice)
+bool DeferredRenderer::CreateSampler()
 {
 	D3D11_SAMPLER_DESC sampDesc;
 	memset(&sampDesc, 0, sizeof(sampDesc));
@@ -184,7 +205,7 @@ bool DeferredRenderer::CreateSampler(ID3D11Device* gDevice)
 	}
 }
 
-bool DeferredRenderer::MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer** gBuffer, void* cbPtr)
+bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr)
 {
 	// Map constant buffer so that we can write to it.
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
@@ -202,7 +223,32 @@ bool DeferredRenderer::MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer** gB
 	return true;
 }
 
-bool DeferredRenderer::CreateBackBufferRTV(ID3D11Device* gDevice, IDXGISwapChain* gSwapChain)
+bool DeferredRenderer::CreateSwapChain(HWND hwnd)
+{
+	// Describe the SwapChain
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	memset(&swapChainDesc, 0, sizeof(DXGI_SWAP_CHAIN_DESC));
+
+	swapChainDesc.BufferCount = 1;                                  // one back buffer
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;   // use 32-bit color
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;    // how swap chain is to be used
+	swapChainDesc.OutputWindow = hwnd;								// the window to be used
+	swapChainDesc.SampleDesc.Count = 1;                             // how many multisamples
+	swapChainDesc.SampleDesc.Quality = 0;
+	swapChainDesc.Windowed = TRUE;
+
+	// Create the SwapChain
+	hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, NULL, nullptr, NULL, D3D11_SDK_VERSION, &swapChainDesc, &gSwapChain, &gDevice, nullptr, &gDevCon);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Create Swapchain - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeferredRenderer::CreateBackBufferRTV()
 {
 	// Describe the Buffer
 	DXGI_MODE_DESC bufferDesc;
@@ -237,7 +283,7 @@ bool DeferredRenderer::CreateBackBufferRTV(ID3D11Device* gDevice, IDXGISwapChain
 	return true;
 }
 
-bool DeferredRenderer::CreateDepthStencilView(ID3D11Device* gDevice)
+bool DeferredRenderer::CreateDepthStencilView()
 {
 	// Describe the Depth/Stencil Buffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -273,7 +319,7 @@ bool DeferredRenderer::CreateDepthStencilView(ID3D11Device* gDevice)
 	return true;
 }
 
-void DeferredRenderer::SetViewPort(ID3D11DeviceContext* gDevCon)
+void DeferredRenderer::SetViewPort()
 {
 	D3D11_VIEWPORT viewport;
 	memset(&viewport, 0, sizeof(D3D11_VIEWPORT));

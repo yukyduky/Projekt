@@ -1,2 +1,3 @@
-﻿  Box.cpp
+﻿  DeferredRenderer.cpp
+c:\users\jacob\dropbox\programmering\3d labbar\projekt\projekt\directxproject\directxproject\deferredrenderer.cpp(206): warning C4715: 'DeferredRenderer::CreateSampler': not all control paths return a value
   DirectXProject.vcxproj -> C:\Users\Jacob\Dropbox\Programmering\3D Labbar\Projekt\Projekt\DirectXProject\Debug\DirectXProject.exe

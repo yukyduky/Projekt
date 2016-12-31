@@ -1,12 +1,12 @@
 #include <windows.h>
 #include "WindowManager.h"
-#include "GameManager.h"
+#include "DeferredRenderer.h"
 
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	WindowManager wm;
-	GameManager gm;
+	DeferredRenderer dr;
 
 
 	POINT p = { WIDTH / 2, HEIGHT / 2 };
@@ -22,14 +22,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	}
 
 	// Initializes DirectX
-	if (!gm.InitializeDirectX(wm.getWinHandle()))
+	if (!dr.InitializeDirectX(wm.getWinHandle()))
 	{
 		MessageBox(0, "Direct3D Initialization - Failed", "Error", MB_OK);
 		return 0;
 	}
 
 	// Initializes the Scene
-	if (!gm.InitScene())
+	if (!dr.InitScene())
 	{
 		MessageBox(0, "Scene Initialization - Failed", "Error", MB_OK);
 		return 0;
@@ -57,8 +57,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		else
 		{
 			// Update & Render
-			gm.Update();
-			if (!gm.Render())
+			dr.Update();
+			if (!dr.Render())
 				return 0;
 
 			// Sets the cursor position every frame to make sure it doesnt leave the window
@@ -67,7 +67,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	}
 
 	// Release the memory
-	gm.Release();
+	dr.Release();
 	//DestroyWindow(wm.getWinHandle());
 
 	return (int)msg.wParam;

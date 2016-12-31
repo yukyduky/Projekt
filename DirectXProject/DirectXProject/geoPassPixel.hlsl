@@ -13,23 +13,25 @@ struct PS_IN
 {
 	float4 positionS	: SV_POSITION;
 	float3 positionW	: POSITIONW;
-	float2 texCoord		: TEXCOORD;
+	float4 color		: COLOR;
 	float3 normalW		: NORMALW;
+	float2 texCoord		: TEXCOORD;
 };
 
 struct PS_OUT
 {
-	float4 normal		: SV_TARGET0;
+	/*float4 normal		: SV_TARGET0;
 	float4 diffuse		: SV_TARGET1;
 	float4 specular		: SV_TARGET2;
-	float4 position		: SV_TARGET3;
+	float4 position		: SV_TARGET3;*/
 };
 
-PS_OUT PS(PS_IN input)
+float4 PS(PS_IN input) : SV_TARGET
 {
-	PS_OUT output;
+	//PS_OUT output;
+	float4 color = input.color;
 
-	// Sample the texture for the diffuse light
+	/*// Sample the texture for the diffuse light
 	float3 diffuse = DiffuseMap.Sample(AnisoSampler, input.texCoord).rgb;
 
 	// Normalize the tangent matrix after interpolation ------------------------------------------------------
@@ -41,12 +43,12 @@ PS_OUT PS(PS_IN input)
 	normalT = normalize(normalT * 2.0f - 1.0f);
 
 	// Convert the normal to world space
-	float3 normalW = mul(normalT, tangentW);
+	float3 normalW = mul(normalT, tangentW);*/
 
-	output.normal = float4(normalW, 1.0f);
+	/*output.normal = float4(normalW, 1.0f);
 	output.diffuse = float4(diffuse, 1.0f);
 	output.specular = float4(specular, specularPower);
-	output.position = float4(input.positionW, 1.0f);
+	output.position = float4(input.positionW, 1.0f);*/
 
-	return output;
+	return color;
 }

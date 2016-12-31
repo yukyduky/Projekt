@@ -4,6 +4,7 @@
 
 #include <d3d11.h>
 #include <SimpleMath.h>
+#include "GameManager.h"
 #include "Shader.h"
 #include "globals.h"
 
@@ -16,26 +17,29 @@ public:
 	DeferredRenderer();
 	~DeferredRenderer();
 
-	bool InitializeDirectX(ID3D11Device* gDevice, IDXGISwapChain* gSwapChain);
-	bool InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon);
-	void Update(Matrix world, Matrix wvp);
-	bool Render(ID3D11DeviceContext* gDevCon);
+	bool InitializeDirectX(HWND hwnd);
+	bool InitScene();
+	void Update();
+	bool Render();
 	void Release();
 
 private:
 	// Functions
-	bool CreateShaders(ID3D11Device* gDevice);
-	void SetGeoShaders(ID3D11DeviceContext* gDevCon);
-	void SetLightShaders(ID3D11DeviceContext* gDevCon);
-	bool CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize);
-	bool CreateSampler(ID3D11Device* gDevice);
-	bool MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer** gBuffer, void* cbPtr);
-	//bool CreateSwapChain(HWND hwnd);
-	bool CreateBackBufferRTV(ID3D11Device* gDevice, IDXGISwapChain* gSwapChain);
-	bool CreateDepthStencilView(ID3D11Device* gDevice);
-	void SetViewPort(ID3D11DeviceContext* gDevCon);
+	bool CreateShaders();
+	void SetGeoShaders();
+	void SetLightShaders();
+	bool CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize);
+	bool CreateSampler();
+	bool MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr);
+	bool CreateSwapChain(HWND hwnd);
+	bool CreateBackBufferRTV();
+	bool CreateDepthStencilView();
+	void SetViewPort();
 
 	// COMS
+	ID3D11Device* gDevice;
+	ID3D11DeviceContext* gDevCon;
+	IDXGISwapChain* gSwapChain;
 	ID3D11DepthStencilView* gDepthStencilView;
 	ID3D11Texture2D* gDepthStencilBuffer;
 	ID3D11Texture2D* gDiffuseMap;
@@ -48,6 +52,7 @@ private:
 	ID3D11Buffer* gLightLightBuffer;
 
 	// Objects
+	GameManager gm;
 	Shader GeoShader;
 	Shader LightShader;
 
@@ -57,11 +62,12 @@ private:
 	const wchar_t* fileNameLightVertex = L"lightPassVert.hlsl";
 	const wchar_t* fileNameLightPixel = L"lightPassPixel.hlsl";
 
-	const D3D11_INPUT_ELEMENT_DESC geoInputDesc[3] =
+	const D3D11_INPUT_ELEMENT_DESC geoInputDesc[4] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	const D3D11_INPUT_ELEMENT_DESC lightInputDesc[1] =
@@ -69,10 +75,11 @@ private:
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	// Structs
+	/*// Structs
 	struct Light
 	{
-		Vector4 pos;
+		Vector3 pos;
+		float pad1;
 		Vector3 color;
 		float pad2;
 		Vector3 dir;
@@ -80,7 +87,7 @@ private:
 		Vector4 range;
 		Vector2 spotlightAngles;
 		Vector2 pad4;
-	};
+	};*/
 
 	// GeoShader Constant buffer: Object
 	struct cbGeoObject
@@ -90,7 +97,7 @@ private:
 	};
 	cbGeoObject cbGeoObj;
 
-	// GeoShader Constant buffer: Light
+	/*// GeoShader Constant buffer: Light
 	struct cbGeoLighting
 	{
 		Vector3 specular;
@@ -106,7 +113,7 @@ private:
 		Vector3 cameraPos;
 		float pad;
 	};
-	cbLightLighting cbLightLight;
+	cbLightLighting cbLightLight;*/
 
 	// Error handling
 	HRESULT hr;

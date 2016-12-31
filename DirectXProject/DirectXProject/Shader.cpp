@@ -15,9 +15,10 @@ void Shader::SetShaders(ID3D11DeviceContext * gDevCon)
 {
 	SetVertexShader(gDevCon);
 	SetPixelShader(gDevCon);
+	SetInputlayout(gDevCon);
 }
 
-bool Shader::CreateShaders(ID3D11Device * gDevice, const wchar_t* fileNameVertex, const wchar_t* fileNamePixel, const D3D11_INPUT_ELEMENT_DESC* inputDesc, int inputDescSize)
+bool Shader::CreateShaders(ID3D11Device* gDevice, const wchar_t* fileNameVertex, const wchar_t* fileNamePixel, const D3D11_INPUT_ELEMENT_DESC* inputDesc, int inputDescSize)
 {
 	// Create Vertex Shader
 	if (!CreateVertexShader(gDevice, fileNameVertex, inputDesc, inputDescSize))
@@ -43,7 +44,7 @@ void Shader::Release()
 	gVertexLayout->Release();
 }
 
-bool Shader::CreateVertexShader(ID3D11Device * gDevice, const wchar_t* fileName, const D3D11_INPUT_ELEMENT_DESC* inputDesc, int inputDescSize)
+bool Shader::CreateVertexShader(ID3D11Device* gDevice, const wchar_t* fileName, const D3D11_INPUT_ELEMENT_DESC* inputDesc, int inputDescSize)
 {
 	ID3DBlob* pVS = nullptr;
 	D3DCompileFromFile(
@@ -125,12 +126,12 @@ void Shader::SetVertexShader(ID3D11DeviceContext * gDevCon) const
 	gDevCon->VSSetShader(gVertexShader, nullptr, 0);
 }
 
-void Shader::SetPixelShader(ID3D11DeviceContext * gDevCon) const
+void Shader::SetPixelShader(ID3D11DeviceContext* gDevCon) const
 {
 	gDevCon->PSSetShader(gPixelShader, nullptr, 0);
 }
 
-void Shader::SetInputlayout(ID3D11DeviceContext * gDevCon) const
+void Shader::SetInputlayout(ID3D11DeviceContext* gDevCon) const
 {
 	gDevCon->IASetInputLayout(gVertexLayout);
 }
