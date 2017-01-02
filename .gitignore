@@ -10,4 +10,7 @@
 #Whitelist .cpp and .h files
 !*.h
 !*.cpp
-*.sdf
+!*.hlsl
+!*/DirectXProject/Textures
+!*/DirectXProject/Lib
+!*/DirectXProject/Include
