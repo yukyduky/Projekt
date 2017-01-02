@@ -164,6 +164,7 @@
     </ClCompile>
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -263,6 +264,7 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Time.h" />

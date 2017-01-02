@@ -12,6 +12,7 @@ const int NUM_DEFERRED_OUTPUTS = 4;
 
 const int NUM_KEYS = 5;
 enum KEYS { W, A, S, D, ESC };
+enum LIGHT_TYPE { SPOTLIGHT, DIRECTLIGHT, POINTLIGHT };
 
 #define VK_W 87
 #define VK_A 65
