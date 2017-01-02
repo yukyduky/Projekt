@@ -33,35 +33,35 @@ bool DeferredRenderer::InitScene()
 	// Set the viewport
 	SetViewPort();
 
-	// Set the render target to the deferred RTV
-	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);
-
 	// Create the shaders
 	if (!CreateShaders())
 		return false;
-
-	
 
 	// Create the gGeoObjBuffer for the shaders
 	if (!CreateConstBuffer(&gGeoObjBuffer, sizeof(cbGeoObject)))
 		return false;
 
 	// Create the gGeoLightBuffer for the shaders
-	/*if (!CreateConstBuffer(&gGeoLightBuffer, sizeof(cbGeoLighting)))
+	if (!CreateConstBuffer(&gGeoLightBuffer, sizeof(cbGeoLighting)))
 		return false;
 
 	// Create the gLightLightBuffer for the shaders
 	if (!CreateConstBuffer(&gLightLightBuffer, sizeof(cbLightLighting)))
-		return false;*/
+		return false;
+
+	// Create the deferred RTV and bind the textures and SRVs to it
+	if (!BindTextureToRTVAndSRV(gDeferredTex, gDeferredRTV, gDeferredSRV))
+		return false;
+
+	// Create the vertex buffer for the screen quad
+	if (!CreateVertexBuffer())
+		return false;
 
 	// Create the sampler for the textures
-	/*if (!CreateSampler())
-		return false;*/
+	if (!CreateSampler())
+		return false;
 
-	// Set the GeoShaders to the current shaders
-	SetGeoShaders();
-
-	if (!gm.InitScene(gDevice, gDevCon))
+	if (!gm.InitScene(gDevice))
 		return false;
 
 	return true;
@@ -78,46 +78,14 @@ void DeferredRenderer::Update()
 
 bool DeferredRenderer::Render()
 {
-	Color bgColor(255, 0, 255, 1.0f);
-	// Clear the backbuffer
-	gDevCon->ClearRenderTargetView(gFinalRTV, bgColor);
-	gDevCon->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	// Prepare to run the GeoPass and store all the geometry data
+	PreDrawing();
 
-	// Generic pointer
-	void* cbPtr = nullptr;
-
-	// Map the GeoObject constant buffer
-	cbPtr = &cbGeoObj;
-	if (!MapBuffer(&gGeoObjBuffer, cbPtr))
-		return false;
-	// Set the constant buffer for the current vertex shader
-	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
-	// Map the GeoLight constant buffer
-	/*cbPtr = &cbGeoLight;
-	if (!MapBuffer(&gGeoLightBuffer, cbPtr))
-		return false;
-	// Set the constant buffer for the current pixel shader
-	gDevCon->PSSetConstantBuffers(0, 1, &gGeoLightBuffer);*/
-
-	// Draw
+	// Draw the geometry
 	gm.Render(gDevCon);
 
-	/*// Set the LightShaders to the current shaders
-	SetLightShaders();
-	// Set the Render Target to the final RTV
-	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);*/
-
-
-	// Map the LightLight constant buffer
-	/*cbPtr = &cbLightLight;
-	if (!MapBuffer(&gLightLightBuffer, cbPtr))
-		return false;
-	// Set the constant buffer for the current pixel shader
-	gDevCon->PSSetConstantBuffers(0, 1, &gLightLightBuffer);*/
-
-	// Present the backbuffer to the screen
-	gSwapChain->Present(0, 0);
-
+	// Prepare and draw the screen quad from the GeoPass data
+	PostDrawing();
 	return true;
 }
 
@@ -128,12 +96,18 @@ void DeferredRenderer::Release()
 	gSwapChain->Release();
 	gDepthStencilView->Release();
 	gDepthStencilBuffer->Release();
-	//gDiffuseMap->Release();
-	//gNormalMap->Release();
-	//gAnisoSampler->Release();
+	gAnisoSampler->Release();
 	gGeoObjBuffer->Release();
-	//gGeoLightBuffer->Release();
-	//gLightLightBuffer->Release();
+	gGeoLightBuffer->Release();
+	gLightLightBuffer->Release();
+	gVertBuffer->Release();
+	gFinalRTV->Release();
+	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
+	{
+		gDeferredTex[i]->Release();
+		gDeferredSRV[i]->Release();
+		gDeferredRTV[i]->Release();
+	}
 
 	gm.Release();
 }
@@ -205,7 +179,7 @@ bool DeferredRenderer::CreateSampler()
 	}
 }
 
-bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr)
+bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int structSize)
 {
 	// Map constant buffer so that we can write to it.
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
@@ -216,9 +190,27 @@ bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr)
 		return false;
 	}
 	// copy memory from CPU to GPU the entire struct
-	memcpy(dataPtr.pData, &cbPtr, sizeof(&cbPtr));
+	memcpy(dataPtr.pData, cbPtr, structSize);
 	// UnMap constant buffer so that we can use it again in the GPU
 	gDevCon->Unmap(*gBuffer, 0);
+
+	return true;
+}
+
+bool DeferredRenderer::MapTexture(ID3D11Texture2D** gTexture, void* texPtr, int textureSize)
+{
+	// Map texture so that we can write to it.
+	D3D11_MAPPED_SUBRESOURCE dataPtr;
+	hr = gDevCon->Map(*gTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Texture mapping - Failed", "Error", MB_OK);
+		return false;
+	}
+	// copy memory from CPU to GPU the entire struct
+	memcpy(dataPtr.pData, texPtr, textureSize);
+	// UnMap texture so that we can use it again in the GPU
+	gDevCon->Unmap(*gTexture, 0);
 
 	return true;
 }
@@ -333,4 +325,177 @@ void DeferredRenderer::SetViewPort()
 
 	// Set the Viewport
 	gDevCon->RSSetViewports(1, &viewport);
+}
+
+bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11RenderTargetView** gRTV, ID3D11ShaderResourceView** gSRV)
+{
+	// Describe the texture
+	D3D11_TEXTURE2D_DESC texDesc;
+	memset(&texDesc, 0, sizeof(texDesc));
+	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.ArraySize = 1;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.Width = WIDTH;
+	texDesc.Height = HEIGHT;
+	texDesc.MipLevels = 1;
+	texDesc.MiscFlags = 0;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	// Create one texture per rendertarget
+	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
+	{
+		hr = gDevice->CreateTexture2D(&texDesc, nullptr, &gTexure[i]);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Create Normal texture - Failed", "Error", MB_OK);
+			return false;
+		}
+	}
+
+	// Describe the Rendertargetview
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+	memset(&rtvDesc, 0, sizeof(rtvDesc));
+	rtvDesc.Format = texDesc.Format;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	rtvDesc.Texture2D.MipSlice = 0;
+
+	// Create one rtv per output from the pixel shader
+	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
+	{
+		hr = gDevice->CreateRenderTargetView(gTexure[i], &rtvDesc, &gRTV[i]);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Create RTV - Failed", "Error", MB_OK);
+			return false;
+		}
+	}
+
+	// Describe the Shaderresourceview
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	memset(&srvDesc, 0, sizeof(srvDesc));
+	srvDesc.Format = texDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	// Create one srv per texture to be loaded into the next pixel shader
+	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
+	{
+		hr = gDevice->CreateShaderResourceView(gTexure[i], &srvDesc, &gSRV[i]);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Create SRV - Failed", "Error", MB_OK);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool DeferredRenderer::CreateVertexBuffer()
+{
+	struct Vertex
+	{
+		float x, y, z, w;
+	};
+
+	Vertex v[] =
+	{
+		-1.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f,
+	};
+
+	// Describe the vertex buffer
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	memset(&vertexBufferDesc, 0, sizeof(vertexBufferDesc));
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(v);
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+
+	// Set the vertex buffer data
+	D3D11_SUBRESOURCE_DATA vertexData;
+	memset(&vertexData, 0, sizeof(vertexData));
+	vertexData.pSysMem = &v;
+
+	hr = gDevice->CreateBuffer(&vertexBufferDesc, &vertexData, &gVertBuffer);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Create Vertex buffer - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	vertBufferStride = sizeof(Vertex);
+	vertBufferOffset = 0;
+}
+
+bool DeferredRenderer::PreDrawing()
+{
+	Color bgColor(255, 0, 255, 1.0f);
+	// Clear the backbuffer
+	gDevCon->ClearRenderTargetView(gFinalRTV, bgColor);
+	// Clear all the deferred RTVs
+	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
+	{
+		gDevCon->ClearRenderTargetView(gDeferredRTV[i], bgColor);
+	}
+	// Clear the DSV
+	gDevCon->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	// Set the GeoShaders to the current shaders
+	SetGeoShaders();
+	// Set the render target to the deferred RTV
+	gDevCon->OMSetRenderTargets(NUM_DEFERRED_OUTPUTS, gDeferredRTV, gDepthStencilView);
+	// Generic pointer for the different structs
+	void* cbPtr = nullptr;
+	// Map the GeoObject constant buffer
+	cbPtr = &cbGeoObj;
+	if (!MapBuffer(&gGeoObjBuffer, cbPtr, sizeof(cbGeoObj)))
+		return false;
+	// Set the constant buffer for the current vertex shader
+	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
+	// Map the GeoLight constant buffer
+	cbPtr = &cbGeoLight;
+	if (!MapBuffer(&gGeoLightBuffer, cbPtr, sizeof(cbGeoLight)))
+		return false;
+	// Set the constant buffer for the current pixel shader
+	gDevCon->PSSetConstantBuffers(0, 1, &gGeoLightBuffer);
+	// Set the texture sampler for the current pixel shader
+	gDevCon->PSSetSamplers(0, 1, &gAnisoSampler);
+}
+
+bool DeferredRenderer::PostDrawing()
+{
+	// Unbind the texture to the previous rendertarget
+	gDevCon->OMSetRenderTargets(0, NULL, NULL);
+	// Set the LightShaders to the current shaders
+	SetLightShaders();
+	// Set the vertexbuffer for the screen quad
+	gDevCon->IASetVertexBuffers(0, 1, &gVertBuffer, &vertBufferStride, &vertBufferOffset);
+	// Set Primitive Topology
+	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	// Set the Render Target to the final RTV
+	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);
+	// Generic pointer for the different structs
+	void* cbPtr = nullptr;
+	// Map the LightLight constant buffer
+	cbPtr = &cbLightLight;
+	if (!MapBuffer(&gLightLightBuffer, cbPtr, sizeof(cbLightLight)))
+		return false;
+	// Set the constant buffer for the current pixel shader
+	gDevCon->PSSetConstantBuffers(0, 1, &gLightLightBuffer);
+	// Set the normal texture for the current pixel shader
+	gDevCon->PSSetShaderResources(0, NUM_DEFERRED_OUTPUTS, gDeferredSRV);
+
+	// Draw the final texture over the whole screen
+	gDevCon->Draw(4, 0);
+
+	// Present the backbuffer to the screen
+	gSwapChain->Present(0, 0);
 }

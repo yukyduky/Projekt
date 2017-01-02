@@ -20,7 +20,7 @@ public:
 	~GameManager();
 
 	// Initialize the scene
-	bool InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon);
+	bool InitScene(ID3D11Device* gDevice);
 	// Update
 	void Update();
 	// Render

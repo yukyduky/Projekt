@@ -8,6 +8,7 @@ const int HEIGHT = 600;
 
 const int GEO_INPUT_DESC_SIZE = 4;
 const int LIGHT_INPUT_DESC_SIZE = 1;
+const int NUM_DEFERRED_OUTPUTS = 4;
 
 const int NUM_KEYS = 5;
 enum KEYS { W, A, S, D, ESC };

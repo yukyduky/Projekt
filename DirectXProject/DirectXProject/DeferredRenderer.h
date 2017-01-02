@@ -30,11 +30,16 @@ private:
 	void SetLightShaders();
 	bool CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize);
 	bool CreateSampler();
-	bool MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr);
+	bool MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int structSize);
+	bool MapTexture(ID3D11Texture2D** gTexture, void * cbPtr, int structSize);
 	bool CreateSwapChain(HWND hwnd);
 	bool CreateBackBufferRTV();
 	bool CreateDepthStencilView();
 	void SetViewPort();
+	bool BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11RenderTargetView** gRTV, ID3D11ShaderResourceView** gSRV);
+	bool CreateVertexBuffer();
+	bool PreDrawing();
+	bool PostDrawing();
 
 	// COMS
 	ID3D11Device* gDevice;
@@ -42,14 +47,15 @@ private:
 	IDXGISwapChain* gSwapChain;
 	ID3D11DepthStencilView* gDepthStencilView;
 	ID3D11Texture2D* gDepthStencilBuffer;
-	ID3D11Texture2D* gDiffuseMap;
-	ID3D11Texture2D* gNormalMap;
-	ID3D11SamplerState* gAnisoSampler;
-	ID3D11RenderTargetView* gDeferredRTV[4];
+	ID3D11Texture2D* gDeferredTex[NUM_DEFERRED_OUTPUTS];
+	ID3D11ShaderResourceView* gDeferredSRV[NUM_DEFERRED_OUTPUTS];
+	ID3D11RenderTargetView* gDeferredRTV[NUM_DEFERRED_OUTPUTS];
 	ID3D11RenderTargetView* gFinalRTV;
+	ID3D11SamplerState* gAnisoSampler;
 	ID3D11Buffer* gGeoObjBuffer;
 	ID3D11Buffer* gGeoLightBuffer;
 	ID3D11Buffer* gLightLightBuffer;
+	ID3D11Buffer* gVertBuffer;
 
 	// Objects
 	GameManager gm;
@@ -61,8 +67,10 @@ private:
 	const wchar_t* fileNameGeoPixel = L"geoPassPixel.hlsl";
 	const wchar_t* fileNameLightVertex = L"lightPassVert.hlsl";
 	const wchar_t* fileNameLightPixel = L"lightPassPixel.hlsl";
+	UINT vertBufferStride;
+	UINT vertBufferOffset;
 
-	const D3D11_INPUT_ELEMENT_DESC geoInputDesc[4] =
+	const D3D11_INPUT_ELEMENT_DESC geoInputDesc[GEO_INPUT_DESC_SIZE] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -70,12 +78,12 @@ private:
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	const D3D11_INPUT_ELEMENT_DESC lightInputDesc[1] =
+	const D3D11_INPUT_ELEMENT_DESC lightInputDesc[LIGHT_INPUT_DESC_SIZE] =
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	/*// Structs
+	// Structs
 	struct Light
 	{
 		Vector3 pos;
@@ -87,7 +95,7 @@ private:
 		Vector4 range;
 		Vector2 spotlightAngles;
 		Vector2 pad4;
-	};*/
+	};
 
 	// GeoShader Constant buffer: Object
 	struct cbGeoObject
@@ -97,7 +105,7 @@ private:
 	};
 	cbGeoObject cbGeoObj;
 
-	/*// GeoShader Constant buffer: Light
+	// GeoShader Constant buffer: Light
 	struct cbGeoLighting
 	{
 		Vector3 specular;
@@ -113,7 +121,7 @@ private:
 		Vector3 cameraPos;
 		float pad;
 	};
-	cbLightLighting cbLightLight;*/
+	cbLightLighting cbLightLight;
 
 	// Error handling
 	HRESULT hr;

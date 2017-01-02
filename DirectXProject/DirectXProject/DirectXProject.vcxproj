@@ -159,8 +159,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DeferredRenderer.cpp" />
     <ClCompile Include="ForwardShader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -257,8 +257,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DeferredRenderer.h" />
     <ClInclude Include="ForwardShader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="globals.h" />

@@ -16,6 +16,7 @@ bool Box::PositionData(ID3D11Device* gDevice)
 	{
 		float x, y, z;
 		float r, g, b, a;
+		float nx, ny, nz;
 		float u, v;
 	};
 
@@ -31,31 +32,31 @@ bool Box::PositionData(ID3D11Device* gDevice)
 
 		// Right Face
 		1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,		// TopRight
+		1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,			// TopRight
 		1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,		// BottomLeft
 		1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,		// BottomRight
 
 		// Left Face
 		-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,		// TopLeft
-		-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 1.0f,		// TopRight
+		-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 0.0f,		// TopRight
 		-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f,		// BottomLeft
-		-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 1.0f,		// BottomRight
+		-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 1.0f,	// BottomRight
 
 		// Back Face
-		1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,		// TopLeft
-		-1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// TopRight
+		1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,			// TopLeft
+		-1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,		// TopRight
 		1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
 		-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
 
 		// Top Face
 		-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// TopRight
+		1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,			// TopRight
 		-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,		// BottomLeft
 		1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// BottomRight
 
 		// Bottom Face
 		-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,		// TopRight
+		1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,		// TopRight
 		-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,		// BottomLeft
 		1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,		// BottomRight
 	};
@@ -136,10 +137,18 @@ bool Box::PositionData(ID3D11Device* gDevice)
 	return true;
 }
 
-bool Box::SetTexture(ID3D11Device* gDevice)
+bool Box::LoadTextures(ID3D11Device* gDevice)
 {
-	// Load texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\ducttape.png", nullptr, &gTextureRV, NULL);
+	// Load diffuse map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\ducttape\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Create texture from file - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	// Load normal map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\ducttape\\normal.png", nullptr, &gNormalMap, NULL);
 	if (hr != S_OK)
 	{
 		MessageBox(0, "Create texture from file - Failed", "Error", MB_OK);
@@ -149,17 +158,13 @@ bool Box::SetTexture(ID3D11Device* gDevice)
 	return true;
 }
 
-bool Box::InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon)
+bool Box::InitScene(ID3D11Device* gDevice)
 {
 	if (!PositionData(gDevice))
 		return false;
 
-	// Set the index buffer
-	gDevCon->IASetIndexBuffer(gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	// Set the vertex buffer
-	gDevCon->IASetVertexBuffers(0, 1, &gVertBuffer, &stride, &offset);
-	// Set Primitive Topology
-	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	if (!LoadTextures(gDevice))
+		return false;
 
 	return true;
 }
@@ -177,8 +182,16 @@ void Box::Update(float dt)
 
 void Box::Render(ID3D11DeviceContext* gDevCon)
 {
-	// Update the pixel shader with the texure
-	//gDevCon->PSSetShaderResources(0, 1, &gTextureRV);
+	// Set the index buffer
+	gDevCon->IASetIndexBuffer(gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	// Set the vertex buffer
+	gDevCon->IASetVertexBuffers(0, 1, &gVertBuffer, &stride, &offset);
+	// Set Primitive Topology
+	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// Update the pixel shader with the texures
+	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
+	gDevCon->PSSetShaderResources(1, 1, &gNormalMap);
+	// Draw the indexed vertices
 	gDevCon->DrawIndexed(36, 0, 0);
 }
 
@@ -186,7 +199,8 @@ void Box::Release()
 {
 	gIndexBuffer->Release();
 	gVertBuffer->Release();
-	//gTextureRV->Release();
+	gDiffuseMap->Release();
+	gNormalMap->Release();
 }
 
 Matrix Box::getWorldMatrix() const

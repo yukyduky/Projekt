@@ -11,8 +11,8 @@ public:
 	~Box();
 
 	virtual bool PositionData(ID3D11Device* gDevice);
-	virtual bool SetTexture(ID3D11Device* gDevice);
-	virtual bool InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon);
+	virtual bool LoadTextures(ID3D11Device* gDevice);
+	virtual bool InitScene(ID3D11Device* gDevice);
 	virtual void Update(float dt);
 	virtual void Render(ID3D11DeviceContext* gDevCon);
 	virtual void Release();
@@ -23,7 +23,8 @@ private:
 	// COMS
 	ID3D11Buffer* gIndexBuffer;
 	ID3D11Buffer* gVertBuffer;
-	ID3D11ShaderResourceView* gTextureRV;
+	ID3D11ShaderResourceView* gDiffuseMap;
+	ID3D11ShaderResourceView* gNormalMap;
 
 	// Matrices
 	Matrix rotate;

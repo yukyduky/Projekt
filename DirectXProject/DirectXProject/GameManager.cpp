@@ -24,10 +24,10 @@ GameManager::~GameManager()
 }
 
 
-bool GameManager::InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon)
+bool GameManager::InitScene(ID3D11Device* gDevice)
 {
 	// Initialize the box
-	if (!box.InitScene(gDevice, gDevCon))
+	if (!box.InitScene(gDevice))
 		return false;
 	
 	// Get the matrices
