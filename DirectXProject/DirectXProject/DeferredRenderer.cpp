@@ -197,24 +197,6 @@ bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int struct
 	return true;
 }
 
-bool DeferredRenderer::MapTexture(ID3D11Texture2D** gTexture, void* texPtr, int textureSize)
-{
-	// Map texture so that we can write to it.
-	D3D11_MAPPED_SUBRESOURCE dataPtr;
-	hr = gDevCon->Map(*gTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
-	if (hr != S_OK)
-	{
-		MessageBox(0, "Texture mapping - Failed", "Error", MB_OK);
-		return false;
-	}
-	// copy memory from CPU to GPU the entire struct
-	memcpy(dataPtr.pData, texPtr, textureSize);
-	// UnMap texture so that we can use it again in the GPU
-	gDevCon->Unmap(*gTexture, 0);
-
-	return true;
-}
-
 bool DeferredRenderer::CreateSwapChain(HWND hwnd)
 {
 	// Describe the SwapChain

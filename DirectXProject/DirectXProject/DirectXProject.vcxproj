@@ -263,7 +263,6 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="WindowManager.h" />

@@ -58,5 +58,5 @@ void LoadGeoPassData(in float2 screenPos, out float3 normal, out float3 diffuse,
 
 float3 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower)
 {
-	return diffuse;
+	return normal;
 }
