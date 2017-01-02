@@ -1,0 +1,10 @@
+﻿  WindowManager.cpp
+  Model.cpp
+  main.cpp
+  GameManager.cpp
+  Box.cpp
+  Generating Code...
+  LINK : C:\Users\Jacob\Dropbox\Programmering\3D Labbar\Projekt\Projekt\DirectXProject\x64\Debug\DirectXProject.exe not found or not built by the last incremental link; performing full link
+Box.obj : error LNK2019: unresolved external symbol "long __cdecl DirectX::CreateWICTextureFromFile(struct ID3D11Device *,wchar_t const *,struct ID3D11Resource * *,struct ID3D11ShaderResourceView * *,unsigned __int64)" (?CreateWICTextureFromFile@DirectX@@YAJPEAUID3D11Device@@PEB_WPEAPEAUID3D11Resource@@PEAPEAUID3D11ShaderResourceView@@_K@Z) referenced in function "public: virtual bool __cdecl Box::Texture(struct ID3D11Device *)" (?Texture@Box@@UEAA_NPEAUID3D11Device@@@Z)
+GameManager.obj : error LNK2019: unresolved external symbol D3D11CreateDeviceAndSwapChain referenced in function "public: bool __cdecl GameManager::InitializeDirectX(struct HINSTANCE__ *,struct HWND__ *)" (?InitializeDirectX@GameManager@@QEAA_NPEAUHINSTANCE__@@PEAUHWND__@@@Z)
+C:\Users\Jacob\Dropbox\Programmering\3D Labbar\Projekt\Projekt\DirectXProject\x64\Debug\DirectXProject.exe : fatal error LNK1120: 2 unresolved externals
