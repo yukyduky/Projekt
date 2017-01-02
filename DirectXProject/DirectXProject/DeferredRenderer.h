@@ -31,7 +31,6 @@ private:
 	bool CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize);
 	bool CreateSampler();
 	bool MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int structSize);
-	bool MapTexture(ID3D11Texture2D** gTexture, void * cbPtr, int structSize);
 	bool CreateSwapChain(HWND hwnd);
 	bool CreateBackBufferRTV();
 	bool CreateDepthStencilView();

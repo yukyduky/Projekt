@@ -38,6 +38,8 @@ private:
 	Matrix view;
 	Matrix proj;
 	Matrix wvp;
+
+	Matrix boxWorld;
 	
 	// Vectors
 	Vector2 mouseOffset;

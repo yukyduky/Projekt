@@ -2,7 +2,13 @@
 #ifndef BOX_H
 #define BOX_H
 
-#include "Model.h"
+#include <d3d11.h>
+#include <SimpleMath.h>
+#include <WICTextureLoader.h>
+#include "globals.h"
+
+using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 class Box
 {
