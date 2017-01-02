@@ -1,8 +1,7 @@
-﻿  compilation object save succeeded; see C:\Users\Jacob\Dropbox\Programmering\3D Labbar\Projekt\Projekt\DirectXProject\Debug\geoPassPixel.cso
-  compilation object save succeeded; see C:\Users\Jacob\Dropbox\Programmering\3D Labbar\Projekt\Projekt\DirectXProject\Debug\lightPassPixel.cso
+﻿  compilation object save succeeded; see C:\Users\Jacob\Dropbox\Programmering\3D Labbar\Projekt\Projekt\DirectXProject\Debug\lightPassPixel.cso
   DeferredRenderer.cpp
 c:\users\jacob\dropbox\programmering\3d labbar\projekt\projekt\directxproject\directxproject\deferredrenderer.cpp(180): warning C4715: 'DeferredRenderer::CreateSampler': not all control paths return a value
 c:\users\jacob\dropbox\programmering\3d labbar\projekt\projekt\directxproject\directxproject\deferredrenderer.cpp(436): warning C4715: 'DeferredRenderer::CreateVertexBuffer': not all control paths return a value
-c:\users\jacob\dropbox\programmering\3d labbar\projekt\projekt\directxproject\directxproject\deferredrenderer.cpp(471): warning C4715: 'DeferredRenderer::PreDrawing': not all control paths return a value
-c:\users\jacob\dropbox\programmering\3d labbar\projekt\projekt\directxproject\directxproject\deferredrenderer.cpp(501): warning C4715: 'DeferredRenderer::PostDrawing': not all control paths return a value
+c:\users\jacob\dropbox\programmering\3d labbar\projekt\projekt\directxproject\directxproject\deferredrenderer.cpp(494): warning C4715: 'DeferredRenderer::PostDrawing': not all control paths return a value
+c:\users\jacob\dropbox\programmering\3d labbar\projekt\projekt\directxproject\directxproject\deferredrenderer.cpp(467): warning C4715: 'DeferredRenderer::PreDrawing': not all control paths return a value
   DirectXProject.vcxproj -> C:\Users\Jacob\Dropbox\Programmering\3D Labbar\Projekt\Projekt\DirectXProject\Debug\DirectXProject.exe

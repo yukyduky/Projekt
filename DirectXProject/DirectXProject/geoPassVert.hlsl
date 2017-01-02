@@ -14,27 +14,30 @@ struct VS_IN
 
 struct VS_OUT
 {
-	float4 positionP	: SV_POSITION;
-	float3 positionW	: POSITIONW;
+	float4 position_P	: SV_POSITION;
+	float3 position_W	: POSITIONW;
 	float4 color		: COLOR;
-	float3 normalW		: NORMALW;
+	float3 normal_W		: NORMALW;
 	float2 texCoord		: TEXCOORD;
+	float3 tangent_W		: TANGENTW;
+	float3 bitangent_W	: BITANGENTW;
+	//float3x3 TBN_W		: TANGENTMATRIXW;
 };
 
 VS_OUT VS(VS_IN input)
 {
 	VS_OUT output;
 	
-	// Convert the position and the normals into world space
-	output.positionW = mul(float4(input.position, 1.0f), world).xyz;
-	output.normalW = normalize(mul(input.normal, (float3x3)world));
+	// Convert the position and the normal into world space
+	output.position_W = mul(float4(input.position, 1.0f), world).xyz;
+	output.normal_W = normalize(mul(input.normal, (float3x3)world));
 	// Convert the position into projection space
-	output.positionP = mul(float4(input.position, 1.0f), wvp);
+	output.position_P = mul(float4(input.position, 1.0f), wvp);
 
 	// Convert the x-tangent to world space
-	//output.tangent1W = normalize(mul(input.tangent.xyz, (float3x3)world));
+	output.tangent_W = normalize(mul(float3(1.0f, 0.0f, 0.0f), (float3x3)world));
 	// Create the y tangent ---------------------------------------------
-	//output.tangent2W = normalize(cross(output.normalW, output.tangent1W)) * input.tangent.w;
+	output.bitangent_W = normalize(cross(output.tangent_W, output.normal_W)); // * input.tangent.w;
 
 	// Do nothing with the texture coords
 	output.texCoord = input.texCoord;

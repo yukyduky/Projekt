@@ -11,11 +11,14 @@ SamplerState AnisoSampler : register(s0);
 
 struct PS_IN
 {
-	float4 positionS	: SV_POSITION;
-	float3 positionW	: POSITIONW;
+	float4 position_S	: SV_POSITION;
+	float3 position_W	: POSITIONW;
 	float4 color		: COLOR;
-	float3 normalW		: NORMALW;
+	float3 normal_W		: NORMALW;
 	float2 texCoord		: TEXCOORD;
+	float3 tangent_W	: TANGENTW;
+	float3 bitangent_W	: BITANGENTW;
+	//float3x3 TBN_W		: TANGENTMATRIXW;
 };
 
 struct PS_OUT
@@ -34,21 +37,20 @@ PS_OUT PS(PS_IN input)
 	float3 diffuse = DiffuseMap.Sample(AnisoSampler, input.texCoord).rgb;
 
 	// Normalize the tangent matrix after interpolation ------------------------------------------------------
-	//tangentW = float3x3(normalize(input.tangent1W), normalize(input.tangent2W), normalize(input.normalW));
-	//tangentW = normalize(tangentW);
+	float3x3 TBN_W = float3x3(normalize(input.tangent_W), normalize(input.bitangent_W), normalize(input.normal_W));
 	
 	// Sample the normal map in tangent space and decompress -------------------------------------------------
-	float3 normalT = NormalMap.Sample(AnisoSampler, input.texCoord).rgb;
-	normalT = normalize(normalT * 2.0f - 1.0f);
+	float3 normal_T = NormalMap.Sample(AnisoSampler, input.texCoord).rgb;
+	normal_T = normalize((normal_T * 2.0f) - 1.0f);
 
 	// Convert the normal to world space
-	//float3 normalW = mul(normalT, tangentW);
+	float3 normal_W = mul(normal_T, TBN_W);
 
-	//output.normal = float4(normalT, 1.0f);
-	output.normal = float4(input.normalW, 1.0f);
+	//output.normal = float4(normal_T, 1.0f);
+	output.normal = float4(normal_W, 1.0f);
 	output.diffuse = float4(diffuse, 1.0f);
 	output.specular = float4(specular, specularPower);
-	output.position = float4(input.positionW, 1.0f);
+	output.position = float4(input.position_W, 1.0f);
 
 	return output;
 }

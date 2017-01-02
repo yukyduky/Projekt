@@ -6,7 +6,6 @@ DeferredRenderer::DeferredRenderer()
 {
 }
 
-
 DeferredRenderer::~DeferredRenderer()
 {
 }
@@ -86,6 +85,7 @@ bool DeferredRenderer::Render()
 
 	// Prepare and draw the screen quad from the GeoPass data
 	PostDrawing();
+
 	return true;
 }
 
@@ -452,17 +452,13 @@ bool DeferredRenderer::PreDrawing()
 	SetGeoShaders();
 	// Set the render target to the deferred RTV
 	gDevCon->OMSetRenderTargets(NUM_DEFERRED_OUTPUTS, gDeferredRTV, gDepthStencilView);
-	// Generic pointer for the different structs
-	void* cbPtr = nullptr;
 	// Map the GeoObject constant buffer
-	cbPtr = &cbGeoObj;
-	if (!MapBuffer(&gGeoObjBuffer, cbPtr, sizeof(cbGeoObj)))
+	if (!MapBuffer(&gGeoObjBuffer, &cbGeoObj, sizeof(cbGeoObj)))
 		return false;
 	// Set the constant buffer for the current vertex shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 	// Map the GeoLight constant buffer
-	cbPtr = &cbGeoLight;
-	if (!MapBuffer(&gGeoLightBuffer, cbPtr, sizeof(cbGeoLight)))
+	if (!MapBuffer(&gGeoLightBuffer, &cbGeoLight, sizeof(cbGeoLight)))
 		return false;
 	// Set the constant buffer for the current pixel shader
 	gDevCon->PSSetConstantBuffers(0, 1, &gGeoLightBuffer);
@@ -473,7 +469,7 @@ bool DeferredRenderer::PreDrawing()
 bool DeferredRenderer::PostDrawing()
 {
 	// Unbind the texture to the previous rendertarget
-	gDevCon->OMSetRenderTargets(0, NULL, NULL);
+	//gDevCon->OMSetRenderTargets(0, NULL, NULL);
 	// Set the LightShaders to the current shaders
 	SetLightShaders();
 	// Set the vertexbuffer for the screen quad
@@ -482,11 +478,8 @@ bool DeferredRenderer::PostDrawing()
 	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	// Set the Render Target to the final RTV
 	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);
-	// Generic pointer for the different structs
-	void* cbPtr = nullptr;
 	// Map the LightLight constant buffer
-	cbPtr = &cbLightLight;
-	if (!MapBuffer(&gLightLightBuffer, cbPtr, sizeof(cbLightLight)))
+	if (!MapBuffer(&gLightLightBuffer, &cbLightLight, sizeof(cbLightLight)))
 		return false;
 	// Set the constant buffer for the current pixel shader
 	gDevCon->PSSetConstantBuffers(0, 1, &gLightLightBuffer);

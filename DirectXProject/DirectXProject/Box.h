@@ -4,22 +4,27 @@
 
 #include "Model.h"
 
-class Box : public Model
+class Box
 {
 public:
 	Box();
 	~Box();
 
-	virtual bool PositionData(ID3D11Device* gDevice);
-	virtual bool LoadTextures(ID3D11Device* gDevice);
-	virtual bool InitScene(ID3D11Device* gDevice);
-	virtual void Update(float dt);
-	virtual void Render(ID3D11DeviceContext* gDevCon);
-	virtual void Release();
+	bool LoadTextures(ID3D11Device* gDevice);
+	bool InitScene(ID3D11Device* gDevice);
+	void Update(float dt);
+	void Render(ID3D11DeviceContext* gDevCon);
+	void Release();
 
-	virtual Matrix getWorldMatrix() const;
+	Matrix getWorldMatrix() const;
 
 private:
+	// Functions
+	bool CreateVertexData(ID3D11Device* gDevice);
+	bool CreateIndexBuffer(ID3D11Device* gDevice);
+	bool CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSize);
+	void CreateTBNMatrix(Vector3 posTBNData);
+
 	// COMS
 	ID3D11Buffer* gIndexBuffer;
 	ID3D11Buffer* gVertBuffer;
@@ -27,6 +32,7 @@ private:
 	ID3D11ShaderResourceView* gNormalMap;
 
 	// Matrices
+	Matrix world;
 	Matrix rotate;
 
 	// Variables

@@ -26,7 +26,7 @@ Texture2D texPosition	: register(t3);
 void LoadGeoPassData(in float2 screenPos, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float specularPower);
 float3 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower);
 
-float4 PS(float4 positionS : SV_POSITION) : SV_TARGET
+float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 {
 	float3 normal;
 	float3 diffuse;
@@ -35,7 +35,7 @@ float4 PS(float4 positionS : SV_POSITION) : SV_TARGET
 	float specularPower;
 
 	// Load the data from all the textures
-	LoadGeoPassData(positionS.xy, normal, diffuse, pos, specular, specularPower);
+	LoadGeoPassData(position_S.xy, normal, diffuse, pos, specular, specularPower);
 
 	// Calculate lightning
 	float3 lighting = CalcLight(normal, diffuse, pos, specular, specularPower);
@@ -58,5 +58,5 @@ void LoadGeoPassData(in float2 screenPos, out float3 normal, out float3 diffuse,
 
 float3 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower)
 {
-	return normal;
+	return diffuse;
 }
