@@ -10,27 +10,6 @@ Box::~Box()
 {
 }
 
-bool Box::LoadTextures(ID3D11Device* gDevice)
-{
-	// Load diffuse map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\ducttape\\diffuse.png", nullptr, &gDiffuseMap, NULL);
-	if (hr != S_OK)
-	{
-		MessageBox(0, "Create texture from file - Failed", "Error", MB_OK);
-		return false;
-	}
-
-	// Load normal map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\ducttape\\normal.png", nullptr, &gNormalMap, NULL);
-	if (hr != S_OK)
-	{
-		MessageBox(0, "Create texture from file - Failed", "Error", MB_OK);
-		return false;
-	}
-
-	return true;
-}
-
 bool Box::InitScene(ID3D11Device* gDevice)
 {
 	// Create the Vertex data (position, normal, etc) and the vertex buffer
@@ -46,17 +25,6 @@ bool Box::InitScene(ID3D11Device* gDevice)
 		return false;
 
 	return true;
-}
-
-void Box::Update(float dt)
-{
-	rot += 1 * dt;
-	if (rot >= 6.28)
-		rot = 0;
-
-	rotate = rotate.CreateRotationY(rot);
-
-	world = rotate;
 }
 
 void Box::Render(ID3D11DeviceContext* gDevCon)
@@ -87,70 +55,154 @@ Matrix Box::getWorldMatrix() const
 	return this->world;
 }
 
+bool Box::LoadTextures(ID3D11Device* gDevice)
+{
+	// Load diffuse map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Create texture from file - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	// Load normal map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\normal.png", nullptr, &gNormalMap, NULL);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Create texture from file - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
 bool Box::CreateVertexData(ID3D11Device* gDevice)
 {
-	struct Vertex
+	Vector3 position[] =
 	{
-		float x, y, z;
-		float r, g, b, a;
-		float nx, ny, nz;
-		float u, v;
-	};
-
-	Vertex v[] =
-	{
-		// Vertices
-		// ---Position---|---------Color---------|-------Normal-------|--Texture--|
 		// Front Face
-		-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,		// TopRight
-		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,		// BottomLeft
-		1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,		// BottomRight
+		Vector3(-1.0f, 1.0f, -1.0f),	// TopLeft
+		Vector3(1.0f, 1.0f, -1.0f),		// TopRight
+		Vector3(-1.0f, -1.0f, -1.0f),	// BottomLeft
+		Vector3(1.0f, -1.0f, -1.0f),	// BottomRight
 
-																						// Right Face
-		1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,			// TopRight
-		1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,		// BottomLeft
-		1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,		// BottomRight
+		// Right Face
+		Vector3(1.0f, 1.0f, -1.0f),		// TopLeft
+		Vector3(1.0f, 1.0f, 1.0f),		// TopRight
+		Vector3(1.0f, -1.0f, -1.0f),	// BottomLeft
+		Vector3(1.0f, -1.0f, 1.0f),		// BottomRight
 
 		// Left Face
-		-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,		// TopLeft
-		-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,		// TopRight
-		-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,		// BottomLeft
-		-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,		// BottomRight
+		Vector3(-1.0f, 1.0f, 1.0f),		// TopLeft
+		Vector3(-1.0f, 1.0f, -1.0f),	// TopRight
+		Vector3(-1.0f, -1.0f, 1.0f),	// BottomLeft
+		Vector3(-1.0f, -1.0f, -1.0f),	// BottomRight
 
 		// Back Face
-		1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,			// TopLeft
-		-1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,		// TopRight
-		1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,		// BottomLeft
-		-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,		// BottomRight
+		Vector3(1.0f, 1.0f, 1.0f),		// TopLeft
+		Vector3(-1.0f, 1.0f, 1.0f),		// TopRight
+		Vector3(1.0f, -1.0f, 1.0f),		// BottomLeft
+		Vector3(-1.0f, -1.0f, 1.0f),	// BottomRight
 
-																						// Top Face
-		-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,			// TopRight
-		-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,		// BottomLeft
-		1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// BottomRight
+		// Top Face
+		Vector3(-1.0f, 1.0f, 1.0f),		// TopLeft
+		Vector3(1.0f, 1.0f, 1.0f),		// TopRight
+		Vector3(-1.0f, 1.0f, -1.0f),	// BottomLeft
+		Vector3(1.0f, 1.0f, -1.0f),		// BottomRight
 
-																						// Bottom Face
-		-1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,		// TopLeft
-		1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,		// TopRight
-		-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,		// BottomLeft
-		1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,		// BottomRight
+		// Bottom Face
+		Vector3(-1.0f, -1.0f, -1.0f),	// TopLeft
+		Vector3(1.0f, -1.0f, -1.0f),	// TopRight
+		Vector3(-1.0f, -1.0f, 1.0f),	// BottomLeft
+		Vector3(1.0f, -1.0f, 1.0f),		// BottomRight
 	};
 
-	/*Vector3 posTBNData[sizeof(v) / sizeof(Vertex)];
-	for (int i = 0; i < sizeof(posTBNData); i++)
+	Vector3 normal[NUM_VERTICES];
+
+	for (int i = 0; i < NUM_VERTICES; i += 4)
 	{
-		posTBNData[i].x = v[i].x;
-		posTBNData[i].y = v[i].y;
-		posTBNData[i].z = v[i].z;
-	}*/
+		Vector3 pos[3];
+
+		for (int k = 0; k < 3; k++)
+			pos[k] = position[i + k];
+
+		for (int k = 0; k < 4; k++)
+			normal[i + k] = CreateVertexNormal(pos);
+	}
+
+	Vector2 texCoords[] =
+	{
+		Vector2(0.0f, 0.0f),
+		Vector2(1.0f, 0.0f),
+		Vector2(0.0f, 1.0f),
+		Vector2(1.0f, 1.0f),
+	};
+
+	Vector3 posTBNData[3];
+	Vector3 norTBNData;
+	Vector2 uvTBNData[3];
+
+	Vector4 tangent[NUM_VERTICES];
+
+	// Get the texture coords
+	for (int i = 0; i < 3; i++)
+		uvTBNData[i] = texCoords[i];
+	
+	for (int i = 0; i < NUM_VERTICES; i += 4)
+	{
+		// Get the positions
+		for (int k = 0; k < 3; k++)
+			posTBNData[k] = position[i + k];
+
+		// Get the normal
+		norTBNData = normal[i];
+
+		// Calculate the tangent per face
+		Vector4 tan = CreateTBNMatrixData(posTBNData, norTBNData, uvTBNData);
+
+		// Store the data per vertex
+		for (int k = 0; k < 4; k++)
+			tangent[i + k] = tan;
+	}
+
+	struct Vertex
+	{
+		Vector3 position;
+		Vector3 normal;
+		Vector2 texCoords;
+		Vector4 tangent;
+	};
+
+	Vertex v[24];
+
+	int k = 0;
+	for (int i = 0; i < 24; i++)
+	{
+		if (i % 4 == 0 && i != 0)
+			k++;
+
+		v[i].position = position[i];
+		v[i].normal = normal[i];
+		v[i].texCoords = texCoords[i - 4 * k];
+		v[i].tangent = tangent[i];
+	}
 
 	// Create the vertexbuffer for the input layout to the shader
 	if (!CreateVertexBuffer(gDevice, &v, sizeof(Vertex)))
 		return false;
 
 	return true;
+}
+
+Vector3 Box::CreateVertexNormal(Vector3* pos)
+{
+	Vector3 p0p1 = pos[1] - pos[0];
+	Vector3 p0p2 = pos[2] - pos[0];
+
+	Vector3 normal = p0p1.Cross(p0p2);
+	normal.Normalize();
+
+	return normal;
 }
 
 bool Box::CreateIndexBuffer(ID3D11Device* gDevice)
@@ -234,7 +286,40 @@ bool Box::CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSi
 	return true;
 }
 
-void Box::CreateTBNMatrix(Vector3 posTBNData)
+Vector4 Box::CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Vector2* uvTBNData)
 {
+	// Edges of triangle; position delta
+	Vector3 v0v1 = posTBNData[1] - posTBNData[0];
+	v0v1.Normalize();
+	Vector3 v0v2 = posTBNData[2] - posTBNData[0];
+	v0v2.Normalize();
+	// Normal
+	Vector3 normal = norTBNData;
+	// Texture coords delta
+	Vector2 uv0uv1 = uvTBNData[1] - uvTBNData[0];
+	Vector2 uv0uv2 = uvTBNData[2] - uvTBNData[0];
 
+	// Calculate the determinant in order to get orientation of the surface
+	float det = 1 / (uv0uv1.x * uv0uv2.y - uv0uv1.y * uv0uv2.x);
+
+	// Calculate the tangent and the bitangent
+	Vector3 tan;
+	tan.x = (v0v1.x * uv0uv2.y - v0v2.x * uv0uv1.y) * det;
+	tan.y = (v0v1.y * uv0uv2.y - v0v2.y * uv0uv1.y) * det;
+	tan.z = (v0v1.z * uv0uv2.y - v0v2.z * uv0uv1.y) * det;
+	Vector3 bitangent;
+	bitangent.x = (v0v2.x * uv0uv2.x - v0v1.x * uv0uv1.x) * det;
+	bitangent.y = (v0v2.y * uv0uv2.x - v0v1.y * uv0uv1.x) * det;
+	bitangent.z = (v0v2.z * uv0uv2.x - v0v1.z * uv0uv1.x) * det;
+
+	//if (bitangent.Dot(normal.Cross(Vector3(tangent))) < 0.0f)
+	//	(Vector3)tangent *= -1.0f;
+	(Vector3)tan = ((Vector3)tan - normal * normal.Dot((Vector3)tan));
+
+	// Normalize after everythings done
+	tan.Normalize();
+
+	Vector4 tangent = Vector4(tan.x, tan.y, tan.z, det);
+
+	return tangent;
 }

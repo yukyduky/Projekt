@@ -13,12 +13,9 @@ struct PS_IN
 {
 	float4 position_S	: SV_POSITION;
 	float3 position_W	: POSITIONW;
-	float4 color		: COLOR;
 	float3 normal_W		: NORMALW;
 	float2 texCoord		: TEXCOORD;
-	float3 tangent_W	: TANGENTW;
-	float3 bitangent_W	: BITANGENTW;
-	//float3x3 TBN_W		: TANGENTMATRIXW;
+	float4 tangent_W	: TANGENTW;
 };
 
 struct PS_OUT
@@ -35,18 +32,18 @@ PS_OUT PS(PS_IN input)
 
 	// Sample the texture for the diffuse light
 	float3 diffuse = DiffuseMap.Sample(AnisoSampler, input.texCoord).rgb;
-
-	// Normalize the tangent matrix after interpolation ------------------------------------------------------
-	float3x3 TBN_W = float3x3(normalize(input.tangent_W), normalize(input.bitangent_W), normalize(input.normal_W));
-	
-	// Sample the normal map in tangent space and decompress -------------------------------------------------
+	// Sample the normal map in tangent space and decompress
 	float3 normal_T = NormalMap.Sample(AnisoSampler, input.texCoord).rgb;
-	normal_T = normalize((normal_T * 2.0f) - 1.0f);
+	normal_T = (normal_T * 2.0f) - 1.0f;
+
+	// Create the bitangent
+	float3 bitangent_W = cross(input.normal_W, input.tangent_W.xyz) * input.tangent_W.w;
+	// Create the tangent matrix
+	float3x3 TBN_W = float3x3(normalize(input.tangent_W.xyz), normalize(bitangent_W), normalize(input.normal_W));
 
 	// Convert the normal to world space
-	float3 normal_W = mul(normal_T, TBN_W);
+	float3 normal_W = normalize(mul(normal_T, TBN_W));
 
-	//output.normal = float4(normal_T, 1.0f);
 	output.normal = float4(normal_W, 1.0f);
 	output.diffuse = float4(diffuse, 1.0f);
 	output.specular = float4(specular, specularPower);

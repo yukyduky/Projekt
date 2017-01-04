@@ -11,9 +11,12 @@ using namespace DirectX::SimpleMath;
 class Light
 {
 public:
-	Light(int lightType, Vector4 lightPosition);
-	Light(int lightType, Vector4 lightPosition, Vector4 lightDirection);
-	Light(int lightType, Vector4 lightPosition, Vector4 lightDirection, float attenuation);
+	// Directionallight
+	Light(int lightType, Vector3 lightPosition);
+	// Pointlight
+	Light(int lightType, Vector3 lightPosition, Vector3 lightDirection, float attenuation);
+	// Spotlight
+	Light(int lightType, Vector3 lightPosition, Vector3 lightDirection, float attenuation, float angle);
 	~Light();
 
 	int getLightType();
@@ -21,9 +24,10 @@ public:
 
 private:
 	int lightType;
-	Vector4 lightPosition;
-	Vector4 lightDirection;
+	Vector3 lightPosition;
+	Vector3 lightDirection;
 	float attenuation;
+	float angle;
 };
 
 #endif

@@ -70,6 +70,8 @@ void DeferredRenderer::Update()
 {
 	gm.Update();
 
+	// Update the lights
+	cbLightLight.light = gm.getLightProperties();
 	// Update the matrices
 	cbGeoObj.world = gm.getMatrixWorld();
 	cbGeoObj.wvp = gm.getMatrixWVP();
@@ -82,6 +84,7 @@ bool DeferredRenderer::Render()
 
 	// Draw the geometry
 	gm.Render(gDevCon);
+
 
 	// Prepare and draw the screen quad from the GeoPass data
 	PostDrawing();
@@ -450,8 +453,6 @@ bool DeferredRenderer::PreDrawing()
 
 bool DeferredRenderer::PostDrawing()
 {
-	// Unbind the texture to the previous rendertarget
-	//gDevCon->OMSetRenderTargets(0, NULL, NULL);
 	// Set the LightShaders to the current shaders
 	SetLightShaders();
 	// Set the vertexbuffer for the screen quad

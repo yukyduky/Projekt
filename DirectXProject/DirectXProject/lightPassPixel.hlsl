@@ -1,14 +1,9 @@
 struct Light
 {
 	float3 pos;
-	float pad1;
-	float3 color;
-	float pad2;
+	float attenuation;
 	float3 dir;
-	float pad3;
-	float4 range;
-	float2 spotlightAngles;
-	float2 pad4;
+	float spotlightAngle;
 };
 
 cbuffer cbLightLighting
@@ -23,8 +18,8 @@ Texture2D texDiffuse	: register(t1);
 Texture2D texSpecular	: register(t2);
 Texture2D texPosition	: register(t3);
 
-void LoadGeoPassData(in float2 screenPos, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float specularPower);
-float3 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower);
+void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float specularPower);
+float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower);
 
 float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 {
@@ -38,14 +33,14 @@ float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 	LoadGeoPassData(position_S.xy, normal, diffuse, pos, specular, specularPower);
 
 	// Calculate lightning
-	float3 lighting = CalcLight(normal, diffuse, pos, specular, specularPower);
+	float4 lighting = CalcLight(normal, diffuse, pos, specular, specularPower);
 
-	return float4(lighting, 1.0f);
+	return lighting;
 }
 
-void LoadGeoPassData(in float2 screenPos, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float specularPower)
+void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float specularPower)
 {
-	int3 texCoords = int3(screenPos, 0);
+	int3 texCoords = int3(screenCoords, 0);
 
 	normal = texNormal.Load(texCoords).xyz;
 	diffuse = texDiffuse.Load(texCoords).xyz;
@@ -56,7 +51,26 @@ void LoadGeoPassData(in float2 screenPos, out float3 normal, out float3 diffuse,
 	specularPower = spec.w;
 }
 
-float3 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower)
+float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower)
 {
-	return normal;
+	float3 pToL = light.pos - pos;
+	float distance = length(pToL);
+
+	// Calculate the attenuation depending on how far away the light is
+	float attenuation = max(0, 1.0f - (distance / light.attenuation));
+	// Directional light will have an attenuation of -1 to indicate infinite range -> 1.0f - (distance / light.attenuation = 2.0f
+	attenuation = min(1.0f, 1.0f - (distance / light.attenuation));
+
+	// Normalize pToL
+	pToL /= distance;
+
+	// Calculate the "angle" between the normal and the light vector
+	float lightIntensity = saturate(dot(normal, pToL));
+	// Calculate the diffuse against the light
+	float3 finalDiffuse = lightIntensity * diffuse;
+
+	// Combine everything and return it
+	float3 lighting = finalDiffuse * attenuation;
+
+	return float4(lighting, 1.0f);
 }

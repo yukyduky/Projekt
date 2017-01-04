@@ -8,7 +8,7 @@ Camera::Camera()
 	forward = Vector3(0.0f, 0.0f, 1.0f);
 	right = Vector3(1.0f, 0.0f, 0.0f);
 	// Position
-	pos = Vector3(0.0f, 4.0f, -4.0f);
+	pos = Vector3(0.0f, 0.0f, -4.0f);
 
 	// Set the world matrix
 	world = XMMatrixIdentity();

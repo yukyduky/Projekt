@@ -16,9 +16,7 @@ public:
 	Box();
 	~Box();
 
-	bool LoadTextures(ID3D11Device* gDevice);
 	bool InitScene(ID3D11Device* gDevice);
-	void Update(float dt);
 	void Render(ID3D11DeviceContext* gDevCon);
 	void Release();
 
@@ -26,10 +24,12 @@ public:
 
 private:
 	// Functions
+	bool LoadTextures(ID3D11Device* gDevice);
 	bool CreateVertexData(ID3D11Device* gDevice);
+	Vector3 CreateVertexNormal(Vector3* pos);
 	bool CreateIndexBuffer(ID3D11Device* gDevice);
 	bool CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSize);
-	void CreateTBNMatrix(Vector3 posTBNData);
+	Vector4 CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Vector2* uvTBNData);
 
 	// COMS
 	ID3D11Buffer* gIndexBuffer;

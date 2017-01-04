@@ -9,9 +9,10 @@ const int HEIGHT = 600;
 const int GEO_INPUT_DESC_SIZE = 4;
 const int LIGHT_INPUT_DESC_SIZE = 1;
 const int NUM_DEFERRED_OUTPUTS = 4;
+const int NUM_VERTICES = 24;
 
-const int NUM_KEYS = 5;
-enum KEYS { W, A, S, D, ESC };
+const int NUM_KEYS = 7;
+enum KEYS { W, A, S, D, ESC, SPACE, CTRL };
 enum LIGHT_TYPE { SPOTLIGHT, DIRECTLIGHT, POINTLIGHT };
 
 #define VK_W 87
