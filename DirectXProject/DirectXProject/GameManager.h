@@ -19,6 +19,9 @@ struct LightProperties
 	float attenuation;
 	Vector3 dir;
 	float spotlightAngle;
+	Vector4 diffuse;
+	Vector3 ambient;
+	float range;
 };
 
 class GameManager

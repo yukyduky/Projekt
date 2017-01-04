@@ -20,9 +20,12 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	for (int i = 0; i < NUM_KEYS; i++)
 		keys[i] = false;
 
-	pointLight.pos = Vector3(0.0f, 0.0f, -10.0f);
-	pointLight.attenuation = 100.0f;
+	pointLight.pos = Vector3(0.0f, 2.0f, -10.0f);
+	pointLight.attenuation = 1.0f;
 	pointLight.dir = Vector3(0.0f, 0.0f, 1.0f);
+	pointLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	pointLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
+	pointLight.range = 100.0f;
 }
 
 GameManager::~GameManager()

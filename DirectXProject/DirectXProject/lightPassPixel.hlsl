@@ -4,6 +4,9 @@ struct Light
 	float attenuation;
 	float3 dir;
 	float spotlightAngle;
+	float4 diffuse;
+	float3 ambient;
+	float range;
 };
 
 cbuffer cbLightLighting
@@ -53,24 +56,29 @@ void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffu
 
 float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower)
 {
+	// Vector from object to light
 	float3 pToL = light.pos - pos;
+	// Length of the vector is the distance between the object to the light
 	float distance = length(pToL);
 
+	// Create and ambient color from the diffuse color of the object
+	float3 finalAmbient = diffuse * light.ambient;
+
 	// Calculate the attenuation depending on how far away the light is
-	float attenuation = max(0, 1.0f - (distance / light.attenuation));
-	// Directional light will have an attenuation of -1 to indicate infinite range -> 1.0f - (distance / light.attenuation = 2.0f
-	attenuation = min(1.0f, 1.0f - (distance / light.attenuation));
+	float attenuation = max(0, light.attenuation - (distance / light.range));
+	/* Directional light will have an attenuation of -1 to indicate infinite range -> 1.0f - (distance / light.attenuation = 2.0f */
+	attenuation = min(1.0f, light.attenuation - (distance / light.range));
 
 	// Normalize pToL
 	pToL /= distance;
 
 	// Calculate the "angle" between the normal and the light vector
 	float lightIntensity = saturate(dot(normal, pToL));
-	// Calculate the diffuse against the light
-	float3 finalDiffuse = lightIntensity * diffuse;
+	// Calculate the diffuse against the light and multiply with the light diffuse color and the "strength" of the light
+	float3 finalDiffuse = lightIntensity * diffuse * light.diffuse * attenuation;
 
-	// Combine everything and return it
-	float3 lighting = finalDiffuse * attenuation;
+	// Add the ambient and saturate to clamp between 0 and 1
+	float3 lighting = saturate(finalDiffuse + finalAmbient);
 
 	return float4(lighting, 1.0f);
 }
