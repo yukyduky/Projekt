@@ -38,6 +38,7 @@ void Box::Render(ID3D11DeviceContext* gDevCon)
 	// Update the pixel shader with the textures
 	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
 	gDevCon->PSSetShaderResources(1, 1, &gNormalMap);
+	gDevCon->PSSetShaderResources(2, 1, &gSpecularMap);
 	// Draw the indexed vertices
 	gDevCon->DrawIndexed(36, 0, 0);
 }
@@ -48,6 +49,7 @@ void Box::Release()
 	gVertBuffer->Release();
 	gDiffuseMap->Release();
 	gNormalMap->Release();
+	gSpecularMap->Release();
 }
 
 Matrix Box::getWorldMatrix() const
@@ -58,10 +60,10 @@ Matrix Box::getWorldMatrix() const
 bool Box::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\diffuse.png", nullptr, &gDiffuseMap, NULL);
 	if (hr != S_OK)
 	{
-		MessageBox(0, "Create texture from file - Failed", "Error", MB_OK);
+		MessageBox(0, "Create box diffuse texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
 
@@ -69,7 +71,15 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\normal.png", nullptr, &gNormalMap, NULL);
 	if (hr != S_OK)
 	{
-		MessageBox(0, "Create texture from file - Failed", "Error", MB_OK);
+		MessageBox(0, "Create box normal texture from file - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	// Load normal map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\specular.png", nullptr, &gSpecularMap, NULL);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Create box specular texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
 

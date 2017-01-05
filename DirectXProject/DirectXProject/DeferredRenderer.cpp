@@ -41,7 +41,7 @@ bool DeferredRenderer::InitScene()
 		return false;
 
 	// Create the gGeoLightBuffer for the shaders
-	if (!CreateConstBuffer(&gGeoLightBuffer, sizeof(cbGeoLighting)))
+	if (!CreateConstBuffer(&gGeoMatsBuffer, sizeof(cbGeoMaterial)))
 		return false;
 
 	// Create the gLightLightBuffer for the shaders
@@ -74,6 +74,7 @@ void DeferredRenderer::Update()
 	cbLightLight.pointLight = gm.getPointLight();
 	cbLightLight.spotLight = gm.getSpotLight();
 	cbLightLight.directLight = gm.getDirectLight();
+	cbLightLight.genLight = gm.getGenLight();
 	// Update the matrices
 	cbGeoObj.world = gm.getMatrixWorld();
 	cbGeoObj.wvp = gm.getMatrixWVP();
@@ -103,7 +104,7 @@ void DeferredRenderer::Release()
 	gDepthStencilBuffer->Release();
 	gAnisoSampler->Release();
 	gGeoObjBuffer->Release();
-	gGeoLightBuffer->Release();
+	gGeoMatsBuffer->Release();
 	gLightLightBuffer->Release();
 	gVertBuffer->Release();
 	gFinalRTV->Release();
@@ -445,10 +446,10 @@ bool DeferredRenderer::PreDrawing()
 	// Set the constant buffer for the current vertex shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 	// Map the GeoLight constant buffer
-	if (!MapBuffer(&gGeoLightBuffer, &cbGeoLight, sizeof(cbGeoLight)))
+	if (!MapBuffer(&gGeoMatsBuffer, &cbGeoMats, sizeof(cbGeoMaterial)))
 		return false;
 	// Set the constant buffer for the current pixel shader
-	gDevCon->PSSetConstantBuffers(0, 1, &gGeoLightBuffer);
+	gDevCon->PSSetConstantBuffers(0, 1, &gGeoMatsBuffer);
 	// Set the texture sampler for the current pixel shader
 	gDevCon->PSSetSamplers(0, 1, &gAnisoSampler);
 }

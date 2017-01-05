@@ -6,7 +6,7 @@ struct PointLight
 	float3 ambient;
 	float pad1;
 	float3 attenuation;
-	float pad2;
+	float specPower;
 };
 
 struct SpotLight
@@ -19,7 +19,7 @@ struct SpotLight
 	float3 ambient;
 	float pad1;
 	float3 attenuation;
-	float pad2;
+	float specPower;
 };
 
 struct DirectLight
@@ -30,7 +30,13 @@ struct DirectLight
 	float pad1;
 	float4 diffuse;
 	float3 ambient;
-	float pad2;
+	float specPower;
+};
+
+struct GeneralLightAttrb
+{
+	float3 cameraDir;
+	float pad;
 };
 
 cbuffer cbLightLighting
@@ -38,21 +44,20 @@ cbuffer cbLightLighting
 	PointLight pointLight;
 	SpotLight spotLight;
 	DirectLight directLight;
-	float3 cameraPos;
-	float pad;
+	GeneralLightAttrb genLight;
 };
 
 static const int NUM_POINTLIGHTS = 0;
-static const int NUM_SPOTLIGHTS = 1;
-static const int NUM_DIRECTLIGHTS = 0;
+static const int NUM_SPOTLIGHTS = 0;
+static const int NUM_DIRECTLIGHTS = 1;
 
 Texture2D texNormal		: register(t0);
 Texture2D texDiffuse	: register(t1);
 Texture2D texSpecular	: register(t2);
 Texture2D texPosition	: register(t3);
 
-void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float specularPower);
-float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower);
+void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular);
+float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular);
 
 float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 {
@@ -60,33 +65,28 @@ float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 	float3 diffuse;
 	float3 pos;
 	float3 specular;
-	float specularPower;
 
 	// Load the data from all the textures
-	LoadGeoPassData(position_S.xy, normal, diffuse, pos, specular, specularPower);
+	LoadGeoPassData(position_S.xy, normal, diffuse, pos, specular);
 
 	// Calculate lightning
-	float4 lighting = CalcLight(normal, diffuse, pos, specular, specularPower);
+	float4 lighting = CalcLight(normal, diffuse, pos, specular);
 
 	return lighting;
 }
 
-void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float specularPower)
+void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular)
 {
 	int3 texCoords = int3(screenCoords, 0);
 
 	normal = texNormal.Load(texCoords).xyz;
 	diffuse = texDiffuse.Load(texCoords).xyz;
 	pos = texPosition.Load(texCoords).xyz;
-	float4 spec = texSpecular.Load(texCoords);
-
-	specular = spec.xyz;
-	specularPower = spec.w;
+	specular = texSpecular.Load(texCoords).xyz;
 }
 
-float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower)
+float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular)
 {
-	const float3 globalAmbient = float3(0.1f, 0.1f, 0.1f);
 	float3 pointLighting = float3(0.0f, 0.0f, 0.0f);
 	float3 spotLighting = float3(0.0f, 0.0f, 0.0f);
 	float3 directLighting = float3(0.0f, 0.0f, 0.0f);
@@ -109,8 +109,16 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 		
 		// Create an ambient color from the diffuse color of the object
 		float3 finalAmbient = diffuse * pointLight.ambient;
-		// Add the ambient and saturate to clamp between 0 and 1
-		pointLighting = saturate(finalColor + finalAmbient);
+
+		// Reflection vector based on the lightIntensity, normal, and the light direction
+		float3 reflect = normalize(2 * lightIntensity * normal - pToL);
+		// Calculate the amount of light reflected
+		float3 spec = pow(saturate(dot(reflect, -genLight.cameraDir)), pointLight.specPower);
+		// Multiply with the amount of specular light at this current pixel
+		spec *= specular;
+
+		// Add the ambient and the specular
+		pointLighting = finalColor + finalAmbient + spec;
 	}
 	for (int i = 0; i < NUM_SPOTLIGHTS; i++)
 	{
@@ -132,8 +140,16 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 
 		// Create an ambient color from the diffuse color of the object
 		float3 finalAmbient = diffuse * spotLight.ambient;
-		// Add the ambient and saturate to clamp between 0 and 1
-		spotLighting = saturate(finalColor + finalAmbient);
+
+		// Reflection vector based on the lightIntensity, normal, and the light direction
+		float3 reflect = normalize(2 * lightIntensity * normal - pToL);
+		// Calculate the amount of light reflected
+		float3 spec = pow(saturate(dot(reflect, -genLight.cameraDir)), spotLight.specPower);
+		// Multiply with the amount of specular light at this current pixel
+		spec *= specular;
+
+		// Add the ambient and the specular
+		spotLighting = finalColor + finalAmbient + spec;
 	}
 	for (int i = 0; i < NUM_DIRECTLIGHTS; i++)
 	{
@@ -144,13 +160,20 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 
 		// Create an ambient color from the diffuse color of the object
 		float3 finalAmbient = diffuse * directLight.ambient;
-		// Add the ambient and saturate to clamp between 0 and 1
-		directLighting = saturate(finalColor + finalAmbient);
+
+		// Reflection vector based on the lightIntensity, normal, and the light direction
+		float3 reflect = normalize(2 * lightIntensity * normal + directLight.dir);
+		// Calculate the amount of light reflected
+		float3 spec = pow(saturate(dot(reflect, -genLight.cameraDir)), directLight.specPower);
+		// Multiply with the amount of specular light at this current pixel
+		spec *= specular;
+
+		// Add the ambient and the specular
+		directLighting = finalColor + finalAmbient + spec;
 	}
-
-
+	
 	// Combine all the different lightsources and clamp it
-	float3 lighting = saturate(pointLighting + spotLighting + directLighting + globalAmbient);
+	float3 lighting = saturate(pointLighting + spotLighting + directLighting);
 
 	return float4(lighting, 1.0f);
 }

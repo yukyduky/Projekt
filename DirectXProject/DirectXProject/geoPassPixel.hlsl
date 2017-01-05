@@ -1,12 +1,15 @@
-cbuffer cbGeoLighting
+cbuffer cbGeoMaterial
 {
+	float3 ambient;
+	float pad0;
+	float4 diffuse;
 	float3 specular;
-	float specularPower;
-	float3x3 tangentW;
+	float shininess;
 };
 
 Texture2D DiffuseMap : register(t0);
 Texture2D NormalMap : register(t1);
+Texture2D SpecularMap : register(t2);
 SamplerState AnisoSampler : register(s0);
 
 struct PS_IN
@@ -32,6 +35,8 @@ PS_OUT PS(PS_IN input)
 
 	// Sample the texture for the diffuse light
 	float3 diffuse = DiffuseMap.Sample(AnisoSampler, input.texCoord).rgb;
+	// Sample the texture for the specular light
+	float4 specular = SpecularMap.Sample(AnisoSampler, input.texCoord);
 	// Sample the normal map in tangent space and decompress
 	float3 normal_T = NormalMap.Sample(AnisoSampler, input.texCoord).rgb;
 	normal_T = (normal_T * 2.0f) - 1.0f;
@@ -46,7 +51,7 @@ PS_OUT PS(PS_IN input)
 
 	output.normal = float4(normal_W, 1.0f);
 	output.diffuse = float4(diffuse, 1.0f);
-	output.specular = float4(specular, specularPower);
+	output.specular = float4(specular);
 	output.position = float4(input.position_W, 1.0f);
 
 	return output;

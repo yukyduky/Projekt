@@ -52,7 +52,7 @@ private:
 	ID3D11RenderTargetView* gFinalRTV;
 	ID3D11SamplerState* gAnisoSampler;
 	ID3D11Buffer* gGeoObjBuffer;
-	ID3D11Buffer* gGeoLightBuffer;
+	ID3D11Buffer* gGeoMatsBuffer;
 	ID3D11Buffer* gLightLightBuffer;
 	ID3D11Buffer* gVertBuffer;
 
@@ -91,13 +91,15 @@ private:
 	cbGeoObject cbGeoObj;
 
 	// GeoShader Constant buffer: Light
-	struct cbGeoLighting
+	struct cbGeoMaterial
 	{
+		Vector3 ambient;
+		float pad0;
+		Vector4 diffuse;
 		Vector3 specular;
-		float specularPower;
-		Matrix tangentW;
+		float shininess;
 	};
-	cbGeoLighting cbGeoLight;
+	cbGeoMaterial cbGeoMats;
 
 	// LightShader Constant buffer: Light
 	struct cbLightLighting
@@ -105,9 +107,7 @@ private:
 		PointLight pointLight;
 		SpotLight spotLight;
 		DirectLight directLight;
-
-		Vector3 cameraPos;
-		float pad;
+		GeneralLightAttrb genLight;
 	};
 	cbLightLighting cbLightLight;
 

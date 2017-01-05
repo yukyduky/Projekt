@@ -20,10 +20,11 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	for (int i = 0; i < NUM_KEYS; i++)
 		keys[i] = false;
 
-	pointLight.pos = Vector3(0.0f, 2.0f, -2.0f);
+	pointLight.pos = Vector3(0.0f, 0.0f, -2.0f);
 	pointLight.attenuation = Vector3(1.0f, 0.1f, 0.2f);
 	pointLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	pointLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
+	pointLight.specPower = 50.0f;
 
 	spotLight.pos = Vector3(0.0f, 0.0f, -3.0f);
 	spotLight.dir = Vector3(0.0f, 0.0f, 1.0f);
@@ -31,11 +32,13 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	spotLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	spotLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	spotLight.attenuation = Vector3(1.0f, 0.1f, 0.0f);
+	spotLight.specPower = 50.0f;
 
 	directLight.pos = Vector3(0.0f, 2.0f, -2.0f);
 	directLight.dir = Vector3(0.0f, 0.0f, 1.0f);
 	directLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	directLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
+	directLight.specPower = 50.0f;
 }
 
 GameManager::~GameManager()
@@ -68,6 +71,8 @@ void GameManager::Update()
 	// Update the view matrix
 	view = cam.getViewMatrix();
 
+	// Update the camera direction for the general light attributes
+	genLight.cameraDir = cam.getForward();
 	// Update Flashlight
 	UpdateFlashLight(cam.getPosition(), cam.getForward());
 
@@ -115,6 +120,11 @@ SpotLight GameManager::getSpotLight() const
 DirectLight GameManager::getDirectLight() const
 {
 	return directLight;
+}
+
+GeneralLightAttrb GameManager::getGenLight() const
+{
+	return genLight;
 }
 
 void GameManager::UpdateWorlds()

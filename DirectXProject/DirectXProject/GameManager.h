@@ -21,7 +21,7 @@ struct PointLight
 	Vector3 ambient;
 	float pad1;
 	Vector3 attenuation;
-	float pad2;
+	float specPower;
 };
 
 struct SpotLight
@@ -34,7 +34,7 @@ struct SpotLight
 	Vector3 ambient;
 	float pad1;
 	Vector3 attenuation;
-	float pad2;
+	float specPower;
 };
 
 struct DirectLight
@@ -45,7 +45,13 @@ struct DirectLight
 	float pad1;
 	Vector4 diffuse;
 	Vector3 ambient;
-	float pad2;
+	float specPower;
+};
+
+struct GeneralLightAttrb
+{
+	Vector3 cameraDir;
+	float pad;
 };
 
 class GameManager
@@ -68,6 +74,7 @@ public:
 	PointLight getPointLight() const;
 	SpotLight getSpotLight() const;
 	DirectLight getDirectLight() const;
+	GeneralLightAttrb getGenLight() const;
 
 private:
 	// Functions
@@ -103,6 +110,7 @@ private:
 	PointLight pointLight;
 	SpotLight spotLight;
 	DirectLight directLight;
+	GeneralLightAttrb genLight;
 
 	// Error handling
 	HRESULT hr;
