@@ -27,10 +27,10 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 
 	spotLight.pos = Vector3(0.0f, 0.0f, -3.0f);
 	spotLight.dir = Vector3(0.0f, 0.0f, 1.0f);
-	spotLight.angle = 20.0f;
+	spotLight.angle = 100.0f;
 	spotLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	spotLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
-	spotLight.attenuation = Vector3(1.0f, 0.1f, 0.2f);
+	spotLight.attenuation = Vector3(1.0f, 0.1f, 0.0f);
 
 	directLight.pos = Vector3(0.0f, 2.0f, -2.0f);
 	directLight.dir = Vector3(0.0f, 0.0f, 1.0f);
@@ -67,6 +67,9 @@ void GameManager::Update()
 	cam.Update(keys, mouseOffset, dt);
 	// Update the view matrix
 	view = cam.getViewMatrix();
+
+	// Update Flashlight
+	UpdateFlashLight(cam.getPosition(), cam.getForward());
 
 	// Update the world matrices
 	UpdateWorlds();
@@ -146,4 +149,10 @@ void GameManager::UpdateBox()
 
 
 	boxWorld = rotate * translate;
+}
+
+void GameManager::UpdateFlashLight(Vector3 position, Vector3 forward)
+{
+	this->spotLight.dir = forward;
+	this->spotLight.pos = position;
 }

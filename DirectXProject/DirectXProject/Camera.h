@@ -18,10 +18,10 @@ public:
 	void InitScene();
 	void Update(bool* keys, Vector2 mouseOffset, float dt);
 
-	Matrix getWorldMatrix() const;
 	Matrix getViewMatrix() const;
 	Matrix getProjMatrix() const;
-
+	Vector3 getPosition() const;
+	Vector3 getForward() const;
 
 private:
 	// Functions
@@ -29,7 +29,6 @@ private:
 	void ProcessMouse(Vector2 mouseOffset, float dt);
 
 	// Matrices
-	Matrix world;
 	Matrix view;
 	Matrix proj;
 
