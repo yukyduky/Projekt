@@ -10,8 +10,6 @@ Camera::Camera()
 	// Position
 	pos = Vector3(0.0f, 0.0f, -4.0f);
 
-	// Set the world matrix
-	world = XMMatrixIdentity();
 	// Set the view matrix
 	view = XMMatrixLookAtLH(pos, forward, up);
 	// Set the projection matrix
@@ -40,19 +38,24 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt)
 	view = XMMatrixLookAtLH(pos, pos + forward, up);
 }
 
-Matrix Camera::getWorldMatrix() const
-{
-	return world;
-}
-
 Matrix Camera::getViewMatrix() const
 {
-	return view;
+	return this->view;
 }
 
 Matrix Camera::getProjMatrix() const
 {
-	return proj;
+	return this->proj;
+}
+
+Vector3 Camera::getPosition() const
+{
+	return this->pos;
+}
+
+Vector3 Camera::getForward() const
+{
+	return this->forward;
 }
 
 void Camera::ProcessKeyboard(bool * keys, float dt)

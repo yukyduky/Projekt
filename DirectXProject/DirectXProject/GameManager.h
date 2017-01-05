@@ -73,6 +73,7 @@ private:
 	// Functions
 	void UpdateWorlds();
 	void UpdateBox();
+	void UpdateFlashLight(Vector3 position, Vector3 forward);
 
 	// Matrices
 	Matrix world;
