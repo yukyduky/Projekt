@@ -14,7 +14,7 @@ At the end, you will submit the project and also a written report in English des
 The english language is not graded in any way, so do not worry but use a spellchecker.
 
 CORE TECHNIQUES(1):
-Deferred Rendering*
+✓Deferred Rendering*
 Skeletal Animation (om vi får tid över)
 
 GEOMETRY(2):
