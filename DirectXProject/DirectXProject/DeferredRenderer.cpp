@@ -71,7 +71,9 @@ void DeferredRenderer::Update()
 	gm.Update();
 
 	// Update the lights
-	cbLightLight.light = gm.getLightProperties();
+	cbLightLight.pointLight = gm.getPointLight();
+	cbLightLight.spotLight = gm.getSpotLight();
+	cbLightLight.directLight = gm.getDirectLight();
 	// Update the matrices
 	cbGeoObj.world = gm.getMatrixWorld();
 	cbGeoObj.wvp = gm.getMatrixWVP();

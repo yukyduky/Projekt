@@ -13,12 +13,39 @@
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-struct LightProperties
+struct PointLight
 {
 	Vector3 pos;
-	float attenuation;
+	float pad0;
+	Vector4 diffuse;
+	Vector3 ambient;
+	float pad1;
+	Vector3 attenuation;
+	float pad2;
+};
+
+struct SpotLight
+{
+	Vector3 pos;
+	float pad0;
 	Vector3 dir;
-	float spotlightAngle;
+	float angle;
+	Vector4 diffuse;
+	Vector3 ambient;
+	float pad1;
+	Vector3 attenuation;
+	float pad2;
+};
+
+struct DirectLight
+{
+	Vector3 pos;
+	float pad0;
+	Vector3 dir;
+	float pad1;
+	Vector4 diffuse;
+	Vector3 ambient;
+	float pad2;
 };
 
 class GameManager
@@ -38,7 +65,9 @@ public:
 
 	Matrix getMatrixWVP() const;
 	Matrix getMatrixWorld() const;
-	LightProperties getLightProperties() const;
+	PointLight getPointLight() const;
+	SpotLight getSpotLight() const;
+	DirectLight getDirectLight() const;
 
 private:
 	// Functions
@@ -69,7 +98,10 @@ private:
 	float rotBoxZ;
 	float transBox;
 
-	LightProperties pointLight;
+	// Structs
+	PointLight pointLight;
+	SpotLight spotLight;
+	DirectLight directLight;
 
 	// Error handling
 	HRESULT hr;
