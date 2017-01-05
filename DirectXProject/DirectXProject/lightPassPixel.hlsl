@@ -1,9 +1,7 @@
-struct Light
+struct PointLight
 {
 	float3 pos;
-	float range;
-	float3 dir;
-	float spotlightAngle;
+	float pad0;
 	float4 diffuse;
 	float3 ambient;
 	float pad1;
@@ -11,12 +9,42 @@ struct Light
 	float pad2;
 };
 
+struct SpotLight
+{
+	float3 pos;
+	float pad0;
+	float3 dir;
+	float angle;
+	float4 diffuse;
+	float3 ambient;
+	float pad1;
+	float3 attenuation;
+	float pad2;
+};
+
+struct DirectLight
+{
+	float3 pos;
+	float pad0;
+	float3 dir;
+	float pad1;
+	float4 diffuse;
+	float3 ambient;
+	float pad2;
+};
+
 cbuffer cbLightLighting
 {
-	Light light;
+	PointLight pointLight;
+	SpotLight spotLight;
+	DirectLight directLight;
 	float3 cameraPos;
 	float pad;
 };
+
+static const int NUM_POINTLIGHTS = 0;
+static const int NUM_SPOTLIGHTS = 1;
+static const int NUM_DIRECTLIGHTS = 0;
 
 Texture2D texNormal		: register(t0);
 Texture2D texDiffuse	: register(t1);
@@ -58,31 +86,71 @@ void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffu
 
 float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float specularPower)
 {
-	// Vector from object to light
-	float3 pToL = light.pos - pos;
-	// Length of the vector is the distance between the object to the light
-	float distance = length(pToL);
+	const float3 globalAmbient = float3(0.1f, 0.1f, 0.1f);
+	float3 pointLighting = float3(0.0f, 0.0f, 0.0f);
+	float3 spotLighting = float3(0.0f, 0.0f, 0.0f);
+	float3 directLighting = float3(0.0f, 0.0f, 0.0f);
 
-	// Create and ambient color from the diffuse color of the object
-	float3 finalAmbient = diffuse * light.ambient;
+	for (int i = 0; i < NUM_POINTLIGHTS; i++)
+	{
+		// Vector from object to light
+		float3 pToL = pointLight.pos - pos;
+		// Length of the vector is the distance between the object to the light
+		float distance = length(pToL);
+		// Normalize pToL
+		pToL /= distance;
 
-	// Calculate the attenuation depending on how far away the light is
-	//float attenuation = max(0, light.attenuation - (distance / light.range));
-	/* Directional light will have an attenuation of -1 to indicate infinite range -> 1.0f - (distance / light.attenuation = 2.0f */
-	//attenuation = min(1.0f, light.attenuation - (distance / light.range));
+		// Calculate the "angle" between the normal and the light vector
+		float lightIntensity = saturate(dot(normal, pToL));
+		// Calculate the diffuse against the light and multiply with the light diffuse color
+		float3 finalColor = lightIntensity * diffuse * pointLight.diffuse.xyz;
+		// Calculate the light falloff factor, aka attenuation
+		finalColor /= pointLight.attenuation[0] + pointLight.attenuation[1] * distance + pointLight.attenuation[2] * distance * distance;
+		
+		// Create an ambient color from the diffuse color of the object
+		float3 finalAmbient = diffuse * pointLight.ambient;
+		// Add the ambient and saturate to clamp between 0 and 1
+		pointLighting = saturate(finalColor + finalAmbient);
+	}
+	for (int i = 0; i < NUM_SPOTLIGHTS; i++)
+	{
+		// Vector from object to light
+		float3 pToL = spotLight.pos - pos;
+		// Length of the vector is the distance between the object to the light
+		float distance = length(pToL);
+		// Normalize pToL
+		pToL /= distance;
 
-	// Normalize pToL
-	pToL /= distance;
+		// Calculate the "angle" between the normal and the light vector
+		float lightIntensity = saturate(dot(normal, pToL));
+		// Calculate the diffuse against the light and multiply with the light diffuse color
+		float3 finalColor = lightIntensity * diffuse * spotLight.diffuse.xyz;
+		// Calculate the light falloff factor, aka attenuation
+		finalColor /= spotLight.attenuation[0] + spotLight.attenuation[1] * distance + spotLight.attenuation[2] * distance * distance;
+		// Calculate the attenuation from the center of the cone to the edge of the spotlight
+		finalColor *= pow(saturate(dot(-pToL, spotLight.dir)), spotLight.angle);
 
-	// Calculate the "angle" between the normal and the light vector
-	float lightIntensity = saturate(dot(normal, pToL));
-	// Calculate the diffuse against the light and multiply with the light diffuse color and the "strength" of the light
-	float3 finalColor = lightIntensity * diffuse * light.diffuse;
-	// Calculate the light falloff factor, aka attenuation
-	finalColor /= light.attenuation[0] + light.attenuation[1] * distance + light.attenuation[2] * distance * distance;
+		// Create an ambient color from the diffuse color of the object
+		float3 finalAmbient = diffuse * spotLight.ambient;
+		// Add the ambient and saturate to clamp between 0 and 1
+		spotLighting = saturate(finalColor + finalAmbient);
+	}
+	for (int i = 0; i < NUM_DIRECTLIGHTS; i++)
+	{
+		// Calculate the "angle" between the normal and the light direction
+		float lightIntensity = saturate(dot(normal, -directLight.dir));
+		// Calculate the diffuse against the light and multiply with the light diffuse color
+		float3 finalColor = lightIntensity * diffuse * directLight.diffuse.xyz;
 
-	// Add the ambient and saturate to clamp between 0 and 1
-	float3 lighting = saturate(finalColor + finalAmbient);
+		// Create an ambient color from the diffuse color of the object
+		float3 finalAmbient = diffuse * directLight.ambient;
+		// Add the ambient and saturate to clamp between 0 and 1
+		directLighting = saturate(finalColor + finalAmbient);
+	}
+
+
+	// Combine all the different lightsources and clamp it
+	float3 lighting = saturate(pointLighting + spotLighting + directLighting + globalAmbient);
 
 	return float4(lighting, 1.0f);
 }

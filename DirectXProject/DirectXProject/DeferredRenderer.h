@@ -102,7 +102,10 @@ private:
 	// LightShader Constant buffer: Light
 	struct cbLightLighting
 	{
-		LightProperties light;
+		PointLight pointLight;
+		SpotLight spotLight;
+		DirectLight directLight;
+
 		Vector3 cameraPos;
 		float pad;
 	};
