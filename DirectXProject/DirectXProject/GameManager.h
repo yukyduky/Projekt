@@ -16,12 +16,14 @@ using namespace DirectX::SimpleMath;
 struct LightProperties
 {
 	Vector3 pos;
-	float attenuation;
+	float range;
 	Vector3 dir;
 	float spotlightAngle;
 	Vector4 diffuse;
 	Vector3 ambient;
-	float range;
+	float pad1;
+	Vector3 attenuation;
+	float pad2;
 };
 
 class GameManager
