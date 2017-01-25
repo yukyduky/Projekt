@@ -48,7 +48,8 @@ GameManager::~GameManager()
 bool GameManager::InitScene(ID3D11Device* gDevice)
 {
 	// Initialize the box
-	if (!box.InitScene(gDevice))
+	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
+
 		return false;
 	
 	// Get the matrices
@@ -88,6 +89,7 @@ void GameManager::Update()
 bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 {
 	box.Render(gDevCon);
+	box2.Render(gDevCon);
 
 	return true;
 }
@@ -95,6 +97,7 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 void GameManager::Release()
 {
 	box.Release();
+	box2.Release();
 }
 
 Matrix GameManager::getMatrixWVP() const

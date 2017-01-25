@@ -94,6 +94,7 @@ private:
 
 	// Objects
 	Box box;
+	Box box2;
 	//ForwardShader shaderForward;
 	Camera cam;
 	Time time;
