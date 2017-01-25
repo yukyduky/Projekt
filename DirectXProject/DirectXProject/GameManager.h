@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Time.h"
 #include "Input.h"
+#include "Surface.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -50,7 +51,7 @@ struct DirectLight
 
 struct GeneralLightAttrb
 {
-	Vector3 cameraDir;
+	Vector3 cameraPos;
 	float pad;
 };
 
@@ -64,7 +65,7 @@ public:
 	bool InitScene(ID3D11Device* gDevice);
 	// Update
 	void Update();
-	// Render
+	// Render Box
 	bool Render(ID3D11DeviceContext* gDevCon);
 	// Release the memory
 	void Release();
@@ -77,13 +78,19 @@ public:
 	GeneralLightAttrb getGenLight() const;
 
 private:
+	//COMS 
+	ID3D11Buffer* gGeoObjBuffer;
+	ID3D11Buffer* gLightLightBuffer;
+
 	// Functions
+	bool CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize);
+	bool MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer ** gBuffer, void * cbPtr, int structSize);
 	void UpdateWorlds();
 	void UpdateBox();
 	void UpdateFlashLight(Vector3 position, Vector3 forward);
 
 	// Matrices
-	Matrix world;
+	Matrix staticWorld;
 	Matrix view;
 	Matrix proj;
 	Matrix wvp;
@@ -94,7 +101,7 @@ private:
 
 	// Objects
 	Box box;
-	//ForwardShader shaderForward;
+	Surface surface;
 	Camera cam;
 	Time time;
 	Input input;
@@ -111,6 +118,26 @@ private:
 	SpotLight spotLight;
 	DirectLight directLight;
 	GeneralLightAttrb genLight;
+
+	// GeoShader Constant buffer: Object
+	struct cbGeoObject
+	{
+		Matrix world;
+		Matrix wvp;
+	};
+
+	// LightShader Constant buffer: Light
+	struct cbLightLighting
+	{
+		PointLight pointLight;
+		SpotLight spotLight;
+		DirectLight directLight;
+		GeneralLightAttrb genLight;
+	};
+
+	// Constant Buffers
+	cbGeoObject cbGeoObj;
+	cbLightLighting cbLightLight;
 
 	// Error handling
 	HRESULT hr;

@@ -36,18 +36,6 @@ bool DeferredRenderer::InitScene()
 	if (!CreateShaders())
 		return false;
 
-	// Create the gGeoObjBuffer for the shaders
-	if (!CreateConstBuffer(&gGeoObjBuffer, sizeof(cbGeoObject)))
-		return false;
-
-	// Create the gGeoLightBuffer for the shaders
-	if (!CreateConstBuffer(&gGeoMatsBuffer, sizeof(cbGeoMaterial)))
-		return false;
-
-	// Create the gLightLightBuffer for the shaders
-	if (!CreateConstBuffer(&gLightLightBuffer, sizeof(cbLightLighting)))
-		return false;
-
 	// Create the deferred RTV and bind the textures and SRVs to it
 	if (!BindTextureToRTVAndSRV(gDeferredTex, gDeferredRTV, gDeferredSRV))
 		return false;
@@ -69,15 +57,6 @@ bool DeferredRenderer::InitScene()
 void DeferredRenderer::Update()
 {
 	gm.Update();
-
-	// Update the lights
-	cbLightLight.pointLight = gm.getPointLight();
-	cbLightLight.spotLight = gm.getSpotLight();
-	cbLightLight.directLight = gm.getDirectLight();
-	cbLightLight.genLight = gm.getGenLight();
-	// Update the matrices
-	cbGeoObj.world = gm.getMatrixWorld();
-	cbGeoObj.wvp = gm.getMatrixWVP();
 }
 
 bool DeferredRenderer::Render()
@@ -87,7 +66,6 @@ bool DeferredRenderer::Render()
 
 	// Draw the geometry
 	gm.Render(gDevCon);
-
 
 	// Prepare and draw the screen quad from the GeoPass data
 	PostDrawing();
@@ -103,9 +81,6 @@ void DeferredRenderer::Release()
 	gDepthStencilView->Release();
 	gDepthStencilBuffer->Release();
 	gAnisoSampler->Release();
-	gGeoObjBuffer->Release();
-	gGeoMatsBuffer->Release();
-	gLightLightBuffer->Release();
 	gVertBuffer->Release();
 	gFinalRTV->Release();
 	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
@@ -168,7 +143,7 @@ bool DeferredRenderer::CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize)
 bool DeferredRenderer::CreateSampler()
 {
 	D3D11_SAMPLER_DESC sampDesc;
-	memset(&sampDesc, 0, sizeof(sampDesc));
+	memset(&sampDesc, 0, sizeof(D3D11_SAMPLER_DESC));
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -183,6 +158,8 @@ bool DeferredRenderer::CreateSampler()
 		MessageBox(0, "Create Samplerstate - Failed", "Error", MB_OK);
 		return false;
 	}
+
+	return true;
 }
 
 bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int structSize)
@@ -192,7 +169,7 @@ bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int struct
 	hr = gDevCon->Map(*gBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
 	if (hr != S_OK)
 	{
-		MessageBox(0, "Buffer mapping - Failed", "Error", MB_OK);
+		MessageBox(0, "Deferred Buffer mapping - Failed", "Error", MB_OK);
 		return false;
 	}
 	// copy memory from CPU to GPU the entire struct
@@ -267,7 +244,7 @@ bool DeferredRenderer::CreateDepthStencilView()
 {
 	// Describe the Depth/Stencil Buffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
-	memset(&depthStencilDesc, 0, sizeof(depthStencilDesc));
+	memset(&depthStencilDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
 
 	depthStencilDesc.Width = WIDTH;
 	depthStencilDesc.Height = HEIGHT;
@@ -319,7 +296,7 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 {
 	// Describe the texture
 	D3D11_TEXTURE2D_DESC texDesc;
-	memset(&texDesc, 0, sizeof(texDesc));
+	memset(&texDesc, 0, sizeof(D3D11_TEXTURE2D_DESC));
 	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	texDesc.CPUAccessFlags = 0;
 	texDesc.ArraySize = 1;
@@ -338,14 +315,14 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 		hr = gDevice->CreateTexture2D(&texDesc, nullptr, &gTexure[i]);
 		if (hr != S_OK)
 		{
-			MessageBox(0, "Create Normal texture - Failed", "Error", MB_OK);
+			MessageBox(0, "Create deferred texture - Failed", "Error", MB_OK);
 			return false;
 		}
 	}
 
 	// Describe the Rendertargetview
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
-	memset(&rtvDesc, 0, sizeof(rtvDesc));
+	memset(&rtvDesc, 0, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
 	rtvDesc.Format = texDesc.Format;
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
@@ -356,14 +333,14 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 		hr = gDevice->CreateRenderTargetView(gTexure[i], &rtvDesc, &gRTV[i]);
 		if (hr != S_OK)
 		{
-			MessageBox(0, "Create RTV - Failed", "Error", MB_OK);
+			MessageBox(0, "Create deferred RTV - Failed", "Error", MB_OK);
 			return false;
 		}
 	}
 
 	// Describe the Shaderresourceview
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	memset(&srvDesc, 0, sizeof(srvDesc));
+	memset(&srvDesc, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
 	srvDesc.Format = texDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
@@ -375,7 +352,7 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 		hr = gDevice->CreateShaderResourceView(gTexure[i], &srvDesc, &gSRV[i]);
 		if (hr != S_OK)
 		{
-			MessageBox(0, "Create SRV - Failed", "Error", MB_OK);
+			MessageBox(0, "Create deferred SRV - Failed", "Error", MB_OK);
 			return false;
 		}
 	}
@@ -400,7 +377,7 @@ bool DeferredRenderer::CreateVertexBuffer()
 
 	// Describe the vertex buffer
 	D3D11_BUFFER_DESC vertexBufferDesc;
-	memset(&vertexBufferDesc, 0, sizeof(vertexBufferDesc));
+	memset(&vertexBufferDesc, 0, sizeof(D3D11_BUFFER_DESC));
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = sizeof(v);
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -421,6 +398,8 @@ bool DeferredRenderer::CreateVertexBuffer()
 
 	vertBufferStride = sizeof(Vertex);
 	vertBufferOffset = 0;
+
+	return true;
 }
 
 bool DeferredRenderer::PreDrawing()
@@ -440,18 +419,10 @@ bool DeferredRenderer::PreDrawing()
 	SetGeoShaders();
 	// Set the render target to the deferred RTV
 	gDevCon->OMSetRenderTargets(NUM_DEFERRED_OUTPUTS, gDeferredRTV, gDepthStencilView);
-	// Map the GeoObject constant buffer
-	if (!MapBuffer(&gGeoObjBuffer, &cbGeoObj, sizeof(cbGeoObj)))
-		return false;
-	// Set the constant buffer for the current vertex shader
-	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
-	// Map the GeoLight constant buffer
-	if (!MapBuffer(&gGeoMatsBuffer, &cbGeoMats, sizeof(cbGeoMaterial)))
-		return false;
-	// Set the constant buffer for the current pixel shader
-	gDevCon->PSSetConstantBuffers(0, 1, &gGeoMatsBuffer);
 	// Set the texture sampler for the current pixel shader
 	gDevCon->PSSetSamplers(0, 1, &gAnisoSampler);
+
+	return true;
 }
 
 bool DeferredRenderer::PostDrawing()
@@ -464,11 +435,7 @@ bool DeferredRenderer::PostDrawing()
 	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	// Set the Render Target to the final RTV
 	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);
-	// Map the LightLight constant buffer
-	if (!MapBuffer(&gLightLightBuffer, &cbLightLight, sizeof(cbLightLight)))
-		return false;
-	// Set the constant buffer for the current pixel shader
-	gDevCon->PSSetConstantBuffers(0, 1, &gLightLightBuffer);
+	
 	// Set the normal texture for the current pixel shader
 	gDevCon->PSSetShaderResources(0, NUM_DEFERRED_OUTPUTS, gDeferredSRV);
 
@@ -477,4 +444,6 @@ bool DeferredRenderer::PostDrawing()
 
 	// Present the backbuffer to the screen
 	gSwapChain->Present(0, 0);
+
+	return true;
 }

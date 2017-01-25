@@ -51,9 +51,6 @@ private:
 	ID3D11RenderTargetView* gDeferredRTV[NUM_DEFERRED_OUTPUTS];
 	ID3D11RenderTargetView* gFinalRTV;
 	ID3D11SamplerState* gAnisoSampler;
-	ID3D11Buffer* gGeoObjBuffer;
-	ID3D11Buffer* gGeoMatsBuffer;
-	ID3D11Buffer* gLightLightBuffer;
 	ID3D11Buffer* gVertBuffer;
 
 	// Objects
@@ -81,35 +78,6 @@ private:
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-
-	// GeoShader Constant buffer: Object
-	struct cbGeoObject
-	{
-		Matrix world;
-		Matrix wvp;
-	};
-	cbGeoObject cbGeoObj;
-
-	// GeoShader Constant buffer: Light
-	struct cbGeoMaterial
-	{
-		Vector3 ambient;
-		float pad0;
-		Vector4 diffuse;
-		Vector3 specular;
-		float shininess;
-	};
-	cbGeoMaterial cbGeoMats;
-
-	// LightShader Constant buffer: Light
-	struct cbLightLighting
-	{
-		PointLight pointLight;
-		SpotLight spotLight;
-		DirectLight directLight;
-		GeneralLightAttrb genLight;
-	};
-	cbLightLighting cbLightLight;
 
 	// Error handling
 	HRESULT hr;
