@@ -5,8 +5,8 @@ What techniques to implement:
 
 MANDATORY TECHNIQUES(all):
 ✓You have to use a "perspective" camera
-You have to use textures in your 3D models
-You have to implement ambient, diffuse and specular lighting
+✓You have to use textures in your 3D models
+✓You have to implement ambient, diffuse and specular lighting
 ✓You have to implement a first-person camera movement
   use "w-a-s-d" for moving and the mouse to look around.
 Using a Geometry shader is not mandatory, but recommended.
