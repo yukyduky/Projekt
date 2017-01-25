@@ -9,10 +9,10 @@ Box::~Box()
 {
 }
 
-bool Box::InitScene(ID3D11Device* gDevice)
+bool Box::InitScene(ID3D11Device* gDevice, Vector3 startPos, float width)
 {
 	// Create the Vertex data (position, normal, etc) and the vertex buffer
-	if (!CreateVertexData(gDevice))
+	if (!CreateVertexData(gDevice, startPos, width))
 		return false;
 
 	// Create the index buffer for what order to draw the vertices in
@@ -80,45 +80,45 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 	return true;
 }
 
-bool Box::CreateVertexData(ID3D11Device* gDevice)
+bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 {
 	Vector3 position[] =
 	{
 		// Front Face
-		Vector3(-1.0f, 1.0f, -1.0f),	// TopLeft
-		Vector3(1.0f, 1.0f, -1.0f),		// TopRight
-		Vector3(-1.0f, -1.0f, -1.0f),	// BottomLeft
-		Vector3(1.0f, -1.0f, -1.0f),	// BottomRight
+		Vector3(startPos.x, startPos.y+width, startPos.z),					// TopLeft
+		Vector3(startPos.x+ width, startPos.y + width, startPos.z),			// TopRight
+		startPos,															// BottomLeft
+		Vector3(startPos.x + width, startPos.y, startPos.z),				// BottomRight
 
 		// Right Face
-		Vector3(1.0f, 1.0f, -1.0f),		// TopLeft
-		Vector3(1.0f, 1.0f, 1.0f),		// TopRight
-		Vector3(1.0f, -1.0f, -1.0f),	// BottomLeft
-		Vector3(1.0f, -1.0f, 1.0f),		// BottomRight
+		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// TopLeft
+		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopRight
+		Vector3(startPos.x + width, startPos.y, startPos.z),				// BottomLeft
+		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomRight
 
 		// Left Face
-		Vector3(-1.0f, 1.0f, 1.0f),		// TopLeft
-		Vector3(-1.0f, 1.0f, -1.0f),	// TopRight
-		Vector3(-1.0f, -1.0f, 1.0f),	// BottomLeft
-		Vector3(-1.0f, -1.0f, -1.0f),	// BottomRight
+		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopLeft
+		Vector3(startPos.x, startPos.y + width, startPos.z),				// TopRight
+		Vector3(startPos.x, startPos.y, startPos.z + width),				// BottomLeft
+		startPos,															// BottomRight
 
 		// Back Face
-		Vector3(1.0f, 1.0f, 1.0f),		// TopLeft
-		Vector3(-1.0f, 1.0f, 1.0f),		// TopRight
-		Vector3(1.0f, -1.0f, 1.0f),		// BottomLeft
-		Vector3(-1.0f, -1.0f, 1.0f),	// BottomRight
+		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopLeft
+		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopRight
+		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomLeft
+		Vector3(startPos.x, startPos.y, startPos.z + width),				// BottomRight
 
 		// Top Face
-		Vector3(-1.0f, 1.0f, 1.0f),		// TopLeft
-		Vector3(1.0f, 1.0f, 1.0f),		// TopRight
-		Vector3(-1.0f, 1.0f, -1.0f),	// BottomLeft
-		Vector3(1.0f, 1.0f, -1.0f),		// BottomRight
+		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopLeft
+		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopRight
+		Vector3(startPos.x, startPos.y + width, startPos.z),				// BottomLeft
+		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// BottomRight
 
 		// Bottom Face
-		Vector3(-1.0f, -1.0f, -1.0f),	// TopLeft
-		Vector3(1.0f, -1.0f, -1.0f),	// TopRight
-		Vector3(-1.0f, -1.0f, 1.0f),	// BottomLeft
-		Vector3(1.0f, -1.0f, 1.0f),		// BottomRight
+		startPos,															// TopLeft
+		Vector3(startPos.x + width, startPos.y, startPos.z),				// TopRight
+		Vector3(startPos.x, startPos.y, startPos.z + width),				// BottomLeft
+		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomRight
 	};
 
 	const int numVertices = sizeof(position) / sizeof(Vector3);
