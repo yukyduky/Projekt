@@ -49,7 +49,9 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 {
 	// Initialize the box
 	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
+		return false;
 
+	if (!box2.InitScene(gDevice, Vector3(-0.5f, 1.0f, -0.5f), 1.0f))
 		return false;
 	
 	// Get the matrices
