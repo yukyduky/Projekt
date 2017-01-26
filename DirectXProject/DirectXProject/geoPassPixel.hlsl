@@ -1,12 +1,3 @@
-cbuffer cbGeoMaterial
-{
-	float3 ambient;
-	float pad0;
-	float4 diffuse;
-	float3 specular;
-	float shininess;
-};
-
 Texture2D DiffuseMap : register(t0);
 Texture2D NormalMap : register(t1);
 Texture2D SpecularMap : register(t2);

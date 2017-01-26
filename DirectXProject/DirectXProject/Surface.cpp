@@ -1,18 +1,19 @@
-#include "Box.h"
+#include "Surface.h"
 
 
-Box::Box()
+
+Surface::Surface()
 {
 }
 
-Box::~Box()
+Surface::~Surface()
 {
 }
 
-bool Box::InitScene(ID3D11Device* gDevice, Vector3 startPos, float width)
+bool Surface::InitScene(ID3D11Device* gDevice)
 {
 	// Create the Vertex data (position, normal, etc) and the vertex buffer
-	if (!CreateVertexData(gDevice, startPos, width))
+	if (!CreateVertexData(gDevice))
 		return false;
 
 	// Create the index buffer for what order to draw the vertices in
@@ -26,7 +27,7 @@ bool Box::InitScene(ID3D11Device* gDevice, Vector3 startPos, float width)
 	return true;
 }
 
-void Box::Render(ID3D11DeviceContext* gDevCon)
+void Surface::Render(ID3D11DeviceContext* gDevCon)
 {
 	// Set the index buffer
 	gDevCon->IASetIndexBuffer(gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -36,89 +37,39 @@ void Box::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// Update the pixel shader with the textures
 	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
-	gDevCon->PSSetShaderResources(1, 1, &gNormalMap);
-	gDevCon->PSSetShaderResources(2, 1, &gSpecularMap);
 	// Draw the indexed vertices
-	gDevCon->DrawIndexed(36, 0, 0);
+	gDevCon->DrawIndexed(6, 0, 0);
 }
 
-void Box::Release()
+void Surface::Release()
 {
 	gIndexBuffer->Release();
 	gVertBuffer->Release();
 	gDiffuseMap->Release();
-	gNormalMap->Release();
-	gSpecularMap->Release();
 }
 
-bool Box::LoadTextures(ID3D11Device* gDevice)
+bool Surface::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\bricks\\diffuse.jpg", nullptr, &gDiffuseMap, NULL);
 	if (hr != S_OK)
 	{
-		MessageBox(0, "Create box diffuse texture from file - Failed", "Error", MB_OK);
-		return false;
-	}
-
-	// Load normal map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\normal.png", nullptr, &gNormalMap, NULL);
-	if (hr != S_OK)
-	{
-		MessageBox(0, "Create box normal texture from file - Failed", "Error", MB_OK);
-		return false;
-	}
-
-	// Load normal map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\specular.png", nullptr, &gSpecularMap, NULL);
-	if (hr != S_OK)
-	{
-		MessageBox(0, "Create box specular texture from file - Failed", "Error", MB_OK);
+		MessageBox(0, "Create surface diffuse texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
 
 	return true;
 }
 
-bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
+bool Surface::CreateVertexData(ID3D11Device* gDevice)
 {
 	Vector3 position[] =
 	{
 		// Front Face
-		Vector3(startPos.x, startPos.y+width, startPos.z),					// TopLeft
-		Vector3(startPos.x+ width, startPos.y + width, startPos.z),			// TopRight
-		startPos,															// BottomLeft
-		Vector3(startPos.x + width, startPos.y, startPos.z),				// BottomRight
-
-		// Right Face
-		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// TopLeft
-		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopRight
-		Vector3(startPos.x + width, startPos.y, startPos.z),				// BottomLeft
-		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomRight
-
-		// Left Face
-		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopLeft
-		Vector3(startPos.x, startPos.y + width, startPos.z),				// TopRight
-		Vector3(startPos.x, startPos.y, startPos.z + width),				// BottomLeft
-		startPos,															// BottomRight
-
-		// Back Face
-		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopLeft
-		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopRight
-		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomLeft
-		Vector3(startPos.x, startPos.y, startPos.z + width),				// BottomRight
-
-		// Top Face
-		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopLeft
-		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopRight
-		Vector3(startPos.x, startPos.y + width, startPos.z),				// BottomLeft
-		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// BottomRight
-
-		// Bottom Face
-		startPos,															// TopLeft
-		Vector3(startPos.x + width, startPos.y, startPos.z),				// TopRight
-		Vector3(startPos.x, startPos.y, startPos.z + width),				// BottomLeft
-		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomRight
+		Vector3(-10.0f, -5.0f, 10.0f),		// TopLeft
+		Vector3(10.0f, -5.0f, 10.0f),		// TopRight
+		Vector3(-10.0f, -5.0f, -10.0f),		// BottomLeft
+		Vector3(10.0f, -5.0f, -10.0f),		// BottomRight
 	};
 
 	const int numVertices = sizeof(position) / sizeof(Vector3);
@@ -153,7 +104,7 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 	// Get the texture coords
 	for (int i = 0; i < 3; i++)
 		uvTBNData[i] = texCoords[i];
-	
+
 	for (int i = 0; i < numVertices; i += 4)
 	{
 		// Get the positions
@@ -200,7 +151,7 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 	return true;
 }
 
-Vector3 Box::CreateVertexNormal(Vector3* pos)
+Vector3 Surface::CreateVertexNormal(Vector3* pos)
 {
 	Vector3 p0p1 = pos[1] - pos[0];
 	Vector3 p0p2 = pos[2] - pos[0];
@@ -211,33 +162,13 @@ Vector3 Box::CreateVertexNormal(Vector3* pos)
 	return normal;
 }
 
-bool Box::CreateIndexBuffer(ID3D11Device* gDevice)
+bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 {
 	// Index of how to draw the vertices
 	DWORD indices[] = {
 		// Front Face
 		0,  1,  2,
 		2,  1,  3,
-
-		// Right Face
-		4,  5,  6,
-		6,  5,  7,
-
-		// Left Face
-		8,  9, 10,
-		10, 9, 11,
-
-		// Back Face
-		12, 13, 14,
-		14, 13, 15,
-
-		// Top Face
-		16, 17, 18,
-		18, 17, 19,
-
-		// Bottom Face
-		20, 21, 22,
-		22, 21, 23
 	};
 
 	// Describe the index buffer
@@ -257,14 +188,14 @@ bool Box::CreateIndexBuffer(ID3D11Device* gDevice)
 	hr = gDevice->CreateBuffer(&indexBufferDesc, &indexData, &gIndexBuffer);
 	if (hr != S_OK)
 	{
-		MessageBox(0, "Box Index Buffer - Failed", "Error", MB_OK);
+		MessageBox(0, "Surface Index Buffer - Failed", "Error", MB_OK);
 		return false;
 	}
 
 	return true;
 }
 
-bool Box::CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSize, int stride)
+bool Surface::CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSize, int stride)
 {
 	// Describe the vertex buffer
 	D3D11_BUFFER_DESC vertexBufferDesc;
@@ -292,7 +223,7 @@ bool Box::CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSi
 	return true;
 }
 
-Vector4 Box::CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Vector2* uvTBNData)
+Vector4 Surface::CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Vector2* uvTBNData)
 {
 	// Edges of triangle; position delta
 	Vector3 v0v1 = posTBNData[1] - posTBNData[0];

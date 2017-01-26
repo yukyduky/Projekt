@@ -35,7 +35,7 @@ struct DirectLight
 
 struct GeneralLightAttrb
 {
-	float3 cameraDir;
+	float3 cameraPos;
 	float pad;
 };
 
@@ -47,9 +47,9 @@ cbuffer cbLightLighting
 	GeneralLightAttrb genLight;
 };
 
-static const int NUM_POINTLIGHTS = 0;
+static const int NUM_POINTLIGHTS =1;
 static const int NUM_SPOTLIGHTS = 0;
-static const int NUM_DIRECTLIGHTS = 1;
+static const int NUM_DIRECTLIGHTS = 0;
 
 Texture2D texNormal		: register(t0);
 Texture2D texDiffuse	: register(t1);
@@ -95,6 +95,8 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 	{
 		// Vector from object to light
 		float3 pToL = pointLight.pos - pos;
+		// Vector from object to camera
+		float3 pToC = normalize(genLight.cameraPos - pos);
 		// Length of the vector is the distance between the object to the light
 		float distance = length(pToL);
 		// Normalize pToL
@@ -113,7 +115,7 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 		// Reflection vector based on the lightIntensity, normal, and the light direction
 		float3 reflect = normalize(2 * lightIntensity * normal - pToL);
 		// Calculate the amount of light reflected
-		float3 spec = pow(saturate(dot(reflect, -genLight.cameraDir)), pointLight.specPower);
+		float3 spec = pow(saturate(dot(reflect, pToC)), pointLight.specPower);
 		// Multiply with the amount of specular light at this current pixel
 		spec *= specular;
 
@@ -124,6 +126,8 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 	{
 		// Vector from object to light
 		float3 pToL = spotLight.pos - pos;
+		// Vector from object to camera
+		float3 pToC = normalize(genLight.cameraPos - pos);
 		// Length of the vector is the distance between the object to the light
 		float distance = length(pToL);
 		// Normalize pToL
@@ -144,7 +148,7 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 		// Reflection vector based on the lightIntensity, normal, and the light direction
 		float3 reflect = normalize(2 * lightIntensity * normal - pToL);
 		// Calculate the amount of light reflected
-		float3 spec = pow(saturate(dot(reflect, -genLight.cameraDir)), spotLight.specPower);
+		float3 spec = pow(saturate(dot(reflect, pToC)), spotLight.specPower);
 		// Multiply with the amount of specular light at this current pixel
 		spec *= specular;
 
@@ -153,6 +157,8 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 	}
 	for (int i = 0; i < NUM_DIRECTLIGHTS; i++)
 	{
+		// Vector from object to camera
+		float3 pToC = normalize(genLight.cameraPos - pos);
 		// Calculate the "angle" between the normal and the light direction
 		float lightIntensity = saturate(dot(normal, -directLight.dir));
 		// Calculate the diffuse against the light and multiply with the light diffuse color
@@ -164,7 +170,7 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 		// Reflection vector based on the lightIntensity, normal, and the light direction
 		float3 reflect = normalize(2 * lightIntensity * normal + directLight.dir);
 		// Calculate the amount of light reflected
-		float3 spec = pow(saturate(dot(reflect, -genLight.cameraDir)), directLight.specPower);
+		float3 spec = pow(saturate(dot(reflect, pToC)), directLight.specPower);
 		// Multiply with the amount of specular light at this current pixel
 		spec *= specular;
 
