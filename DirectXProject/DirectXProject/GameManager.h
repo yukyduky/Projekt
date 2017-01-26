@@ -102,6 +102,7 @@ private:
 	// Objects
 	Box box;
 	Surface surface;
+	Box box2;
 	Camera cam;
 	Time time;
 	Input input;

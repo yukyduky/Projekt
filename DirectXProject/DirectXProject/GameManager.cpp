@@ -56,9 +56,12 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 		return false;
 
 	// Initialize the box
-	if (!box.InitScene(gDevice))
+	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
 		return false;
 
+	if (!box2.InitScene(gDevice, Vector3(-0.5f, 1.0f, -0.5f), 1.0f))
+		return false;
+	
 	// Initialize the surface
 	if (!surface.InitScene(gDevice))
 		return false;
@@ -100,7 +103,7 @@ void GameManager::Update()
 
 bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 {
-	// Update the Matrices 
+	// Update the Matrices
 	wvp = boxWorld * view * proj;
 	cbGeoObj.wvp = wvp.Transpose();
 	cbGeoObj.world = boxWorld.Transpose();
@@ -111,7 +114,8 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 
 	box.Render(gDevCon);
-	
+	box2.Render(gDevCon);
+
 	// Update the Matrices
 	wvp = staticWorld * view * proj;
 	cbGeoObj.wvp = wvp.Transpose();
@@ -140,6 +144,7 @@ void GameManager::Release()
 	gLightLightBuffer->Release();
 
 	box.Release();
+	box2.Release();
 	surface.Release();
 }
 
