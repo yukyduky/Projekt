@@ -75,7 +75,7 @@ bool ForwardShader::CreateVertexShader(ID3D11Device * gDevice)
 		);
 
 	hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Vertex Shader - Failed", "Error", MB_OK);
 		return false;
@@ -107,7 +107,7 @@ bool ForwardShader::CreateFragmentShader(ID3D11Device * gDevice)
 		);
 
 	hr = gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gFragShader);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Fragment Shader - Failed", "Error", MB_OK);
 		return false;
@@ -131,7 +131,7 @@ bool ForwardShader::CreateInputLayout(ID3D11Device* gDevice, ID3DBlob* pVS)
 
 	// Create the Input Layout
 	hr = gDevice->CreateInputLayout(inputDesc, 3, pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Input Layout - Failed", "Error", MB_OK);
 		return false;

@@ -20,6 +20,8 @@ public:
 	void Render(ID3D11DeviceContext* gDevCon);
 	void Release();
 
+	void setOffset(UINT offset);
+
 private:
 	// Functions
 	bool LoadTextures(ID3D11Device* gDevice);

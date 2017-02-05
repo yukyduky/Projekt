@@ -51,11 +51,16 @@ void Box::Release()
 	gSpecularMap->Release();
 }
 
+void Box::setOffset(UINT offset)
+{
+	this->offset = offset;
+}
+
 bool Box::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
 	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\diffuse.png", nullptr, &gDiffuseMap, NULL);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create box diffuse texture from file - Failed", "Error", MB_OK);
 		return false;
@@ -63,7 +68,7 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 
 	// Load normal map texture from file
 	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\normal.png", nullptr, &gNormalMap, NULL);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create box normal texture from file - Failed", "Error", MB_OK);
 		return false;
@@ -71,7 +76,7 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 
 	// Load normal map texture from file
 	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\specular.png", nullptr, &gSpecularMap, NULL);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create box specular texture from file - Failed", "Error", MB_OK);
 		return false;
@@ -85,8 +90,8 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 	Vector3 position[] =
 	{
 		// Front Face
-		Vector3(startPos.x, startPos.y+width, startPos.z),					// TopLeft
-		Vector3(startPos.x+ width, startPos.y + width, startPos.z),			// TopRight
+		Vector3(startPos.x, startPos.y + width, startPos.z),				// TopLeft
+		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// TopRight
 		startPos,															// BottomLeft
 		Vector3(startPos.x + width, startPos.y, startPos.z),				// BottomRight
 
@@ -255,7 +260,7 @@ bool Box::CreateIndexBuffer(ID3D11Device* gDevice)
 
 	indexData.pSysMem = indices;
 	hr = gDevice->CreateBuffer(&indexBufferDesc, &indexData, &gIndexBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Box Index Buffer - Failed", "Error", MB_OK);
 		return false;
@@ -280,7 +285,7 @@ bool Box::CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSi
 	memset(&vertexData, 0, sizeof(vertexData));
 	vertexData.pSysMem = ptrV;
 	hr = gDevice->CreateBuffer(&vertexBufferDesc, &vertexData, &gVertBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Vertex Buffer - Failed", "Error", MB_OK);
 		return false;
