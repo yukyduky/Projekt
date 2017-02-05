@@ -4,21 +4,20 @@
 Camera::Camera()
 {
 	// For orientation purposes it needs to know what way is up, forward, and right
-	up = Vector3(0.0f, 1.0f, 0.0f);
-	forward = Vector3(0.0f, 0.0f, 1.0f);
+	up = Vector3(0.0f, 0.0f, 1.0f);
+	forward = Vector3(0.0f, -1.0f, 0.0f);
 	right = Vector3(1.0f, 0.0f, 0.0f);
 	// Position
-	pos = Vector3(0.0f, 0.0f, -4.0f);
+	pos = Vector3(0.0f, 8.0f, 0.0f);
 
 	// Set the view matrix
-	view = XMMatrixLookAtLH(pos, forward, up);
+	//view = XMMatrixLookAtLH(pos, forward, up);
 	// Set the projection matrix
-	proj = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)WIDTH / HEIGHT, 1.0f, 1000.0f);
+	proj = XMMatrixPerspectiveFovLH(0.4f * XM_PI, (float)WIDTH / HEIGHT, 0.01f, 1000.0f);
 
 	yaw = 90.0f;
-	pitch = 0.0f;
+	pitch = -90.0f;
 }
-
 
 Camera::~Camera()
 {

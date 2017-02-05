@@ -29,6 +29,7 @@ private:
 	void SetGeoShaders();
 	void SetLightShaders();
 	bool CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize);
+	bool CreateRasterizerState();
 	bool CreateSampler();
 	bool MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int structSize);
 	bool CreateSwapChain(HWND hwnd);
@@ -52,6 +53,8 @@ private:
 	ID3D11RenderTargetView* gFinalRTV;
 	ID3D11SamplerState* gAnisoSampler;
 	ID3D11Buffer* gVertBuffer;
+	ID3D11ShaderResourceView* gSpotShadowMap;
+	ID3D11RasterizerState* gDefaultRasterizer;
 
 	// Objects
 	GameManager gm;
