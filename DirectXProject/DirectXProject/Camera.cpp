@@ -4,19 +4,17 @@
 Camera::Camera()
 {
 	// For orientation purposes it needs to know what way is up, forward, and right
-	up = Vector3(0.0f, 0.0f, 1.0f);
-	forward = Vector3(0.0f, -1.0f, 0.0f);
+	up = Vector3(0.0f, 1.0f, 0.0f);
+	forward = Vector3(0.0f, 0.0f, 1.0f);
 	right = Vector3(1.0f, 0.0f, 0.0f);
 	// Position
-	pos = Vector3(0.0f, 8.0f, 0.0f);
+	pos = Vector3(0.0f, 2.0f, -2.0f);
 
-	// Set the view matrix
-	//view = XMMatrixLookAtLH(pos, forward, up);
 	// Set the projection matrix
 	proj = XMMatrixPerspectiveFovLH(0.4f * XM_PI, (float)WIDTH / HEIGHT, 0.01f, 1000.0f);
 
-	yaw = 90.0f;
-	pitch = -90.0f;
+	yaw = 0.0f;
+	pitch = 0.0f;
 }
 
 Camera::~Camera()
@@ -74,7 +72,7 @@ void Camera::ProcessKeyboard(bool * keys, float dt)
 
 void Camera::ProcessMouse(Vector2 mouseOffset, float dt)
 {
-	float sensitivity = 1000.0f;
+	float sensitivity = -1000.0f;
 
 	// Change the yaw and pitch depending on the mouse offset since the last frame
 	yaw += mouseOffset.x * sensitivity * dt;
@@ -86,11 +84,11 @@ void Camera::ProcessMouse(Vector2 mouseOffset, float dt)
 	if (this->pitch < -89.0f)
 		this->pitch = -89.0f;
 
+	// Create the rotation matrix
+	Matrix rotation = XMMatrixRotationRollPitchYaw(XMConvertToRadians(pitch), XMConvertToRadians(yaw), 0.0f);
+
 	// Recalculate the vectors
-	forward.x = cos(XMConvertToRadians(yaw)) * cos(XMConvertToRadians(pitch));
-	forward.y = sin(XMConvertToRadians(pitch));
-	forward.z = sin(XMConvertToRadians(yaw)) * cos(XMConvertToRadians(pitch));
-	forward = XMVector3Normalize(forward);
-	right = XMVector3Normalize(XMVector3Cross(Vector3(0.0f, 1.0f, 0.0f), forward));
-	up = XMVector3Normalize(XMVector3Cross(forward, right));
+	forward = XMVector3Normalize(XMVector3TransformCoord(Vector3(0.0f, 0.0f, 1.0f), rotation));
+	right = XMVector3Normalize(XMVector3TransformCoord(Vector3(1.0f, 0.0f, 0.0f), rotation));
+	up = XMVector3Normalize(XMVector3TransformCoord(Vector3(0.0f, 1.0f, 0.0f), rotation));
 }
