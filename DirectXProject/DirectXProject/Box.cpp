@@ -82,6 +82,8 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 
 bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 {
+	this->width = width;
+
 	Vector3 position[] =
 	{
 		// Front Face
@@ -120,6 +122,45 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 		Vector3(startPos.x, startPos.y, startPos.z + width),				// BottomLeft
 		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomRight
 	};
+
+	
+
+	//Creates the 6 planes that will make up the hitbox
+	//The order will be: Front, Right, Left, Back, Top, Bottom
+	hitBox[0] = Plane(		// Front Face
+		Vector3(startPos.x, startPos.y + width, startPos.z),				// TopLeft
+		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// TopRight
+		startPos															// BottomLeft
+	);
+	hitBox[1] = Plane(		// Right Face
+		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// TopLeft
+		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopRight
+		Vector3(startPos.x + width, startPos.y, startPos.z)					// BottomLeft
+	);
+	hitBox[2] = Plane(		// Left Face
+		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopLeft
+		Vector3(startPos.x, startPos.y + width, startPos.z),				// TopRight
+		Vector3(startPos.x, startPos.y, startPos.z + width)					// BottomLeft
+	);
+	hitBox[3] = Plane(		// Back Face
+		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopLeft
+		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopRight
+		Vector3(startPos.x + width, startPos.y, startPos.z + width)			// BottomLeft
+	);
+	hitBox[4] = Plane(		// Top Face
+		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopLeft
+		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopRight
+		Vector3(startPos.x, startPos.y + width, startPos.z)					// BottomLeft
+	);
+	hitBox[5] = Plane(		// Bottom Face
+		startPos,															// TopLeft
+		Vector3(startPos.x + width, startPos.y, startPos.z),				// TopRight
+		Vector3(startPos.x, startPos.y, startPos.z + width)					// BottomLeft
+	);
+	//for (int i = 0; i < 6; i++)
+	//	hitBox[i] = Plane(position[i * 4], position[i * 4 + 1], position[i * 4 + 2]);
+
+
 
 	const int numVertices = sizeof(position) / sizeof(Vector3);
 
@@ -328,4 +369,42 @@ Vector4 Box::CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Vector
 	Vector4 tangent = Vector4(tan.x, tan.y, tan.z, det);
 
 	return tangent;
+}
+
+
+void Box::onClick(ID3D11Device* gDevice)
+{
+	if (textureSwitch)
+	{ 
+		// Load diffuse map texture from file
+		hr = CreateWICTextureFromFile(gDevice, L"Textures\\smiley\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Changing texure with onClick() - Failed", "Error", MB_OK);
+		}
+
+		// Load normal map texture from file
+		hr = CreateWICTextureFromFile(gDevice, L"Textures\\smiley\\normal.png", nullptr, &gNormalMap, NULL);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Changing normalmap with onClick - Failed", "Error", MB_OK);
+		}
+	}
+	else
+	{
+		// Load diffuse map texture from file
+		hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Changing back texure with onClick() - Failed", "Error", MB_OK);
+		}
+
+		// Load normal map texture from file
+		hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\normal.png", nullptr, &gNormalMap, NULL);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Changing back normalmap with onClick - Failed", "Error", MB_OK);
+		}
+	}
+	textureSwitch = !textureSwitch;
 }

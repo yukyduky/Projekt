@@ -10,6 +10,7 @@
 #include "Time.h"
 #include "Input.h"
 #include "Surface.h"
+#include "Picking.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -64,7 +65,7 @@ public:
 	// Initialize the scene
 	bool InitScene(ID3D11Device* gDevice);
 	// Update
-	void Update();
+	void Update(ID3D11Device* gDevice);
 	// Render Box
 	bool Render(ID3D11DeviceContext* gDevCon);
 	// Release the memory
@@ -101,8 +102,9 @@ private:
 
 	// Objects
 	Box box;
-	Surface surface;
 	Box box2;
+	Box* Boxes[2] = { &box, &box2 };
+	Surface surface;
 	Camera cam;
 	Time time;
 	Input input;
@@ -119,6 +121,9 @@ private:
 	SpotLight spotLight;
 	DirectLight directLight;
 	GeneralLightAttrb genLight;
+
+	//Methods
+	Picking mouse;
 
 	// GeoShader Constant buffer: Object
 	struct cbGeoObject

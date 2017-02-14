@@ -10,10 +10,10 @@ Surface::~Surface()
 {
 }
 
-bool Surface::InitScene(ID3D11Device* gDevice)
+bool Surface::InitScene(Vector3 startPos, float width, ID3D11Device* gDevice)
 {
 	// Create the Vertex data (position, normal, etc) and the vertex buffer
-	if (!CreateVertexData(gDevice))
+	if (!CreateVertexData(startPos, width, gDevice))
 		return false;
 
 	// Create the index buffer for what order to draw the vertices in
@@ -61,15 +61,14 @@ bool Surface::LoadTextures(ID3D11Device* gDevice)
 	return true;
 }
 
-bool Surface::CreateVertexData(ID3D11Device* gDevice)
+bool Surface::CreateVertexData(Vector3 startPos, float width, ID3D11Device* gDevice)
 {
 	Vector3 position[] =
 	{
-		// Front Face
-		Vector3(-10.0f, -5.0f, 10.0f),		// TopLeft
-		Vector3(10.0f, -5.0f, 10.0f),		// TopRight
-		Vector3(-10.0f, -5.0f, -10.0f),		// BottomLeft
-		Vector3(10.0f, -5.0f, -10.0f),		// BottomRight
+		Vector3(startPos.x, startPos.y, startPos.z + width),		// TopLeft
+		Vector3(startPos.x + width, startPos.y, startPos.z + width),// TopRight
+		Vector3(startPos.x, startPos.y, startPos.z),				// BottomLeft
+		Vector3(startPos.x + width, startPos.y, startPos.z),		// BottomRight
 	};
 
 	const int numVertices = sizeof(position) / sizeof(Vector3);

@@ -56,14 +56,14 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 		return false;
 
 	// Initialize the box
-	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
+	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.15), 2.0f))
 		return false;
 
-	if (!box2.InitScene(gDevice, Vector3(-0.5f, 1.0f, -0.5f), 1.0f))
+	if (!box2.InitScene(gDevice, Vector3(-0.5f, 10.0f, -0.5f), 8.0f))
 		return false;
 	
 	// Initialize the surface
-	if (!surface.InitScene(gDevice))
+	if (!surface.InitScene(Vector3(-10.0f, -5.0f, -10.0f), 20.0f, gDevice))
 		return false;
 	
 	// Get the matrices
@@ -73,7 +73,7 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	return true;
 }
 
-void GameManager::Update()
+void GameManager::Update(ID3D11Device* gDevice)
 {
 	// Get time since last frame
 	dt = float(time.GetFrameTime());
@@ -99,6 +99,16 @@ void GameManager::Update()
 
 	// Update the world matrices
 	UpdateWorlds();
+
+	//Picking the boxes
+	mouse.pickBoxes(keys[MB], *Boxes, cam, gDevice);
+
+	if (keys[UP])
+	{
+		Plane HitboxRS = box.getHitBox()[1];
+
+
+	}
 }
 
 bool GameManager::Render(ID3D11DeviceContext* gDevCon)
@@ -250,6 +260,23 @@ void GameManager::UpdateBox()
 
 
 	boxWorld = rotate * translate;
+
+	Plane* temp = box.getHitBox();
+
+	//Rotating the hitbox
+	if (keys[SPACE])
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			temp[i] = temp[i].Transform(temp[i], boxWorld);
+		}
+		box.setHitBox(temp);
+
+	}
+
+		//box.getHitBox()[i] = box.getHitBox()[i]->Transform(box.getHitBox()[i], boxWorld); //Might not be right
+		//box.getHitBox()[i] *= boxWorld;
+
 }
 
 void GameManager::UpdateFlashLight(Vector3 position, Vector3 forward)

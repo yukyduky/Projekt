@@ -20,6 +20,10 @@ public:
 	void Render(ID3D11DeviceContext* gDevCon);
 	void Release();
 
+	Plane* getHitBox() { return hitBox; };
+	void setHitBox(Plane* p) { *hitBox = *p; };
+	float getWidth() { return width; };
+	void onClick(ID3D11Device* gDevice);
 private:
 	// Functions
 	bool LoadTextures(ID3D11Device* gDevice);
@@ -39,10 +43,15 @@ private:
 	// Variables
 	UINT stride;
 	UINT offset;
+	bool textureSwitch = true;
+	float width;
 
 	// Error handling
 	HRESULT hr;
 
-};
+	//The order will be: 
+	//front, Right, Left, Back, Top, Bottom
+	Plane hitBox[6];
+	};
 
 #endif

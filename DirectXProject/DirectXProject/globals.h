@@ -13,7 +13,7 @@ const int SHADOW_INPUT_DESC_SIZE = 3;
 const int NUM_DEFERRED_OUTPUTS = 4;
 
 const int NUM_KEYS = 7;
-enum KEYS { W, A, S, D, ESC, SPACE, CTRL };
+enum KEYS { W, A, S, D, ESC, SPACE, CTRL, MB, UP };
 enum LIGHT_TYPE { SPOTLIGHT, DIRECTLIGHT, POINTLIGHT };
 
 #define VK_W 87

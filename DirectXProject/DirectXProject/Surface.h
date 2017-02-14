@@ -16,14 +16,14 @@ public:
 	Surface();
 	~Surface();
 
-	bool InitScene(ID3D11Device* gDevice);
+	bool InitScene(Vector3 startPos, float width, ID3D11Device* gDevice);
 	void Render(ID3D11DeviceContext* gDevCon);
 	void Release();
 
 private:
 	// Functions
 	bool LoadTextures(ID3D11Device* gDevice);
-	bool CreateVertexData(ID3D11Device* gDevice);
+	bool CreateVertexData(Vector3 startPos, float width, ID3D11Device* gDevice);
 	Vector3 CreateVertexNormal(Vector3* pos);
 	bool CreateIndexBuffer(ID3D11Device* gDevice);
 	bool CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSize, int stride);
