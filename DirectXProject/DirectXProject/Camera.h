@@ -16,7 +16,7 @@ public:
 	~Camera();
 	
 	void InitScene();
-	void Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValues, float &previousHeight);
+	void Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValues);
 
 	Matrix getViewMatrix() const;
 	Matrix getProjMatrix() const;
