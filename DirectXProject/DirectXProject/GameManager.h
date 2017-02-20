@@ -10,6 +10,7 @@
 #include "Time.h"
 #include "Input.h"
 #include "Surface.h"
+#include "Spotlight.h"
 #include "Picking.h"
 
 using namespace DirectX;
@@ -26,7 +27,7 @@ struct PointLight
 	float specPower;
 };
 
-struct SpotLight
+/*struct SpotLight
 {
 	Vector3 pos;
 	float pad0;
@@ -37,7 +38,7 @@ struct SpotLight
 	float pad1;
 	Vector3 attenuation;
 	float specPower;
-};
+};*/
 
 struct DirectLight
 {
@@ -68,20 +69,19 @@ public:
 	void Update(ID3D11Device* gDevice);
 	// Render Box
 	bool Render(ID3D11DeviceContext* gDevCon);
+	bool CreateShadowMap(ID3D11DeviceContext * gDevCon, ID3D11ShaderResourceView** gSpotShadowMap);
 	// Release the memory
 	void Release();
 
 	Matrix getMatrixWVP() const;
 	Matrix getMatrixWorld() const;
 	PointLight getPointLight() const;
-	SpotLight getSpotLight() const;
-	DirectLight getDirectLight() const;
-	GeneralLightAttrb getGenLight() const;
 
 private:
 	//COMS 
 	ID3D11Buffer* gGeoObjBuffer;
 	ID3D11Buffer* gLightLightBuffer;
+	ID3D11SamplerState* gShadowSampler;
 
 	// Functions
 	bool CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize);
@@ -110,6 +110,7 @@ private:
 	Camera cam;
 	Time time;
 	Input input;
+	Spotlight spotLight;
 
 	// Variables
 	float dt;
@@ -120,7 +121,7 @@ private:
 
 	// Structs
 	PointLight pointLight;
-	SpotLight spotLight;
+	//SpotLight spotLight;
 	DirectLight directLight;
 	GeneralLightAttrb genLight;
 
@@ -138,7 +139,7 @@ private:
 	struct cbLightLighting
 	{
 		PointLight pointLight;
-		SpotLight spotLight;
+		SpotLightProperties spotLight;
 		DirectLight directLight;
 		GeneralLightAttrb genLight;
 	};
