@@ -22,21 +22,20 @@ public:
 private:
 	bool clickOnce = false;
 
-
+	//Returns a box if it was a hit
 	Box* PointBox(Box* box, Camera cam);
-	
-	//
-	Vector2 GetHits(Plane p1, Plane p2, Ray inRay, float width);
-
-	float DistanceToPlane(Plane plane, Ray inRay);
-
-	//Gets the distance from the camera to the Box
-	float intersectionDistance(Plane plane, Ray inRay);
-
 	bool CheckHit(Plane hitBox[], Ray inRay, float width);
 
+	//A v2 with intersectiondistance to planes
+	Vector2 GetHits(Plane p1, Plane p2, Ray inRay, float width);
+
+	//Math functions
+	float intersectionDistance(Plane plane, Ray inRay);
+	float DistanceToPlane(Plane plane, Ray inRay);
+
+
+	//OLD:
 	//For triangles
 	bool IntersectionCheck(Vector3 vert1, Vector3 vert2, Vector3 vert3, Ray inRay);
-
 };
 #endif

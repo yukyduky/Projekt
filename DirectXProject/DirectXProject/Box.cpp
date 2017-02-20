@@ -160,7 +160,7 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 	//for (int i = 0; i < 6; i++)
 	//	hitBox[i] = Plane(position[i * 4], position[i * 4 + 1], position[i * 4 + 2]);
 
-
+	center = Vector3(startPos.x + (width / 2), startPos.y + (width / 2), startPos.z + (width / 2));
 
 	const int numVertices = sizeof(position) / sizeof(Vector3);
 
@@ -370,7 +370,6 @@ Vector4 Box::CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Vector
 
 	return tangent;
 }
-
 
 void Box::onClick(ID3D11Device* gDevice)
 {

@@ -23,6 +23,9 @@ public:
 	Plane* getHitBox() { return hitBox; };
 	void setHitBox(Plane* p) { *hitBox = *p; };
 	float getWidth() { return width; };
+	Vector3 getCenterVector() { return center; };
+
+	//Action of clicking the box
 	void onClick(ID3D11Device* gDevice);
 private:
 	// Functions
@@ -45,6 +48,7 @@ private:
 	UINT offset;
 	bool textureSwitch = true;
 	float width;
+	Vector3 center;
 
 	// Error handling
 	HRESULT hr;

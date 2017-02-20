@@ -15,13 +15,47 @@ void Picking::pickBoxes(bool keys, Box Boxes[], Camera cam, ID3D11Device *gDevic
 
 	if (keys & clickOnce)
 	{
-		const int NumbBoxes = 2;
-
+		//Sorts the boxes in distance to camera order.
+		const int NumbBoxes = 4;
+		float distance[NumbBoxes];
+		for (int i = 0; i < NumbBoxes; i++)
+			distance[i] = Boxes[i].getCenterVector().Distance(cam.getPosition(), Boxes[i].getCenterVector());
+		
+		int order[NumbBoxes];
 		for (int i = 0; i < NumbBoxes; i++)
 		{
-			Box* heldBox = PointBox(&Boxes[i], cam);
+			order[i] = i;
+		}
+		for (int j = 0; j < NumbBoxes; j++)
+		{
+			float lowest = distance[j];
+			int lowestIndex = j;
+
+			for (int i = j; i < NumbBoxes; i++)
+				if (distance[i] < lowest)
+				{
+					lowest = distance[i];
+					lowestIndex = i;
+				}
+
+			if (order[j] != lowestIndex)
+			{
+				int temp = order[j];
+				order[j] = lowestIndex;
+				order[lowestIndex] = temp;
+				distance[lowestIndex] = 99999.0f;
+			}
+		}
+
+		//Checks intersection until it hits
+		for (int i = 0; i < NumbBoxes; i++)
+		{
+ 			Box* heldBox = PointBox(&Boxes[order[i]], cam);
 			if (heldBox != nullptr)
+			{
 				heldBox->onClick(gDevice);
+				i = NumbBoxes;
+			}
 		}
 
 		clickOnce = false;
@@ -30,21 +64,8 @@ void Picking::pickBoxes(bool keys, Box Boxes[], Camera cam, ID3D11Device *gDevic
 		clickOnce = true;
 }
 
-Box* Picking::PointBox(Box* box, Camera cam)//POINT cursor)
+Box* Picking::PointBox(Box* box, Camera cam)
 {
-	////Default for First person
-	//Vector3 sightRay(0, 0, 1);
-	//XMVECTOR scrapDet;
-
-	////Transforms Ray from ViewSpace into WorldSpace
-	//Matrix RayToWoSpace = XMMatrixInverse(&scrapDet, cam.getViewMatrix());
-
-	//XMVECTOR RayInWoSpacePos = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
-	//	RayInWoSpaceDir = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-
-	//RayInWoSpacePos = XMVector3TransformCoord(RayInWoSpacePos, RayToWoSpace);
-	//RayInWoSpaceDir = XMVector3TransformNormal(RayInWoSpaceDir, RayToWoSpace);
-
 	//Puts the vaulues into a Ray for easy handling in the funktions
 	Ray ray(cam.getPosition(), cam.getForward());
 
@@ -57,10 +78,6 @@ Box* Picking::PointBox(Box* box, Camera cam)//POINT cursor)
 //If 
 Vector2 Picking::GetHits(Plane p1, Plane p2, Ray inRay, float width)
 {
-
-	//Plane firstPlane = (d1 <= d2) ? p1 : p2;
-	//Plane secondPlane = (firstPlane == p2 ? p1 : p2);
-	//
 	float xValue = intersectionDistance(p1, inRay);
 
 	//xValue will be 9999.0 if the ray is parrallel with the planes
@@ -68,6 +85,7 @@ Vector2 Picking::GetHits(Plane p1, Plane p2, Ray inRay, float width)
 	{
 		float yValue = intersectionDistance(p2, inRay);
 
+		//Makes sure that XValue is the lowest
 		if (xValue > yValue)
 		{
 			float temp = yValue;
@@ -76,13 +94,14 @@ Vector2 Picking::GetHits(Plane p1, Plane p2, Ray inRay, float width)
 		}
 		if (yValue > 0.0f)
 			return Vector2(xValue, yValue);
+		//Value tha twill fail if the intersecton is behind the camera
 		else
 			return Vector2(9999.0f, -9999.0f);
 		
 	}
 	//Checks if they ray is between the planes
 	float d1 = DistanceToPlane(p1, inRay), d2 = DistanceToPlane(p2, inRay);
-	if((fabs(d1+d2) < width + 0.1f))
+	if((fabs(d1+d2) < width + 0.001f))
 		return Vector2(-9999.0f, 9999.0f);
 	else
 		return Vector2(9999.0f, -9999.0f);
@@ -152,7 +171,7 @@ bool Picking::CheckHit(Plane hitBox[], Ray inRay, float width)
 }
 
 
-
+//OLD:
 //Returns true if the ray hits the triangle vertice
 bool Picking::IntersectionCheck(Vector3 vert1, Vector3 vert2, Vector3 vert3, Ray inRay)
 {

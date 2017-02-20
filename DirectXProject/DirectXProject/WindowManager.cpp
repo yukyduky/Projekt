@@ -23,7 +23,7 @@ bool WindowManager::InitializeWindow(HINSTANCE hInstance, int ShowWnd, int width
 	wc.cbWndExtra = NULL;							// Extra bytes after the windows instance
 	wc.hInstance = hInstance;						// Instance of the current program
 	wc.hIcon = LoadIcon(nullptr, IDI_WINLOGO);		// Titlebar icon
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);	// Default mouse icon
+	wc.hCursor = LoadCursor(nullptr, IDC_CROSS);	// Default mouse icon
 	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 4);	// Window background color
 	wc.lpszMenuName = nullptr;						// Name of the menu attached to the window if we had one
 	wc.lpszClassName = WndClassName;				// Name of the windows class

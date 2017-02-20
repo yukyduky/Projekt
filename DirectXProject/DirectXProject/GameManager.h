@@ -103,7 +103,9 @@ private:
 	// Objects
 	Box box;
 	Box box2;
-	Box* Boxes[2] = { &box, &box2 };
+	Box box3;
+	Box box4;
+	Box* Boxes[4] = { &box, &box2 , &box3 , &box4};
 	Surface surface;
 	Camera cam;
 	Time time;
