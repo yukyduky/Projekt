@@ -26,13 +26,13 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	pointLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	pointLight.specPower = 50.0f;
 
-	spotLight.pos = Vector3(0.0f, 0.0f, -3.0f);
+	/*spotLight.pos = Vector3(0.0f, 0.0f, -3.0f);
 	spotLight.dir = Vector3(0.0f, 0.0f, 1.0f);
 	spotLight.angle = 100.0f;
 	spotLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	spotLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	spotLight.attenuation = Vector3(1.0f, 0.1f, 0.0f);
-	spotLight.specPower = 50.0f;
+	spotLight.specPower = 50.0f;*/
 
 	directLight.pos = Vector3(0.0f, 2.0f, -2.0f);
 	directLight.dir = Vector3(0.0f, 0.0f, 1.0f);
@@ -40,9 +40,7 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	directLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	directLight.specPower = 50.0f;
 
-
-
-	this->camPreviousHeight = 50.0f;
+	gShadowSampler = spotLight.getSampler();
 }
 
 GameManager::~GameManager()
@@ -70,6 +68,10 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	if (!surface.InitScene(gDevice))
 		return false;
 	
+	// Initialize the spotlights
+	if (!spotLight.InitScene(gDevice))
+		return false;
+
 	// Get the matrices
 	view = cam.getViewMatrix();
 	proj = cam.getProjMatrix();
@@ -86,18 +88,22 @@ void GameManager::Update()
 	input.HandleInput(keys, mouseOffset);
 
 	// Update the camera
-	cam.Update(keys, mouseOffset, dt, surface.heightValueList(), this->camPreviousHeight);
+	cam.Update(keys, mouseOffset, dt, surface.heightValueList());
 	// Update the view matrix
 	view = cam.getViewMatrix();
+
+	// Update the spotlights
+	spotLight.Update();
 
 	// Update the camera position for the general light attributes
 	genLight.cameraPos = cam.getPosition();
 	// Update Flashlight
-	UpdateFlashLight(cam.getPosition(), cam.getForward());
+	if(keys[CTRL])
+		UpdateFlashLight(cam.getPosition(), cam.getForward());
 
 	// Update the lights
 	cbLightLight.pointLight = pointLight;
-	cbLightLight.spotLight = spotLight;
+	cbLightLight.spotLight = spotLight.getSpotLight();
 	cbLightLight.directLight = directLight;
 	cbLightLight.genLight = genLight;
 
@@ -109,6 +115,7 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 {
 	// Update the Matrices
 	wvp = boxWorld * view * proj;
+	
 	cbGeoObj.wvp = wvp.Transpose();
 	cbGeoObj.world = boxWorld.Transpose();
 
@@ -117,11 +124,13 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	// Set the constant buffer for the current vertex shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 
+	// Render
 	box.Render(gDevCon);
 	box2.Render(gDevCon);
 
 	// Update the Matrices
 	wvp = staticWorld * view * proj;
+
 	cbGeoObj.wvp = wvp.Transpose();
 	cbGeoObj.world = staticWorld.Transpose();
 
@@ -130,14 +139,47 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	// Set the constant buffer for the current vertex shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 
+	// Render
 	surface.Render(gDevCon);
-
 
 	// Map the LightLight constant buffer
 	if (!MapBuffer(gDevCon, &gLightLightBuffer, &cbLightLight, sizeof(cbLightLight)))
 		return false;
 	// Set the constant buffer for the current pixel shader
 	gDevCon->PSSetConstantBuffers(0, 1, &gLightLightBuffer);
+	// Set the shadow sampler for the light pass
+	gDevCon->PSSetSamplers(0, 1, &gShadowSampler);
+
+	return true;
+}
+
+bool GameManager::CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderResourceView** gSpotShadowMap)
+{
+	// Set the Rasterizerstate to allow depth bias
+	gDevCon->RSSetState(spotLight.getRasterizer());
+	// Update the world matrix
+	spotLight.setWorld(boxWorld);
+	// Update the spotlights
+	spotLight.Update();
+
+	if (!spotLight.Render(gDevCon))
+		return false;
+
+	// Render
+	box.Render(gDevCon);
+	box2.Render(gDevCon);
+
+	// Update the world matrix
+	spotLight.setWorld(staticWorld);
+	// Update the spotlights
+	spotLight.Update();
+
+	spotLight.UpdateResources(gDevCon);
+
+	// Render
+	surface.Render(gDevCon);
+
+	*gSpotShadowMap = spotLight.getSRV();
 
 	return true;
 }
@@ -167,21 +209,6 @@ PointLight GameManager::getPointLight() const
 	return pointLight;
 }
 
-SpotLight GameManager::getSpotLight() const
-{
-	return spotLight;
-}
-
-DirectLight GameManager::getDirectLight() const
-{
-	return directLight;
-}
-
-GeneralLightAttrb GameManager::getGenLight() const
-{
-	return genLight;
-}
-
 bool GameManager::CreateConstBuffer(ID3D11Device * gDevice, ID3D11Buffer ** gBuffer, int bufferSize)
 {
 	// Describes the constant buffer
@@ -195,7 +222,7 @@ bool GameManager::CreateConstBuffer(ID3D11Device * gDevice, ID3D11Buffer ** gBuf
 	cbBufferDesc.MiscFlags = 0;
 
 	hr = gDevice->CreateBuffer(&cbBufferDesc, nullptr, gBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Constant Buffer - Failed", "Error", MB_OK);
 		return false;
@@ -209,7 +236,7 @@ bool GameManager::MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer** gBuffer
 	// Map constant buffer so that we can write to it.
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
 	hr = gDevCon->Map(*gBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Deferred Buffer mapping - Failed", "Error", MB_OK);
 		return false;
@@ -258,6 +285,10 @@ void GameManager::UpdateBox()
 
 void GameManager::UpdateFlashLight(Vector3 position, Vector3 forward)
 {
-	this->spotLight.dir = forward;
-	this->spotLight.pos = position;
+	SpotLightProperties tempSpotLight = spotLight.getSpotLight();
+	
+	tempSpotLight.dir = forward;
+	tempSpotLight.pos = position;
+
+	spotLight.setSpotLight(tempSpotLight);
 }

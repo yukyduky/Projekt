@@ -15,7 +15,7 @@ Camera::Camera()
 	// Set the view matrix
 	this->view = XMMatrixLookAtLH(pos, forward, up);
 	// Set the projection matrix
-	this->proj = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)WIDTH / HEIGHT, 1.0f, 1000.0f);
+	proj = XMMatrixPerspectiveFovLH(0.4f * XM_PI, (float)WIDTH / HEIGHT, 0.01f, 1000.0f);
 
 
 	this->yaw = 0.0f;
@@ -26,7 +26,6 @@ Camera::Camera()
 	this->moveBF = 0.0f;
 }
 
-
 Camera::~Camera()
 {
 }
@@ -36,7 +35,7 @@ void Camera::InitScene()
 
 }
 
-void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValues, float &previousHeight)
+void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValues)
 {
 	if (this->flyMode == 0)
 	{
