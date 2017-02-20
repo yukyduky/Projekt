@@ -4,20 +4,51 @@
 
 Surface::Surface()
 {
+	this->hmd.tempHeightValue = nullptr;
+	this->hmd.vertexData = nullptr;
+	this->hmd.normals = nullptr;
+	this->hmd.indices = nullptr;
 }
 
 Surface::~Surface()
 {
+	if (this->hmd.tempHeightValue != nullptr)
+	{
+		delete[] this->hmd.tempHeightValue;
+		this->hmd.tempHeightValue = nullptr;
+	}
+
+	if(this->hmd.vertexData != nullptr)
+	{
+		delete[] this->hmd.vertexData;
+		this->hmd.vertexData = nullptr;
+	}
+
+	if (this->hmd.normals != nullptr) 
+	{
+		delete[] this->hmd.normals;
+		this->hmd.normals = nullptr;
+	}
+
+	if (this->hmd.indices != nullptr) 
+	{
+		delete[] this->hmd.indices;
+		this->hmd.indices = nullptr;
+	}
 }
 
 bool Surface::InitScene(ID3D11Device* gDevice)
 {
-	// Create the Vertex data (position, normal, etc) and the vertex buffer
-	if (!CreateVertexData(gDevice))
+	//Load heightmap
+	if (!this->LoadHeightMapInfo())
 		return false;
 
 	// Create the index buffer for what order to draw the vertices in
 	if (!CreateIndexBuffer(gDevice))
+		return false;
+
+	// Create the Vertex data (position, normal, etc) and the vertex buffer
+	if (!CreateVertexData(gDevice))
 		return false;
 
 	// Load the textures into memory
@@ -37,8 +68,9 @@ void Surface::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// Update the pixel shader with the textures
 	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
+	gDevCon->PSSetShaderResources(1, 1, &gNormalMap);
 	// Draw the indexed vertices
-	gDevCon->DrawIndexed(6, 0, 0);
+	gDevCon->DrawIndexed(this->hmd.numFaces * 3, 0, 0);
 }
 
 void Surface::Release()
@@ -46,15 +78,24 @@ void Surface::Release()
 	gIndexBuffer->Release();
 	gVertBuffer->Release();
 	gDiffuseMap->Release();
+	gNormalMap->Release();
 }
 
 bool Surface::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\bricks\\diffuse.jpg", nullptr, &gDiffuseMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\surfacereal.png", nullptr, &gDiffuseMap, NULL);
 	if (hr != S_OK)
 	{
 		MessageBox(0, "Create surface diffuse texture from file - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	// Load normal map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\normalmapreal.png", nullptr, &gNormalMap, NULL);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Create surface normal texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
 
@@ -63,95 +104,127 @@ bool Surface::LoadTextures(ID3D11Device* gDevice)
 
 bool Surface::CreateVertexData(ID3D11Device* gDevice)
 {
-	Vector3 position[] =
+	//Calculate the number of vertices we will have depending on the width and height of the heightmap we use
+	int nrOfVertices = this->hmd.height * this->hmd.width;
+
+	std::vector<Vertex> v(nrOfVertices); 
+	int index = 0;
+	
+
+	//Open up the txt file with the precalculated normal if it exists, else we create calculate the normals and save them to the txt file.
+
+	std::string name = "Textures\\surface\\normals.txt";
+	std::ifstream f(name.c_str());
+
+	if (f.good())
 	{
-		// Front Face
-		Vector3(-10.0f, -5.0f, 10.0f),		// TopLeft
-		Vector3(10.0f, -5.0f, 10.0f),		// TopRight
-		Vector3(-10.0f, -5.0f, -10.0f),		// BottomLeft
-		Vector3(10.0f, -5.0f, -10.0f),		// BottomRight
-	};
+		std::fstream normalFile("Textures\\surface\\normals.txt", std::ios_base::in);
 
-	const int numVertices = sizeof(position) / sizeof(Vector3);
+		for (int i = 0; i < this->hmd.height; i++)
+		{
+			for (int j = 0; j < this->hmd.width; j++)
+			{
+				v[index].position = this->hmd.vertexData[index];
+				//v[index].position.y = 25.5f;
 
-	Vector3 normal[numVertices];
+				normalFile >> v[index].normal.x;
+				getchar();
+				normalFile >> v[index].normal.y;
+				getchar();
+				normalFile >> v[index].normal.z;
+				getchar();
 
-	for (int i = 0; i < numVertices; i += 4)
+				v[index].texCoords.x = (float)j / ((float)this->hmd.width - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the x-axis
+				v[index].texCoords.y = (float)i / ((float)this->hmd.height - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the y-axis
+				v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent. (Borde fixas ordentligt om vi får tid)
+
+				index++;
+			}
+		}
+		//close the normalFile
+		normalFile.close();
+
+	}
+	else
 	{
-		Vector3 pos[3];
+		
 
-		for (int k = 0; k < 3; k++)
-			pos[k] = position[i + k];
+		for (int i = 0; i < this->hmd.height; i++)
+		{
+			for (int j = 0; j < this->hmd.width; j++)
+			{
+				v[index].position = this->hmd.vertexData[index];
+				//v[index].position.y = 25.5f;
+				v[index].texCoords.x = (float)j / ((float)this->hmd.width - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the x-axis
+				v[index].texCoords.y = (float)i / ((float)this->hmd.height - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the y-axis
+				v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent. (Borde fixas ordentligt om vi får tid)
 
-		for (int k = 0; k < 4; k++)
-			normal[i + k] = CreateVertexNormal(pos);
+				index++;
+			}
+		}
+
+		this->CreateNormalBMP(v, nrOfVertices);
+
+		std::fstream normalFile("Textures\\surface\\normals.txt", std::ios_base::in);
+		
+		index = 0;
+
+		for (int i = 0; i < this->hmd.height; i++)
+		{
+			for (int j = 0; j < this->hmd.width; j++)
+			{
+				normalFile >> v[index].normal.x;
+				getchar();
+				normalFile >> v[index].normal.y;
+				getchar();
+				normalFile >> v[index].normal.z;
+				getchar();
+
+				index++;
+			}
+		}
+
+		//close the normalFile
+		normalFile.close();
+
 	}
 
-	Vector2 texCoords[] =
+	/*
+	std::fstream normalFile("Textures\\surface\\normals.txt", std::ios_base::in);
+
+	for (int i = 0; i < this->hmd.height; i++)
 	{
-		Vector2(0.0f, 0.0f),
-		Vector2(1.0f, 0.0f),
-		Vector2(0.0f, 1.0f),
-		Vector2(1.0f, 1.0f),
-	};
+		for(int j = 0; j < this->hmd.width; j++)
+		{
+			v[index].position = this->hmd.vertexData[index];
+			v[index].position.y = 25.5f;
+		
+			normalFile >> v[index].normal.x;
+			getchar();
+			normalFile >> v[index].normal.y;
+			getchar();
+			normalFile >> v[index].normal.z;
+			getchar();
+		
+			v[index].texCoords.x = (float)j / ((float)this->hmd.width - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the x-axis
+			v[index].texCoords.y = (float)i / ((float)this->hmd.height - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the y-axis
+			v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent. (Borde fixas ordentligt om vi får tid)
 
-	Vector3 posTBNData[3];
-	Vector3 norTBNData;
-	Vector2 uvTBNData[3];
-
-	Vector4 tangent[numVertices];
-
-	// Get the texture coords
-	for (int i = 0; i < 3; i++)
-		uvTBNData[i] = texCoords[i];
-
-	for (int i = 0; i < numVertices; i += 4)
-	{
-		// Get the positions
-		for (int k = 0; k < 3; k++)
-			posTBNData[k] = position[i + k];
-
-		// Get the normal
-		norTBNData = normal[i];
-
-		// Calculate the tangent per face
-		Vector4 tan = CreateTBNMatrixData(posTBNData, norTBNData, uvTBNData);
-
-		// Store the data per vertex
-		for (int k = 0; k < 4; k++)
-			tangent[i + k] = tan;
+			index++;
+		}
 	}
-
-	struct Vertex
-	{
-		Vector3 position;
-		Vector3 normal;
-		Vector2 texCoords;
-		Vector4 tangent;
-	};
-
-	Vertex v[numVertices];
-
-	int k = 0;
-	for (int i = 0; i < numVertices; i++)
-	{
-		if (i % 4 == 0 && i != 0)
-			k++;
-
-		v[i].position = position[i];
-		v[i].normal = normal[i];
-		v[i].texCoords = texCoords[i - 4 * k];
-		v[i].tangent = tangent[i];
-	}
+	//close the normalFile
+	normalFile.close();
+	*/
 
 	// Create the vertexbuffer for the input layout to the shader
-	if (!CreateVertexBuffer(gDevice, &v, sizeof(v), sizeof(Vertex)))
+	if (!CreateVertexBuffer(gDevice, &v[0], sizeof(Vertex)*nrOfVertices, sizeof(Vertex)))
 		return false;
 
 	return true;
 }
 
-Vector3 Surface::CreateVertexNormal(Vector3* pos)
+Vector3 Surface::CreateVertexNormal(Vector3* pos) //fråga Dew
 {
 	Vector3 p0p1 = pos[1] - pos[0];
 	Vector3 p0p2 = pos[2] - pos[0];
@@ -164,19 +237,34 @@ Vector3 Surface::CreateVertexNormal(Vector3* pos)
 
 bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 {
-	// Index of how to draw the vertices
-	DWORD indices[] = {
-		// Front Face
-		0,  1,  2,
-		2,  1,  3,
-	};
+	int nrOfIndices = (this->hmd.height - 1) * (this->hmd.width - 1) * 2 * 3;
+	this->hmd.indices = new DWORD[nrOfIndices];
+	int index = 0;
+
+
+	for(int i = 0; i < this->hmd.height - 1; i++)
+	{
+		for(int j = 0; j < this->hmd.width - 1; j++)
+		{
+			this->hmd.indices[index] = (i * (this->hmd.width)) + j;
+			this->hmd.indices[index + 1] = (i * (this->hmd.width) + j + 1);
+			this->hmd.indices[index + 2] = ((i + 1) * (this->hmd.width) + j);
+
+			this->hmd.indices[index + 3] = this->hmd.indices[index + 2];
+			this->hmd.indices[index + 4] = this->hmd.indices[index + 1];
+			this->hmd.indices[index + 5] = ((i + 1) * (this->hmd.width) + j + 1);
+
+			index += 6;
+		}
+	}
+
 
 	// Describe the index buffer
 	D3D11_BUFFER_DESC indexBufferDesc;
 	memset(&indexBufferDesc, 0, sizeof(indexBufferDesc));
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(indices) * sizeof(DWORD);
+	indexBufferDesc.ByteWidth = nrOfIndices * sizeof(DWORD);
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -184,7 +272,7 @@ bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 	// Set the index buffer data
 	D3D11_SUBRESOURCE_DATA indexData;
 
-	indexData.pSysMem = indices;
+	indexData.pSysMem = this->hmd.indices;
 	hr = gDevice->CreateBuffer(&indexBufferDesc, &indexData, &gIndexBuffer);
 	if (hr != S_OK)
 	{
@@ -259,4 +347,254 @@ Vector4 Surface::CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Ve
 	Vector4 tangent = Vector4(tan.x, tan.y, tan.z, det);
 
 	return tangent;
+}
+
+bool Surface::LoadHeightMapInfo()
+{
+	if (!this->LoadBMPInfo())
+		return false;
+
+	this->CreateHMVertices();
+	
+
+
+	return true;
+}
+
+bool Surface::LoadBMPInfo()
+{
+	FILE* filePtr = nullptr;
+	fopen_s( &filePtr,"Textures\\surface\\heightmap2.bmp" ,"rb");
+	if (filePtr == nullptr)
+	{
+		MessageBox(0, "Surface Load BMP - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	unsigned char info[54]; //header information
+	fread(info, sizeof(unsigned char), 54, filePtr); //reading the header information
+
+	//saving the width and height from header information.
+	this->hmd.width = *(int*)&info[18];
+	this->hmd.height = *(int*)&info[22];
+
+
+	int paddedRowLength = (this->hmd.width * 3 + 3) &(~3); 
+	unsigned char* data = new unsigned char[paddedRowLength];
+	unsigned char tmp;
+
+	int index = 0;
+	hmd.tempHeightValue = new float[this->hmd.width * this->hmd.height];
+	
+	
+	for (int i = 0; i < this->hmd.height; i++)
+	{
+		fread(data, sizeof(unsigned char), paddedRowLength, filePtr);
+		for (int j = 0; j < this->hmd.width * 3; j += 3)
+		{
+			// Convert (B, G, R) to (R, G, B) since bmp saves in (B, G, R)-format. 
+			// Unnessesary since we only use one of the values and they are all the same.
+			tmp = data[j];
+			data[j] = data[j + 2];
+			data[j + 2] = tmp;
+
+			this->hmd.tempHeightValue[index] = (float)data[j];
+			index++;
+		}
+	}
+
+	delete[] data;
+	data = nullptr;
+
+	return true;
+}
+
+void Surface::CreateHMVertices() //Creates the vertice points for the heightmap.
+{
+	//The number of vertices used is determined by the height and width of the heightmap we use
+	int index = 0;
+	this->hmd.vertexData = new Vector3[this->hmd.height * this->hmd.width];
+	
+	//Calculate the number of faces
+	this->hmd.numFaces = (this->hmd.width - 1) * (this->hmd.height - 1) * 2;
+
+	//Save the vertex coordinates to hmd, we divide the y-value (the height) with 10.0f to make the surface look a bit smoother
+	for (int i = 0; i < this->hmd.height; i++)
+	{
+		for (int j = 0; j < this->hmd.width; j++)
+		{
+			this->hmd.vertexData[index].x = j;
+			this->hmd.vertexData[index].y = this->hmd.tempHeightValue[index] / 10.0f;
+			this->hmd.vertexData[index].z = (this->hmd.height - 1) - i;
+			index++;
+		}
+	}
+}
+
+void Surface::CreateNormalBMP(std::vector<Vertex> v, int nrOfVertices)
+{
+	// Thinking in quads in the coming code with the corners numbered as illustrated bellow.
+	//   0________1
+	//    |      |
+	//    |      |
+	//    |______|
+	//   2        3
+
+	//Calculating the normals
+	std::vector<Vector3> temporaryNormal;
+
+	this->hmd.normals = new Vector3[this->hmd.numFaces];
+
+	Vector3 unNormalized = Vector3(0.0f, 0.0f, 0.0f);
+	float vecX, vecY, vecZ;
+	Vector3 edge1 = Vector3(0.0f, 0.0f, 0.0f);
+	Vector3 edge2 = Vector3(0.0f, 0.0f, 0.0f);
+
+	/////////////////////////////////////////////////
+	for (int i = 0; i < this->hmd.numFaces / 2; i++)
+	{
+	//Get the vector describing one edge of our triangle (edge 0,2)
+	vecX = v[this->hmd.indices[(i * 6)]].position.x - v[this->hmd.indices[(i * 6) + 2]].position.x;
+	vecY = v[this->hmd.indices[(i * 6)]].position.y - v[this->hmd.indices[(i * 6) + 2]].position.y;
+	vecZ = v[this->hmd.indices[(i * 6)]].position.z - v[this->hmd.indices[(i * 6) + 2]].position.z;
+	edge1 = Vector3(vecX, vecY, vecZ);    //Create our first edge
+
+	//Get the vector describing another edge of our triangle (edge 0,1)
+	vecX = v[this->hmd.indices[(i * 6)]].position.x - v[this->hmd.indices[(i * 6) + 1]].position.x;
+	vecY = v[this->hmd.indices[(i * 6)]].position.y - v[this->hmd.indices[(i * 6) + 1]].position.y;
+	vecZ = v[this->hmd.indices[(i * 6)]].position.z - v[this->hmd.indices[(i * 6) + 1]].position.z;
+	edge2 = Vector3(vecX, vecY, vecZ);    //Create our second edge
+
+	//Cross multiply the two edge vectors to get the un-normalized face normal
+	unNormalized = XMVector3Cross(edge2, edge1);
+	temporaryNormal.push_back(unNormalized);            //Save unormalized normal (for normal averaging)
+
+
+	//Get the vector describing one edge of our triangle (edge 3,1)
+	vecX = v[this->hmd.indices[(i+1) * 6 - 1]].position.x - v[this->hmd.indices[(i+1) * 6 - 2]].position.x;
+	vecY = v[this->hmd.indices[(i+1) * 6 - 1]].position.y - v[this->hmd.indices[(i+1) * 6 - 2]].position.y;
+	vecZ = v[this->hmd.indices[(i+1) * 6 - 1]].position.z - v[this->hmd.indices[(i+1) * 6 - 2]].position.z;
+	edge1 = Vector3(vecX, vecY, vecZ);    //Create our first edge
+
+	//Get the vector describing another edge of our triangle (edge 3,2)
+	vecX = v[this->hmd.indices[(i+1) * 6 - 1]].position.x - v[this->hmd.indices[(i+1) * 6 - 3]].position.x;
+	vecY = v[this->hmd.indices[(i+1) * 6 - 1]].position.y - v[this->hmd.indices[(i+1) * 6 - 3]].position.y;
+	vecZ = v[this->hmd.indices[(i+1) * 6 - 1]].position.z - v[this->hmd.indices[(i+1) * 6 - 3]].position.z;
+	edge2 = Vector3(vecX, vecY, vecZ);    //Create our second edge
+
+	//Cross multiply the two edge vectors to get the un-normalized face normal
+	unNormalized = XMVector3Cross(edge2, edge1);
+	temporaryNormal.push_back(unNormalized);            //Save unormalized normal (for normal averaging)
+
+	}
+
+
+	//Compute vertex normals (normal Averaging)
+	Vector3 normalSum = Vector3(0.0f, 0.0f, 0.0f);
+	int facesUsing = 0;
+	float tempX;
+	float tempY;
+	float tempZ;
+	std::ofstream normalFile;
+	normalFile.open("Textures\\surface\\normals.txt");
+
+
+	//Go through each vertex
+	for (int i = 0; i < nrOfVertices; ++i)
+	{
+	//Check which triangles use this vertex
+	for (int j = 0; j < this->hmd.numFaces; ++j)
+	{
+	if (this->hmd.indices[j * 3] == i ||
+	this->hmd.indices[(j * 3) + 1] == i ||
+	this->hmd.indices[(j * 3) + 2] == i)
+	{
+	tempX = normalSum.x + temporaryNormal[j].x;
+	tempY = normalSum.y + temporaryNormal[j].y;
+	tempZ = normalSum.z + temporaryNormal[j].z;
+
+	normalSum = Vector3(tempX, tempY, tempZ);    //If a face is using the vertex, add the face normal to the normalSum
+	facesUsing++;
+	}
+	}
+
+	//Get the average normal of this vertex by dividing the sum with the number of faces using it.
+	normalSum = normalSum / facesUsing;
+
+	//Normalize the normalSum vector
+	normalSum.Normalize();
+
+	//Store the normal in our current vertex 
+	v[i].normal = normalSum;
+	this->hmd.normals[i] = normalSum;
+	
+	//Save it to a txt - file so we don't have to calculate it everytime the application runs
+	normalFile << normalSum.x;
+	normalFile << "\n";
+	normalFile << normalSum.y;
+	normalFile << "\n";
+	normalFile << normalSum.z;
+	normalFile << "\n";
+
+	//Clear normalSum and facesUsing for next vertex
+	normalSum = Vector3(0.0f, 0.0f, 0.0f);
+	facesUsing = 0;
+	}
+
+	//close normalFile since all the normals have been saved at this point.
+	normalFile.close();
+	
+	///////////////////////////////////////////////////////////////////////////
+	//Save the normals to a BMP so we can use it as a normalmap
+	char* data;
+	data = new char[this->hmd.width * this->hmd.height * 3];
+
+	float tester;
+
+	int counter = 0;
+	for (int i = 0; i < this->hmd.width * this->hmd.height; i++)
+	{
+		
+		if (v[i].normal.z < 0.0f)
+		{
+
+		}
+
+
+		data[counter] = (char)(((v[i].normal.z + 1.0f) / 2) * 255.0f);
+		data[counter+1] = (char)(((v[i].normal.y + 1.0f) / 2)* 255.0f);
+		data[counter+2] = (char)(((v[i].normal.x + 1.0f) / 2) * 255.0f);
+		counter += 3;
+	}
+	int fileSize = this->hmd.height * this->hmd.width * 3 + 14 + 40;
+
+	char* temp = (char*)((void*)&fileSize);
+	char* temp2 = (char*)((void*)&this->hmd.width);
+	char* temp3 = (char*)((void*)&this->hmd.height);
+
+
+	char bmpFileHeader[14] = { 'B', 'M', temp[0],temp[1],temp[2],temp[3], 0,0, 0,0, 54,0,0,0 };
+	char bmpFileInfoHeader[40] = { 40,0,0,0, temp2[0],temp2[1],temp2[2],temp2[3], temp3[0],temp3[1],temp3[2],temp3[3], 1,0, 24,0,
+									0,0,0,0, 0,0,0,0, 24,0,0,0, 24,0,0,0, 0,0,0,0, 0,0,0,0};
+	
+
+	std::ofstream bmpFile;
+
+	bmpFile.open("Textures\\surface\\normals.bmp", std::ios::binary);
+
+	bmpFile.write(bmpFileHeader, 14);
+	bmpFile.write(bmpFileInfoHeader, 40);
+	bmpFile.write(data, this->hmd.width*this->hmd.height*3);
+
+	bmpFile.close();
+
+	delete[] data;
+	data = NULL;
+
+	///////////////////////////////////////////////////////////////////////////////////
+}
+
+float* Surface::heightValueList()
+{
+	return this->hmd.tempHeightValue;
 }

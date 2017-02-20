@@ -113,6 +113,7 @@ private:
 	float rotBoxY;
 	float rotBoxZ;
 	float transBox;
+	float camPreviousHeight;
 
 	// Structs
 	PointLight pointLight;
