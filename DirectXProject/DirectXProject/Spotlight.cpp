@@ -9,13 +9,13 @@ Spotlight::Spotlight()
 	spotLight.angle = 10.0f;
 	spotLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	spotLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
-	spotLight.attenuation = Vector3(1.0f, 0.5f, 0.0f);
+	spotLight.attenuation = Vector3(1.0f, 0.0000005f, 0.0f);
 	spotLight.specPower = 50.0f;
 
 	right = Vector3(1.0f, 0.0f, 0.0f);
 	up = XMVector3Normalize(XMVector3Cross(spotLight.dir, right));
 
-	proj = XMMatrixPerspectiveFovLH(0.40f * XM_PI, (float)WIDTH / HEIGHT, 0.1f, 30.0f);
+	proj = XMMatrixPerspectiveFovLH(0.40f * XM_PI, (float)WIDTH / HEIGHT, 0.1f, 1000.0f);
 
 	vpWidth = 800;
 	vpHeight = 600;

@@ -16,7 +16,7 @@ public:
 	~Camera();
 	
 	void InitScene();
-	void Update(bool* keys, Vector2 mouseOffset, float dt);
+	void Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValues);
 
 	Matrix getViewMatrix() const;
 	Matrix getProjMatrix() const;
@@ -31,16 +31,31 @@ private:
 	// Matrices
 	Matrix view;
 	Matrix proj;
+	//New
+	Matrix rotationMatrix;
+	Matrix groundWorld;
+
 
 	// Vectors
 	Vector3 up;
+	Vector3 worldUp;
 	Vector3 forward;
+	Vector3 worldForward;
 	Vector3 right;
+	Vector3 worldRight;
 	Vector3 pos;
+	//new
+	Vector3 target;
 
 	// Variables
 	float yaw;
 	float pitch;
+	
+	int flyMode;
+	float moveLR;
+	float moveBF;
+	float test;
+	
 };
 
 #endif

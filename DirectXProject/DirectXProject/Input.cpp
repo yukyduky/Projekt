@@ -47,6 +47,10 @@ void Input::ProcessKeyboard(bool* keys)
 		keys[CTRL] = true;
 	else if (GetAsyncKeyState(VK_CONTROL) == 0 && keys[CTRL])
 		keys[CTRL] = false;
+	if (GetAsyncKeyState(VK_F) != 0 && !keys[F])
+		keys[F] = true;
+	else if (GetAsyncKeyState(VK_F) == 0 && keys[F])
+		keys[F] = false;
 }
 
 void Input::ProcessMouse(Vector2 &mouseOffset)

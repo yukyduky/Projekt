@@ -20,8 +20,8 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	for (int i = 0; i < NUM_KEYS; i++)
 		keys[i] = false;
 
-	pointLight.pos = Vector3(0.0f, 6.0f, -4.0f);
-	pointLight.attenuation = Vector3(0.5f, 0.05f, 0.0f);
+	pointLight.pos = Vector3(0.0f, 10.0f, 0.0f);
+	pointLight.attenuation = Vector3(1.0f, 0.05f, 0.0f);
 	pointLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	pointLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	pointLight.specPower = 50.0f;
@@ -88,7 +88,7 @@ void GameManager::Update()
 	input.HandleInput(keys, mouseOffset);
 
 	// Update the camera
-	cam.Update(keys, mouseOffset, dt);
+	cam.Update(keys, mouseOffset, dt, surface.heightValueList());
 	// Update the view matrix
 	view = cam.getViewMatrix();
 
@@ -277,7 +277,7 @@ void GameManager::UpdateBox()
 	}
 	rotate *= rotate.CreateRotationZ(rotBoxZ);
 	rotate *= rotate.CreateRotationY(rotBoxY);
-	//translate.Translation(Vector3(0.0f, 0.0f, transBox));
+	translate.Translation(Vector3(0.0f, 0.0f, transBox));
 
 
 	boxWorld = rotate * translate;
