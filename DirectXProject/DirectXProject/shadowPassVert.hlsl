@@ -1,19 +1,9 @@
-struct VS_IN
+cbuffer cbShadowObject	: register(c0)
 {
-	float4 position		: POSITION;
-	float3 normal		: NORMAL;
-	float2 texCoord		: TEXCOORD;
-}
+	float4x4 wvp;
+};
 
-struct VS_OUT
-{
-
-}
-
-VS_OUT VS(VS_IN input)
-{
-	VS_OUT output = input;
-
-
-	return output;
+float4 VS(float3 position : POSITION) : SV_POSITION
+{	
+	return mul(float4(position, 1.0f), wvp);
 }

@@ -63,7 +63,7 @@ bool Shader::CreateVertexShader(ID3D11Device* gDevice, const wchar_t* fileName, 
 
 	// Create Vertex shader
 	hr = gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Vertex Shader - Failed", "Error", MB_OK);
 		return false;
@@ -97,7 +97,7 @@ bool Shader::CreatePixelShader(ID3D11Device* gDevice, const wchar_t* fileName)
 
 	// Create Pixel shader
 	hr = gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShader);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Pixel Shader - Failed", "Error", MB_OK);
 		return false;
@@ -112,7 +112,7 @@ bool Shader::CreateInputLayout(ID3D11Device* gDevice, ID3DBlob* pVS, const D3D11
 {
 	// Create the Input Layout
 	hr = gDevice->CreateInputLayout(inputDesc, inputDescSize, pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Input Layout - Failed", "Error", MB_OK);
 		return false;

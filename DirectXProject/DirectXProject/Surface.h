@@ -29,6 +29,8 @@ public:
 	void Release();
 	float* heightValueList();
 
+	void setOffset(UINT offset);
+
 private:
 	// Functions
 	bool LoadTextures(ID3D11Device* gDevice);

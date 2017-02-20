@@ -8,7 +8,7 @@ const int HEIGHT = 600;
 
 const int GEO_INPUT_DESC_SIZE = 4;
 const int LIGHT_INPUT_DESC_SIZE = 1;
-const int SHADOW_INPUT_DESC_SIZE = 3;
+const int SHADOW_INPUT_DESC_SIZE = 1;
 
 const int NUM_DEFERRED_OUTPUTS = 4;
 
