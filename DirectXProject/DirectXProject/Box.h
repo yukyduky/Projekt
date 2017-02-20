@@ -19,6 +19,8 @@ public:
 	bool InitScene(ID3D11Device* gDevice, Vector3 startPos, float width);
 	void Render(ID3D11DeviceContext* gDevCon);
 	void Release();
+	
+	void setOffset(UINT offset);
 
 	Plane* getHitBox() { return hitBox; };
 	void setHitBox(Plane* p) { *hitBox = *p; };

@@ -48,11 +48,16 @@ void Surface::Release()
 	gDiffuseMap->Release();
 }
 
+void Surface::setOffset(UINT offset)
+{
+	this->offset = offset;
+}
+
 bool Surface::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
 	hr = CreateWICTextureFromFile(gDevice, L"Textures\\bricks\\diffuse.jpg", nullptr, &gDiffuseMap, NULL);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create surface diffuse texture from file - Failed", "Error", MB_OK);
 		return false;
@@ -185,7 +190,7 @@ bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 
 	indexData.pSysMem = indices;
 	hr = gDevice->CreateBuffer(&indexBufferDesc, &indexData, &gIndexBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Surface Index Buffer - Failed", "Error", MB_OK);
 		return false;
@@ -210,7 +215,7 @@ bool Surface::CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDa
 	memset(&vertexData, 0, sizeof(vertexData));
 	vertexData.pSysMem = ptrV;
 	hr = gDevice->CreateBuffer(&vertexBufferDesc, &vertexData, &gVertBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Vertex Buffer - Failed", "Error", MB_OK);
 		return false;

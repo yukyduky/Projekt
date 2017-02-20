@@ -29,9 +29,6 @@ bool DeferredRenderer::InitializeDirectX(HWND hwnd)
 
 bool DeferredRenderer::InitScene()
 {
-	// Set the viewport
-	SetViewPort();
-
 	// Create the shaders
 	if (!CreateShaders())
 		return false;
@@ -46,6 +43,9 @@ bool DeferredRenderer::InitScene()
 
 	// Create the sampler for the textures
 	if (!CreateSampler())
+		return false;
+
+	if (!CreateRasterizerState())
 		return false;
 
 	if (!gm.InitScene(gDevice))
@@ -131,9 +131,30 @@ bool DeferredRenderer::CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize)
 	cbBufferDesc.MiscFlags = 0;
 
 	hr = gDevice->CreateBuffer(&cbBufferDesc, nullptr, gBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Constant Buffer - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+bool DeferredRenderer::CreateRasterizerState()
+{
+	D3D11_RASTERIZER_DESC rastDesc;
+	memset(&rastDesc, 0, sizeof(D3D11_RASTERIZER_DESC));
+	rastDesc.CullMode = D3D11_CULL_BACK;
+	rastDesc.FillMode = D3D11_FILL_SOLID;
+	rastDesc.FrontCounterClockwise = false;
+	rastDesc.DepthBias = 0;
+	rastDesc.DepthBiasClamp = 0;
+	rastDesc.SlopeScaledDepthBias = 0;
+
+	hr = gDevice->CreateRasterizerState(&rastDesc, &gDefaultRasterizer);
+	if (FAILED(hr))
+	{
+		MessageBox(0, "Create Default Rasterizer - Failed", "Error", MB_OK);
 		return false;
 	}
 
@@ -153,7 +174,7 @@ bool DeferredRenderer::CreateSampler()
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	hr = gDevice->CreateSamplerState(&sampDesc, &gAnisoSampler);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Samplerstate - Failed", "Error", MB_OK);
 		return false;
@@ -167,7 +188,7 @@ bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int struct
 	// Map constant buffer so that we can write to it.
 	D3D11_MAPPED_SUBRESOURCE dataPtr;
 	hr = gDevCon->Map(*gBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Deferred Buffer mapping - Failed", "Error", MB_OK);
 		return false;
@@ -195,8 +216,8 @@ bool DeferredRenderer::CreateSwapChain(HWND hwnd)
 	swapChainDesc.Windowed = TRUE;
 
 	// Create the SwapChain
-	hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, NULL, nullptr, NULL, D3D11_SDK_VERSION, &swapChainDesc, &gSwapChain, &gDevice, nullptr, &gDevCon);
-	if (hr != S_OK)
+	hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr, NULL, D3D11_SDK_VERSION, &swapChainDesc, &gSwapChain, &gDevice, nullptr, &gDevCon);
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Swapchain - Failed", "Error", MB_OK);
 		return false;
@@ -222,7 +243,7 @@ bool DeferredRenderer::CreateBackBufferRTV()
 	// Create the BackBuffer
 	ID3D11Texture2D* BackBuffer;
 	hr = gSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Swapchain backbuffer - Failed", "Error", MB_OK);
 		return false;
@@ -230,7 +251,7 @@ bool DeferredRenderer::CreateBackBufferRTV()
 
 	// Create the Render Target
 	hr = gDevice->CreateRenderTargetView(BackBuffer, nullptr, &gFinalRTV);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Render Target View - Failed", "Error", MB_OK);
 		return false;
@@ -260,14 +281,14 @@ bool DeferredRenderer::CreateDepthStencilView()
 
 	// Creates the Depth/Stencil View
 	hr = gDevice->CreateTexture2D(&depthStencilDesc, nullptr, &gDepthStencilBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Depth Texture - Failed", "Error", MB_OK);
 		return false;
 	}
 
 	hr = gDevice->CreateDepthStencilView(gDepthStencilBuffer, nullptr, &gDepthStencilView);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Depth Stencil - Failed", "Error", MB_OK);
 		return false;
@@ -313,7 +334,7 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
 	{
 		hr = gDevice->CreateTexture2D(&texDesc, nullptr, &gTexure[i]);
-		if (hr != S_OK)
+		if (FAILED(hr))
 		{
 			MessageBox(0, "Create deferred texture - Failed", "Error", MB_OK);
 			return false;
@@ -331,7 +352,7 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
 	{
 		hr = gDevice->CreateRenderTargetView(gTexure[i], &rtvDesc, &gRTV[i]);
-		if (hr != S_OK)
+		if (FAILED(hr))
 		{
 			MessageBox(0, "Create deferred RTV - Failed", "Error", MB_OK);
 			return false;
@@ -350,7 +371,7 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
 	{
 		hr = gDevice->CreateShaderResourceView(gTexure[i], &srvDesc, &gSRV[i]);
-		if (hr != S_OK)
+		if (FAILED(hr))
 		{
 			MessageBox(0, "Create deferred SRV - Failed", "Error", MB_OK);
 			return false;
@@ -390,7 +411,7 @@ bool DeferredRenderer::CreateVertexBuffer()
 	vertexData.pSysMem = &v;
 
 	hr = gDevice->CreateBuffer(&vertexBufferDesc, &vertexData, &gVertBuffer);
-	if (hr != S_OK)
+	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Vertex buffer - Failed", "Error", MB_OK);
 		return false;
@@ -404,6 +425,12 @@ bool DeferredRenderer::CreateVertexBuffer()
 
 bool DeferredRenderer::PreDrawing()
 {
+	// Create the shadowmaps
+	gm.CreateShadowMap(gDevCon, &gSpotShadowMap);
+
+	// Set the Rasterizerstate to the default state
+	gDevCon->RSSetState(gDefaultRasterizer);
+
 	Color bgColor(255, 0, 255, 1.0f);
 	// Clear the backbuffer
 	gDevCon->ClearRenderTargetView(gFinalRTV, bgColor);
@@ -417,7 +444,9 @@ bool DeferredRenderer::PreDrawing()
 
 	// Set the GeoShaders to the current shaders
 	SetGeoShaders();
-	// Set the render target to the deferred RTV
+	// Set the viewport
+	SetViewPort();
+	// Set the render target to the deferred RTV 
 	gDevCon->OMSetRenderTargets(NUM_DEFERRED_OUTPUTS, gDeferredRTV, gDepthStencilView);
 	// Set the texture sampler for the current pixel shader
 	gDevCon->PSSetSamplers(0, 1, &gAnisoSampler);
@@ -435,9 +464,10 @@ bool DeferredRenderer::PostDrawing()
 	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	// Set the Render Target to the final RTV
 	gDevCon->OMSetRenderTargets(1, &gFinalRTV, gDepthStencilView);
-	
+
 	// Set the normal texture for the current pixel shader
 	gDevCon->PSSetShaderResources(0, NUM_DEFERRED_OUTPUTS, gDeferredSRV);
+	gDevCon->PSSetShaderResources(4, 1, &gSpotShadowMap);
 
 	// Draw the final texture over the whole screen
 	gDevCon->Draw(4, 0);
