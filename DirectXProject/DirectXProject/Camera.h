@@ -38,6 +38,7 @@ private:
 
 	// Vectors
 	Vector3 up;
+	Vector3 worldUp;
 	Vector3 forward;
 	Vector3 worldForward;
 	Vector3 right;
@@ -53,6 +54,7 @@ private:
 	int flyMode;
 	float moveLR;
 	float moveBF;
+	float test;
 	
 };
 

@@ -78,7 +78,7 @@ void Surface::Release()
 	gIndexBuffer->Release();
 	gVertBuffer->Release();
 	gDiffuseMap->Release();
-	gNormalMap->Release();
+	//gNormalMap->Release();
 }
 
 void Surface::setOffset(UINT offset)
@@ -89,13 +89,13 @@ void Surface::setOffset(UINT offset)
 bool Surface::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\bricks\\diffuse.jpg", nullptr, &gDiffuseMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\surface.png", nullptr, &gDiffuseMap, NULL);
 	if (FAILED(hr))
 	{
 		MessageBox(0, "Create surface diffuse texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
-
+	/*
 	// Load normal map texture from file
 	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\normalmapreal.png", nullptr, &gNormalMap, NULL);
 	if (hr != S_OK)
@@ -103,7 +103,7 @@ bool Surface::LoadTextures(ID3D11Device* gDevice)
 		MessageBox(0, "Create surface normal texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
-
+	*/
 	return true;
 }
 
@@ -131,14 +131,14 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 			{
 				v[index].position = this->hmd.vertexData[index];
 				//v[index].position.y = 25.5f;
-
+				
 				normalFile >> v[index].normal.x;
 				getchar();
 				normalFile >> v[index].normal.y;
 				getchar();
 				normalFile >> v[index].normal.z;
 				getchar();
-
+				
 				v[index].texCoords.x = (float)j / ((float)this->hmd.width - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the x-axis
 				v[index].texCoords.y = (float)i / ((float)this->hmd.height - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the y-axis
 				v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent. (Borde fixas ordentligt om vi får tid)
@@ -152,8 +152,6 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 	}
 	else
 	{
-		
-
 		for (int i = 0; i < this->hmd.height; i++)
 		{
 			for (int j = 0; j < this->hmd.width; j++)
@@ -171,7 +169,6 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 		this->CreateNormalBMP(v, nrOfVertices);
 
 		std::fstream normalFile("Textures\\surface\\normals.txt", std::ios_base::in);
-		
 		index = 0;
 
 		for (int i = 0; i < this->hmd.height; i++)
@@ -188,40 +185,9 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 				index++;
 			}
 		}
-
 		//close the normalFile
 		normalFile.close();
-
 	}
-
-	/*
-	std::fstream normalFile("Textures\\surface\\normals.txt", std::ios_base::in);
-
-	for (int i = 0; i < this->hmd.height; i++)
-	{
-		for(int j = 0; j < this->hmd.width; j++)
-		{
-			v[index].position = this->hmd.vertexData[index];
-			v[index].position.y = 25.5f;
-		
-			normalFile >> v[index].normal.x;
-			getchar();
-			normalFile >> v[index].normal.y;
-			getchar();
-			normalFile >> v[index].normal.z;
-			getchar();
-		
-			v[index].texCoords.x = (float)j / ((float)this->hmd.width - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the x-axis
-			v[index].texCoords.y = (float)i / ((float)this->hmd.height - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the y-axis
-			v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent. (Borde fixas ordentligt om vi får tid)
-
-			index++;
-		}
-	}
-	//close the normalFile
-	normalFile.close();
-	*/
-
 	// Create the vertexbuffer for the input layout to the shader
 	if (!CreateVertexBuffer(gDevice, &v[0], sizeof(Vertex)*nrOfVertices, sizeof(Vertex)))
 		return false;
@@ -246,10 +212,25 @@ bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 	this->hmd.indices = new DWORD[nrOfIndices];
 	int index = 0;
 
-
 	for(int i = 0; i < this->hmd.height - 1; i++)
 	{
 		for(int j = 0; j < this->hmd.width - 1; j++)
+		{
+			this->hmd.indices[index] = (i * (this->hmd.width)) + j;
+			this->hmd.indices[index + 1] = ((i + 1) * (this->hmd.width) + j);
+			this->hmd.indices[index + 2] = (i * (this->hmd.width) + j + 1);
+
+			this->hmd.indices[index + 3] = this->hmd.indices[index + 2];
+			this->hmd.indices[index + 4] = this->hmd.indices[index + 1];
+			this->hmd.indices[index + 5] = ((i + 1) * (this->hmd.width) + j + 1);
+
+			index += 6;
+		}
+	}
+	/*
+	for (int i = 0; i < this->hmd.height - 1; i++)
+	{
+		for (int j = 0; j < this->hmd.width - 1; j++)
 		{
 			this->hmd.indices[index] = (i * (this->hmd.width)) + j;
 			this->hmd.indices[index + 1] = (i * (this->hmd.width) + j + 1);
@@ -262,8 +243,7 @@ bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 			index += 6;
 		}
 	}
-
-
+	*/
 	// Describe the index buffer
 	D3D11_BUFFER_DESC indexBufferDesc;
 	memset(&indexBufferDesc, 0, sizeof(indexBufferDesc));
@@ -369,7 +349,7 @@ bool Surface::LoadHeightMapInfo()
 bool Surface::LoadBMPInfo()
 {
 	FILE* filePtr = nullptr;
-	fopen_s( &filePtr,"Textures\\surface\\heightmap2.bmp" ,"rb");
+	fopen_s( &filePtr,"Textures\\surface\\heightmap.bmp" ,"rb");
 	if (filePtr == nullptr)
 	{
 		MessageBox(0, "Surface Load BMP - Failed", "Error", MB_OK);
@@ -386,7 +366,6 @@ bool Surface::LoadBMPInfo()
 
 	int paddedRowLength = (this->hmd.width * 3 + 3) &(~3); 
 	unsigned char* data = new unsigned char[paddedRowLength];
-	unsigned char tmp;
 
 	int index = 0;
 	hmd.tempHeightValue = new float[this->hmd.width * this->hmd.height];
@@ -394,16 +373,11 @@ bool Surface::LoadBMPInfo()
 	
 	for (int i = 0; i < this->hmd.height; i++)
 	{
+		index = 0;
 		fread(data, sizeof(unsigned char), paddedRowLength, filePtr);
 		for (int j = 0; j < this->hmd.width * 3; j += 3)
 		{
-			// Convert (B, G, R) to (R, G, B) since bmp saves in (B, G, R)-format. 
-			// Unnessesary since we only use one of the values and they are all the same.
-			tmp = data[j];
-			data[j] = data[j + 2];
-			data[j + 2] = tmp;
-
-			this->hmd.tempHeightValue[index] = (float)data[j];
+			this->hmd.tempHeightValue[(this->hmd.width * (this->hmd.height - 1 - i)) + index] = (float)data[j];
 			index++;
 		}
 	}
@@ -430,7 +404,7 @@ void Surface::CreateHMVertices() //Creates the vertice points for the heightmap.
 		{
 			this->hmd.vertexData[index].x = j;
 			this->hmd.vertexData[index].y = this->hmd.tempHeightValue[index] / 10.0f;
-			this->hmd.vertexData[index].z = (this->hmd.height - 1) - i;
+			this->hmd.vertexData[index].z = i; //(this->hmd.height - 1) - i;
 			index++;
 		}
 	}

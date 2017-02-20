@@ -1,4 +1,4 @@
-cbuffer cbShadowObject	: register(c0)
+cbuffer cbShadowObject	: register(b0)
 {
 	float4x4 wvp;
 };

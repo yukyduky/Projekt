@@ -7,10 +7,11 @@ Camera::Camera()
 	this->up = Vector3(0.0f, 1.0f, 0.0f);
 	this->forward = Vector3(0.0f, 0.0f, 1.0f);
 	this->right = Vector3(1.0f, 0.0f, 0.0f);
+	this->worldUp = Vector3(0.0f, 1.0f, 0.0f);
 	this->worldForward = Vector3(0.0f, 0.0f, 1.0f);
 	this->worldRight = Vector3(1.0f, 0.0f, 0.0f);
 	// Position
-	this->pos = Vector3(50.0f, 50.0f, 50.0f);
+	this->pos = Vector3(0.0f, 20.0f, 0.0f);
 
 	// Set the view matrix
 	this->view = XMMatrixLookAtLH(pos, forward, up);
@@ -39,6 +40,8 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 {
 	if (this->flyMode == 0)
 	{
+		this->test = 0;
+
 		this->ProcessKeyboard(keys, dt);
 		this->ProcessMouse(mouseOffset, dt);
 
@@ -52,7 +55,7 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 
 		this->right = XMVector3TransformCoord(this->worldRight, rotateYTempMatrix);
 		this->right.Normalize();
-		this->up = XMVector3TransformCoord(this->up, rotateYTempMatrix);
+		this->up = XMVector3TransformCoord(this->worldUp, rotateYTempMatrix);
 		this->up.Normalize();
 		this->forward = XMVector3TransformCoord(this->worldForward, rotateYTempMatrix);
 		this->forward.Normalize();
@@ -61,9 +64,11 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 		this->pos += this->moveBF * this->forward;
 		
 		//////////////////////////////////////////////////////////
-		int index = this->pos.x + (257 - this->pos.z) * 257;
+		int index = (int)this->pos.x + (int)this->pos.z * 256;
+		//int index = (int)this->pos.x + (11 - (int)this->pos.z) * 12;
+
+		this->pos.y = (heightValues[index] / 10.0f) + 5.0f;
 		
-		this->pos.y = (heightValues[index] / 10.0f) + 20.0f;
 		//////////////////////////////////////////////////////////
 
 		this->moveLR = 0.0f;
@@ -72,6 +77,7 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 		this->target = this->pos + this->target;
 
 		this->view = XMMatrixLookAtLH(this->pos, this->target, this->up);
+		
 	}
 
 	else if (this->flyMode == 1)
@@ -108,11 +114,9 @@ void Camera::ProcessKeyboard(bool* keys, float dt)
 {
 	float velocity = 0;
 
-	
-
 	if (this->flyMode == 0)
 	{
-		velocity = 15.0f * dt;
+		velocity = 10.0f * dt;
 
 		if (keys[W])
 			this->moveBF += velocity;
@@ -124,8 +128,6 @@ void Camera::ProcessKeyboard(bool* keys, float dt)
 			this->moveLR += velocity;
 		if (keys[F])
 			this->flyMode = 1;
-
-		
 	}
 
 	else if (this->flyMode == 1)
@@ -143,11 +145,7 @@ void Camera::ProcessKeyboard(bool* keys, float dt)
 			this->pos += this->right * velocity;
 		if (keys[F])
 			this->flyMode = 0;
-
 	}
-		
-	
-
 }
 
 void Camera::ProcessMouse(Vector2 mouseOffset, float dt)

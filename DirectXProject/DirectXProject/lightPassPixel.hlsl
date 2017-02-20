@@ -40,7 +40,7 @@ struct GeneralLightAttrb
 	float pad;
 };
 
-cbuffer cbLightLighting	: register(c0)
+cbuffer cbLightLighting	: register(b0)
 {
 	PointLight pointLight;
 	SpotLight spotLight;
