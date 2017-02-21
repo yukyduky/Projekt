@@ -28,10 +28,8 @@ private:
 	bool CreateShaders();
 	void SetGeoShaders();
 	void SetLightShaders();
-	bool CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize);
 	bool CreateRasterizerState();
 	bool CreateSampler();
-	bool MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int structSize);
 	bool CreateSwapChain(HWND hwnd);
 	bool CreateBackBufferRTV();
 	bool CreateDepthStencilView();

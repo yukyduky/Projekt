@@ -148,7 +148,7 @@ void Camera::ProcessKeyboard(bool* keys, float dt)
 
 void Camera::ProcessMouse(Vector2 mouseOffset, float dt)
 {
-	float sensitivity = -1000.0f;
+	float sensitivity = -10000.0f;
 
 	// Change the yaw and pitch depending on the mouse offset since the last frame
 	yaw += mouseOffset.x * sensitivity * dt;

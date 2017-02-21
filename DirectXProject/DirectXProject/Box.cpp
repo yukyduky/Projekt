@@ -59,7 +59,7 @@ void Box::setOffset(UINT offset)
 bool Box::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\diffuse.png", nullptr, &gDiffuseMap, NULL);
 	if (FAILED(hr))
 	{
 		MessageBox(0, "Create box diffuse texture from file - Failed", "Error", MB_OK);
