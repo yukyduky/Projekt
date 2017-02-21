@@ -10,11 +10,13 @@ Picking::~Picking()
 
 }
 
-void Picking::pickBoxes(bool keys, Box Boxes[], Camera cam, ID3D11Device *gDevice)
+void Picking::pickBoxes(bool keys, Box Boxes[], Camera cam, Matrix boxWorld, ID3D11Device *gDevice)
 {
 
 	if (keys & clickOnce)
 	{
+		for (int i = 0; i < 4; i++)
+			Boxes[i].setWorld(boxWorld);
 		//Sorts the boxes in distance to camera order.
 		const int NumbBoxes = 4;
 		float distance[NumbBoxes];
@@ -140,7 +142,7 @@ float Picking::intersectionDistance(Plane plane, Ray inRay)
 		return 9999.0f;
 }
 
-bool Picking::CheckHit(Plane hitBox[], Ray inRay, float width)
+bool Picking::CheckHit(Plane *hitBox, Ray inRay, float width)
 {
 	//front and back
 	Vector2 d = GetHits(hitBox[0], hitBox[3], inRay, width);

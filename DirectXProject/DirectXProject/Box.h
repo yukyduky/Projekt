@@ -22,8 +22,8 @@ public:
 	
 	void setOffset(UINT offset);
 
-	Plane* getHitBox() { return hitBox; };
-	void setHitBox(Plane* p) { *hitBox = *p; };
+	Plane* getHitBox();
+	void setWorld(Matrix boxWorld) { this->world = boxWorld; };
 	float getWidth() { return width; };
 	Vector3 getCenterVector() { return center; };
 
@@ -51,13 +51,15 @@ private:
 	bool textureSwitch = true;
 	float width;
 	Vector3 center;
+	Vector3 normals[3];//front, right, top
+	Plane tempHitBox[6];
+	Matrix world;
 
 	// Error handling
 	HRESULT hr;
 
 	//The order will be: 
-	//front, Right, Left, Back, Top, Bottom
-	Plane hitBox[6];
+	
 	};
 
 #endif

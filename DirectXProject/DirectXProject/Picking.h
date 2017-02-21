@@ -17,14 +17,14 @@ public:
 	Picking();
 	~Picking();
 
-	void pickBoxes(bool keys, Box Boxes[], Camera cam, ID3D11Device *gDevice);
+	void pickBoxes(bool keys, Box Boxes[], Camera cam, Matrix boxWorld, ID3D11Device *gDevice);
 
 private:
 	bool clickOnce = false;
 
 	//Returns a box if it was a hit
 	Box* PointBox(Box* box, Camera cam);
-	bool CheckHit(Plane hitBox[], Ray inRay, float width);
+	bool CheckHit(Plane* hitBox, Ray inRay, float width);
 
 	//A v2 with intersectiondistance to planes
 	Vector2 GetHits(Plane p1, Plane p2, Ray inRay, float width);

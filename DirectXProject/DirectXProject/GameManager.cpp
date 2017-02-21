@@ -117,7 +117,7 @@ void GameManager::Update(ID3D11Device* gDevice)
 	UpdateWorlds();
 
 	//Picking the boxes
-	mouse.pickBoxes(keys[MB], *Boxes, cam, gDevice);
+	mouse.pickBoxes(keys[MB], *Boxes, cam, boxWorld, gDevice);
 
 }
 
@@ -294,21 +294,7 @@ void GameManager::UpdateBox()
 
 	boxWorld = rotate * translate;
 
-	Plane* temp = box.getHitBox();
 
-	//Rotating the hitbox
-	if (keys[SPACE])
-	{
-		for (int i = 0; i < 6; i++)
-		{
-			temp[i] = temp[i].Transform(temp[i], boxWorld);
-		}
-		box.setHitBox(temp);
-
-	}
-
-		//box.getHitBox()[i] = box.getHitBox()[i]->Transform(box.getHitBox()[i], boxWorld); //Might not be right
-		//box.getHitBox()[i] *= boxWorld;
 
 }
 

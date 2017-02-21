@@ -294,7 +294,6 @@
     <ClInclude Include="globals.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Pointlight.h" />
-    <ClInclude Include="Light.h" />
     <ClInclude Include="Picking.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShadowMap.h" />

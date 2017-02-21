@@ -128,42 +128,6 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomRight
 	};
 
-	
-
-	//Creates the 6 planes that will make up the hitbox
-	//The order will be: Front, Right, Left, Back, Top, Bottom
-	hitBox[0] = Plane(		// Front Face
-		Vector3(startPos.x, startPos.y + width, startPos.z),				// TopLeft
-		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// TopRight
-		startPos															// BottomLeft
-	);
-	hitBox[1] = Plane(		// Right Face
-		Vector3(startPos.x + width, startPos.y + width, startPos.z),		// TopLeft
-		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopRight
-		Vector3(startPos.x + width, startPos.y, startPos.z)					// BottomLeft
-	);
-	hitBox[2] = Plane(		// Left Face
-		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopLeft
-		Vector3(startPos.x, startPos.y + width, startPos.z),				// TopRight
-		Vector3(startPos.x, startPos.y, startPos.z + width)					// BottomLeft
-	);
-	hitBox[3] = Plane(		// Back Face
-		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopLeft
-		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopRight
-		Vector3(startPos.x + width, startPos.y, startPos.z + width)			// BottomLeft
-	);
-	hitBox[4] = Plane(		// Top Face
-		Vector3(startPos.x, startPos.y + width, startPos.z + width),		// TopLeft
-		Vector3(startPos.x + width, startPos.y + width, startPos.z + width),// TopRight
-		Vector3(startPos.x, startPos.y + width, startPos.z)					// BottomLeft
-	);
-	hitBox[5] = Plane(		// Bottom Face
-		startPos,															// TopLeft
-		Vector3(startPos.x + width, startPos.y, startPos.z),				// TopRight
-		Vector3(startPos.x, startPos.y, startPos.z + width)					// BottomLeft
-	);
-	//for (int i = 0; i < 6; i++)
-	//	hitBox[i] = Plane(position[i * 4], position[i * 4 + 1], position[i * 4 + 2]);
 
 	center = Vector3(startPos.x + (width / 2), startPos.y + (width / 2), startPos.z + (width / 2));
 
@@ -181,6 +145,10 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 		for (int k = 0; k < 4; k++)
 			normal[i + k] = CreateVertexNormal(pos);
 	}
+
+	this->normals[0] = normal[0];//front	4*0
+	this->normals[1] = normal[4];//right	4*1
+	this->normals[2] = normal[16];//top		4*4
 
 	Vector2 texCoords[] =
 	{
@@ -411,4 +379,34 @@ void Box::onClick(ID3D11Device* gDevice)
 		}
 	}
 	textureSwitch = !textureSwitch;
+}
+
+Plane* Box::getHitBox()
+{
+	Vector3 center = this->center.Transform(this->center, world), 
+		normals[3];
+	for (int i = 0; i < 3; i++)
+		normals[i] = this->normals[i].Transform(this->normals[i], world);
+
+	//Creates the 6 planes that will make up the hitbox
+	//The order will be: Front, Right, Left, Back, Top, Bottom
+	tempHitBox[0] = Plane(		// Front Face
+		center + normals[0] * (width / 2), normals[0]);
+
+	tempHitBox[1] = Plane(		// Right Face
+		center + normals[1] * (width / 2), normals[1]);
+
+	tempHitBox[2] = Plane(		// Left Face
+		center - normals[1] * (width / 2), normals[1]);
+
+	tempHitBox[3] = Plane(		// Back Face
+		center - normals[0] * (width / 2), normals[0]);
+
+	tempHitBox[4] = Plane(		// Top Face
+		center + normals[2] * (width / 2), normals[2]);
+
+	tempHitBox[5] = Plane(		// Bottom Face
+		center - normals[2] * (width / 2), normals[2]);
+
+	return tempHitBox;
 }
