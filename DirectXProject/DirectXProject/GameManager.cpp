@@ -61,9 +61,15 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
 		return false;
 
-	if (!box2.InitScene(gDevice, Vector3(-0.5f, 1.0f, -0.5f), 1.0f))
+	if (!box2.InitScene(gDevice, Vector3(-0.5f, 10.0f, -0.5f), 8.0f))
 		return false;
-	
+
+	if (!box3.InitScene(gDevice, Vector3(-3.5f, 1.0f, -0.5f), 3.0f))
+		return false;
+
+	if (!box4.InitScene(gDevice, Vector3(6.5f, 5.0f, 10.5f), 3.0f))
+		return false;
+
 	// Initialize the surface
 	if (!surface.InitScene(gDevice))
 		return false;
@@ -79,7 +85,7 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	return true;
 }
 
-void GameManager::Update()
+void GameManager::Update(ID3D11Device* gDevice)
 {
 	// Get time since last frame
 	dt = float(time.GetFrameTime());
@@ -109,6 +115,10 @@ void GameManager::Update()
 
 	// Update the world matrices
 	UpdateWorlds();
+
+	//Picking the boxes
+	mouse.pickBoxes(keys[MB], *Boxes, cam, boxWorld, boxRotation, gDevice);
+
 }
 
 bool GameManager::Render(ID3D11DeviceContext* gDevCon)
@@ -127,6 +137,8 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	// Render
 	box.Render(gDevCon);
 	box2.Render(gDevCon);
+	box3.Render(gDevCon);
+	box4.Render(gDevCon);
 
 	// Update the Matrices
 	wvp = staticWorld * view * proj;
@@ -281,6 +293,8 @@ void GameManager::UpdateBox()
 
 
 	boxWorld = rotate * translate;
+	boxRotation = rotate;
+
 }
 
 void GameManager::UpdateFlashLight(Vector3 position, Vector3 forward)

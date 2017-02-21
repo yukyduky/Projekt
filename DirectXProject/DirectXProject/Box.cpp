@@ -87,6 +87,8 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 
 bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 {
+	this->width = width;
+
 	Vector3 position[] =
 	{
 		// Front Face
@@ -126,6 +128,9 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 		Vector3(startPos.x + width, startPos.y, startPos.z + width),		// BottomRight
 	};
 
+
+	center = Vector3(startPos.x + (width / 2), startPos.y + (width / 2), startPos.z + (width / 2));
+
 	const int numVertices = sizeof(position) / sizeof(Vector3);
 
 	Vector3 normal[numVertices];
@@ -140,6 +145,10 @@ bool Box::CreateVertexData(ID3D11Device* gDevice, Vector3 startPos, float width)
 		for (int k = 0; k < 4; k++)
 			normal[i + k] = CreateVertexNormal(pos);
 	}
+
+	this->normals[0] = normal[0];//front	4*0
+	this->normals[1] = normal[4];//right	4*1
+	this->normals[2] = normal[16];//top		4*4
 
 	Vector2 texCoords[] =
 	{
@@ -333,4 +342,71 @@ Vector4 Box::CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Vector
 	Vector4 tangent = Vector4(tan.x, tan.y, tan.z, det);
 
 	return tangent;
+}
+
+void Box::onClick(ID3D11Device* gDevice)
+{
+	if (textureSwitch)
+	{ 
+		// Load diffuse map texture from file
+		hr = CreateWICTextureFromFile(gDevice, L"Textures\\smiley\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Changing texure with onClick() - Failed", "Error", MB_OK);
+		}
+
+		// Load normal map texture from file
+		hr = CreateWICTextureFromFile(gDevice, L"Textures\\smiley\\normal.png", nullptr, &gNormalMap, NULL);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Changing normalmap with onClick - Failed", "Error", MB_OK);
+		}
+	}
+	else
+	{
+		// Load diffuse map texture from file
+		hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Changing back texure with onClick() - Failed", "Error", MB_OK);
+		}
+
+		// Load normal map texture from file
+		hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\normal.png", nullptr, &gNormalMap, NULL);
+		if (hr != S_OK)
+		{
+			MessageBox(0, "Changing back normalmap with onClick - Failed", "Error", MB_OK);
+		}
+	}
+	textureSwitch = !textureSwitch;
+}
+
+Plane* Box::getHitBox()
+{
+	Vector3 center = this->center.Transform(this->center, world), 
+		normals[3];
+	for (int i = 0; i < 3; i++)
+		normals[i] = this->normals[i].Transform(this->normals[i], rotate);
+
+	//Creates the 6 planes that will make up the hitbox
+	//The order will be: Front, Right, Left, Back, Top, Bottom
+	tempHitBox[0] = Plane(		// Front Face
+		center + normals[0] * (width / 2), normals[0]);
+
+	tempHitBox[1] = Plane(		// Right Face
+		center + normals[1] * (width / 2), normals[1]);
+
+	tempHitBox[2] = Plane(		// Left Face
+		center - normals[1] * (width / 2), normals[1]);
+
+	tempHitBox[3] = Plane(		// Back Face
+		center - normals[0] * (width / 2), normals[0]);
+
+	tempHitBox[4] = Plane(		// Top Face
+		center + normals[2] * (width / 2), normals[2]);
+
+	tempHitBox[5] = Plane(		// Bottom Face
+		center - normals[2] * (width / 2), normals[2]);
+
+	return tempHitBox;
 }

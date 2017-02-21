@@ -22,6 +22,13 @@ public:
 	
 	void setOffset(UINT offset);
 
+	Plane* getHitBox();
+	void setWorld(Matrix boxWorld, Matrix boxRotate) { this->world = boxWorld; this->rotate = boxRotate; };
+	float getWidth() { return width; };
+	Vector3 getCenterVector() { return center.Transform(this->center, world); };
+
+	//Action of clicking the box
+	void onClick(ID3D11Device* gDevice);
 private:
 	// Functions
 	bool LoadTextures(ID3D11Device* gDevice);
@@ -41,10 +48,19 @@ private:
 	// Variables
 	UINT stride;
 	UINT offset;
+	bool textureSwitch = true;
+	float width;
+	Vector3 center;
+	Vector3 normals[3];//front, right, top
+	Plane tempHitBox[6];
+	Matrix world;
+	Matrix rotate;
 
 	// Error handling
 	HRESULT hr;
 
-};
+	//The order will be: 
+	
+	};
 
 #endif

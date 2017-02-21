@@ -74,9 +74,7 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 		this->moveLR = 0.0f;
 		this->moveBF = 0.0f;
 
-		this->target = this->pos + this->target;
-
-		this->view = XMMatrixLookAtLH(this->pos, this->target, this->up);
+		this->view = XMMatrixLookAtLH(this->pos, this->target + this->pos, this->up);
 		
 	}
 
@@ -107,7 +105,7 @@ Vector3 Camera::getPosition() const
 
 Vector3 Camera::getForward() const
 {
-	return this->forward;
+	return this->target;
 }
 
 void Camera::ProcessKeyboard(bool* keys, float dt)
@@ -171,5 +169,7 @@ void Camera::ProcessMouse(Vector2 mouseOffset, float dt)
 		forward = XMVector3Normalize(XMVector3TransformCoord(Vector3(0.0f, 0.0f, 1.0f), rotation));
 		right = XMVector3Normalize(XMVector3TransformCoord(Vector3(1.0f, 0.0f, 0.0f), rotation));
 		up = XMVector3Normalize(XMVector3TransformCoord(Vector3(0.0f, 1.0f, 0.0f), rotation));
+
+		this->target = this->forward;
 	}
 }

@@ -11,6 +11,7 @@
 #include "Input.h"
 #include "Surface.h"
 #include "Spotlight.h"
+#include "Picking.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -65,7 +66,7 @@ public:
 	// Initialize the scene
 	bool InitScene(ID3D11Device* gDevice);
 	// Update
-	void Update();
+	void Update(ID3D11Device* gDevice);
 	// Render Box
 	bool Render(ID3D11DeviceContext* gDevCon);
 	bool CreateShadowMap(ID3D11DeviceContext * gDevCon, ID3D11ShaderResourceView** gSpotShadowMap);
@@ -95,14 +96,18 @@ private:
 	Matrix proj;
 	Matrix wvp;
 	Matrix boxWorld;
+	Matrix boxRotation;
 	
 	// Vectors
 	Vector2 mouseOffset;
 
 	// Objects
 	Box box;
-	Surface surface;
 	Box box2;
+	Box box3;
+	Box box4;
+	Box* Boxes[4] = { &box, &box2 , &box3 , &box4};
+	Surface surface;
 	Camera cam;
 	Time time;
 	Input input;
@@ -120,6 +125,9 @@ private:
 	//SpotLight spotLight;
 	DirectLight directLight;
 	GeneralLightAttrb genLight;
+
+	//Methods
+	Picking mouse;
 
 	// GeoShader Constant buffer: Object
 	struct cbGeoObject

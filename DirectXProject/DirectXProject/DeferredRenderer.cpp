@@ -56,7 +56,7 @@ bool DeferredRenderer::InitScene()
 
 void DeferredRenderer::Update()
 {
-	gm.Update();
+	gm.Update(gDevice);
 }
 
 bool DeferredRenderer::Render()

@@ -40,7 +40,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	}
 
 	// Make cursor invisible
-	ShowCursor(false);
+	ShowCursor(true);
 	// Converts the window coordinates to screen coordinates
 	ClientToScreen(wm.getWinHandle(), &p);
 
