@@ -68,7 +68,7 @@ public:
 	void Update();
 	// Render Box
 	bool Render(ID3D11DeviceContext* gDevCon);
-	bool CreateShadowMap(ID3D11DeviceContext * gDevCon, ID3D11ShaderResourceView** gSpotShadowMap);
+	bool CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderResourceView** gSpotShadowMap);
 	// Release the memory
 	void Release();
 
@@ -84,7 +84,7 @@ private:
 
 	// Functions
 	bool CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize);
-	bool MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer ** gBuffer, void * cbPtr, int structSize);
+	bool MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer** gBuffer, void* cbPtr, int structSize);
 	void UpdateWorlds();
 	void UpdateBox();
 	void UpdateFlashLight(Vector3 position, Vector3 forward);

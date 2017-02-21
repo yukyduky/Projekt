@@ -93,6 +93,7 @@ void Spotlight::Release()
 	gShadowMap->Release();
 	gShadowSRV->Release();
 	gShadowDSV->Release();
+	gShadowObjBuffer->Release();
 
 	ShadowMap::Release();
 }

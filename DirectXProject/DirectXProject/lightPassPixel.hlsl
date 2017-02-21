@@ -222,5 +222,4 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 	float3 lighting = saturate(pointLighting + spotLighting + directLighting);
 
 	return float4(lighting, 1.0f);
-	//return float4(shadow, shadow, shadow, 1.0f);
 }

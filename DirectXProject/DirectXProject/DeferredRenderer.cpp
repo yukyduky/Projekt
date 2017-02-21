@@ -118,28 +118,6 @@ void DeferredRenderer::SetLightShaders()
 	LightShader.SetShaders(gDevCon);
 }
 
-bool DeferredRenderer::CreateConstBuffer(ID3D11Buffer** gBuffer, int bufferSize)
-{
-	// Describes the constant buffer
-	D3D11_BUFFER_DESC cbBufferDesc;
-	memset(&cbBufferDesc, 0, sizeof(D3D11_BUFFER_DESC));
-
-	cbBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	cbBufferDesc.ByteWidth = bufferSize;
-	cbBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbBufferDesc.MiscFlags = 0;
-
-	hr = gDevice->CreateBuffer(&cbBufferDesc, nullptr, gBuffer);
-	if (FAILED(hr))
-	{
-		MessageBox(0, "Create Constant Buffer - Failed", "Error", MB_OK);
-		return false;
-	}
-
-	return true;
-}
-
 bool DeferredRenderer::CreateRasterizerState()
 {
 	D3D11_RASTERIZER_DESC rastDesc;
@@ -179,24 +157,6 @@ bool DeferredRenderer::CreateSampler()
 		MessageBox(0, "Create Samplerstate - Failed", "Error", MB_OK);
 		return false;
 	}
-
-	return true;
-}
-
-bool DeferredRenderer::MapBuffer(ID3D11Buffer** gBuffer, void* cbPtr, int structSize)
-{
-	// Map constant buffer so that we can write to it.
-	D3D11_MAPPED_SUBRESOURCE dataPtr;
-	hr = gDevCon->Map(*gBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &dataPtr);
-	if (FAILED(hr))
-	{
-		MessageBox(0, "Deferred Buffer mapping - Failed", "Error", MB_OK);
-		return false;
-	}
-	// copy memory from CPU to GPU the entire struct
-	memcpy(dataPtr.pData, cbPtr, structSize);
-	// UnMap constant buffer so that we can use it again in the GPU
-	gDevCon->Unmap(*gBuffer, 0);
 
 	return true;
 }

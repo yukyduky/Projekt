@@ -1,7 +1,7 @@
 #include "GameManager.h"
 
 
-GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0f), Vector3(0.0f, 0.0f, 1.0f), 100.0f)
+GameManager::GameManager()
 {
 	staticWorld = XMMatrixIdentity();
 	view = XMMatrixIdentity();
@@ -25,14 +25,6 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	pointLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	pointLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	pointLight.specPower = 50.0f;
-
-	/*spotLight.pos = Vector3(0.0f, 0.0f, -3.0f);
-	spotLight.dir = Vector3(0.0f, 0.0f, 1.0f);
-	spotLight.angle = 100.0f;
-	spotLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	spotLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
-	spotLight.attenuation = Vector3(1.0f, 0.1f, 0.0f);
-	spotLight.specPower = 50.0f;*/
 
 	directLight.pos = Vector3(0.0f, 2.0f, -2.0f);
 	directLight.dir = Vector3(0.0f, 0.0f, 1.0f);
@@ -169,16 +161,16 @@ bool GameManager::CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderReso
 	box.Render(gDevCon);
 	box2.Render(gDevCon);
 
-	// Update the world matrix
+	// Update the world matrix for static objects
 	spotLight.setWorld(staticWorld);
 	// Update the spotlights
 	spotLight.Update();
-
 	spotLight.UpdateResources(gDevCon);
 
 	// Render
 	surface.Render(gDevCon);
 
+	// Get the spotlight shadow maps
 	*gSpotShadowMap = spotLight.getSRV();
 
 	return true;
@@ -192,6 +184,7 @@ void GameManager::Release()
 	box.Release();
 	box2.Release();
 	surface.Release();
+	spotLight.Release();
 }
 
 Matrix GameManager::getMatrixWVP() const
@@ -209,7 +202,7 @@ PointLight GameManager::getPointLight() const
 	return pointLight;
 }
 
-bool GameManager::CreateConstBuffer(ID3D11Device * gDevice, ID3D11Buffer ** gBuffer, int bufferSize)
+bool GameManager::CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize)
 {
 	// Describes the constant buffer
 	D3D11_BUFFER_DESC cbBufferDesc;
