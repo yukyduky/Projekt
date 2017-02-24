@@ -62,6 +62,8 @@ private:
 	// Variables
 	const wchar_t* fileNameGeoVertex = L"geoPassVert.hlsl";
 	const wchar_t* fileNameGeoPixel = L"geoPassPixel.hlsl";
+	const wchar_t* fileNameGeoHull = L"geoPassHull.hlsl";
+	const wchar_t* fileNameGeoDomain = L"geoPassDomain.hlsl";
 	const wchar_t* fileNameLightVertex = L"lightPassVert.hlsl";
 	const wchar_t* fileNameLightPixel = L"lightPassPixel.hlsl";
 	UINT vertBufferStride;

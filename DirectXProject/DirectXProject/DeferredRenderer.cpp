@@ -98,6 +98,8 @@ bool DeferredRenderer::CreateShaders()
 	// Create the GeoPass Shaders
 	if (!GeoShader.CreateShaders(gDevice, fileNameGeoVertex, fileNameGeoPixel, geoInputDesc, GEO_INPUT_DESC_SIZE))
 		return false;
+	if (!GeoShader.CreateTessShaders(gDevice, fileNameGeoHull, fileNameGeoDomain))
+		return false;
 
 	// Create the LightPass Shaders
 	if (!LightShader.CreateShaders(gDevice, fileNameLightVertex, fileNameLightPixel, lightInputDesc, LIGHT_INPUT_DESC_SIZE))
