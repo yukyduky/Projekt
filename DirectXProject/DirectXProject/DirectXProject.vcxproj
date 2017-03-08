@@ -159,16 +159,15 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DeferredRenderer.cpp" />
     <ClCompile Include="Directlight.cpp" />
-    <ClCompile Include="ForwardShader.cpp">
+    <ClCompile Include="FrustumCulling.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="FrustumCulling.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Picking.cpp" />
     <ClCompile Include="Pointlight.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Spotlight.cpp" />
@@ -200,12 +199,16 @@
       <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</DisableOptimizations>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Domain</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="geoPassHull.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">HS</EntryPointName>
       <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</DisableOptimizations>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Hull</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="geoPassVert.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS</EntryPointName>
@@ -273,7 +276,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
@@ -288,7 +291,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
@@ -317,16 +320,15 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DeferredRenderer.h" />
     <ClInclude Include="Directlight.h" />
-    <ClInclude Include="ForwardShader.h">
+    <ClInclude Include="FrustumCulling.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="FrustumCulling.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Pointlight.h" />
     <ClInclude Include="Picking.h" />
+    <ClInclude Include="QuadTree.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Spotlight.h" />

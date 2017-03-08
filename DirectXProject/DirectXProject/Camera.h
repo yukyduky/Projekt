@@ -22,6 +22,11 @@ public:
 	Matrix getProjMatrix() const;
 	Vector3 getPosition() const;
 	Vector3 getForward() const;
+	Vector3 getRight() const;
+	float getNearDist() const;
+	float getFarDist() const;
+	float getFOV() const;
+	float getAR() const;
 
 private:
 	// Functions
@@ -44,17 +49,19 @@ private:
 	Vector3 right;
 	Vector3 worldRight;
 	Vector3 pos;
-	//new
 	Vector3 target;
 
 	// Variables
 	float yaw;
 	float pitch;
+	float nearD;
+	float farD;
+	float fov;
+	float ar;
 	
 	int flyMode;
 	float moveLR;
 	float moveBF;
-	float test;
 	
 };
 

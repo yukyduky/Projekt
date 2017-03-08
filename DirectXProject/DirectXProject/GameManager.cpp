@@ -1,7 +1,7 @@
 #include "GameManager.h"
 
 
-GameManager::GameManager()
+GameManager::GameManager() : fc(cam.getNearDist(), cam.getFarDist(), cam.getFOV(), cam.getAR())
 {
 	staticWorld = XMMatrixIdentity();
 	view = XMMatrixIdentity();
@@ -33,6 +33,9 @@ GameManager::GameManager()
 	directLight.specPower = 50.0f;
 
 	gShadowSampler = spotLight.getSampler();
+
+	staticCamView = XMMatrixLookAtLH(Vector3(128.0f, 200.0f, 115.0f), Vector3(128.0f, -1.0f, 115.0f), Vector3(0.0f, 0.0f, 1.0f));
+	staticCamProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(72), (float)WIDTH / HEIGHT, 1.0f, 1000.0f);
 }
 
 GameManager::~GameManager()
@@ -70,6 +73,8 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	if (!spotLight.InitScene(gDevice))
 		return false;
 
+	fc.FillQuadTree(surface.getVertexData(), surface.getIndexData());
+
 	// Get the matrices
 	view = cam.getViewMatrix();
 	proj = cam.getProjMatrix();
@@ -89,6 +94,18 @@ void GameManager::Update(ID3D11Device* gDevice)
 	cam.Update(keys, mouseOffset, dt, surface.heightValueList());
 	// Update the view matrix
 	view = cam.getViewMatrix();
+	proj = cam.getProjMatrix();
+
+	if (keys[UP])
+	{
+		view = staticCamView;
+		proj = staticCamProj;
+	}
+
+	// Calculate the cameras frustum
+	fc.CalcFrustum(cam.getPosition(), cam.getForward(), cam.getRight());
+	// Set the index buffer for the surface according to the data gather from the quadtree
+	surface.setIndexBuffer(gDevice, fc.getDrawData());
 
 	// Update the spotlights
 	spotLight.Update();
@@ -110,7 +127,6 @@ void GameManager::Update(ID3D11Device* gDevice)
 
 	//Picking the boxes
 	mouse.pickBoxes(keys[MB], *Boxes, cam, boxWorld, boxRotation, gDevice);
-
 }
 
 bool GameManager::Render(ID3D11DeviceContext* gDevCon)

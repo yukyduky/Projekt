@@ -1,23 +1,19 @@
 #include "Camera.h"
 
 
-Camera::Camera()
+Camera::Camera() : up(Vector3(0.0f, 1.0f, 0.0f)), forward(Vector3(0.0f, 0.0f, 1.0f)), right(Vector3(1.0f, 0.0f, 0.0f)),
+					nearD(1.0f), farD(30.0f), fov(72), ar(float(WIDTH / HEIGHT))
 {
-	// For orientation purposes it needs to know what way is up, forward, and right
-	this->up = Vector3(0.0f, 1.0f, 0.0f);
-	this->forward = Vector3(0.0f, 0.0f, 1.0f);
-	this->right = Vector3(1.0f, 0.0f, 0.0f);
 	this->worldUp = Vector3(0.0f, 1.0f, 0.0f);
 	this->worldForward = Vector3(0.0f, 0.0f, 1.0f);
 	this->worldRight = Vector3(1.0f, 0.0f, 0.0f);
 	// Position
-	this->pos = Vector3(0.0f, 20.0f, 0.0f);
+	this->pos = Vector3(100.0f, 30.0f, 10.0f);
 
 	// Set the view matrix
 	this->view = XMMatrixLookAtLH(pos, forward, up);
 	// Set the projection matrix
-	proj = XMMatrixPerspectiveFovLH(0.4f * XM_PI, (float)WIDTH / HEIGHT, 0.01f, 1000.0f);
-
+	proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(this->fov), this->ar, this->nearD, this->farD);
 
 	this->yaw = 0.0f;
 	this->pitch = 0.0f;
@@ -40,15 +36,13 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 {
 	if (this->flyMode == 0)
 	{
-		this->test = 0;
-
 		this->ProcessKeyboard(keys, dt);
 		this->ProcessMouse(mouseOffset, dt);
 
 		this->rotationMatrix = XMMatrixRotationRollPitchYaw(XMConvertToRadians(this->pitch), XMConvertToRadians(this->yaw), 0);
 
-		this->target = XMVector3TransformCoord(this->worldForward, this->rotationMatrix);
-		this->target.Normalize();
+		this->forward = XMVector3TransformCoord(this->worldForward, this->rotationMatrix);
+		this->forward.Normalize();
 
 		Matrix rotateYTempMatrix;
 		rotateYTempMatrix = XMMatrixRotationY(XMConvertToRadians(this->yaw));
@@ -57,11 +51,11 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 		this->right.Normalize();
 		this->up = XMVector3TransformCoord(this->worldUp, rotateYTempMatrix);
 		this->up.Normalize();
-		this->forward = XMVector3TransformCoord(this->worldForward, rotateYTempMatrix);
-		this->forward.Normalize();
+		this->target = XMVector3TransformCoord(this->worldForward, rotateYTempMatrix);
+		this->target.Normalize();
 
 		this->pos += this->moveLR * this->right;
-		this->pos += this->moveBF * this->forward;
+		this->pos += this->moveBF * this->target;
 		
 		//////////////////////////////////////////////////////////
 		int index = (int)this->pos.x + (int)this->pos.z * 256;
@@ -74,10 +68,9 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 		this->moveLR = 0.0f;
 		this->moveBF = 0.0f;
 
-		this->view = XMMatrixLookAtLH(this->pos, this->target + this->pos, this->up);
+		this->view = XMMatrixLookAtLH(this->pos, this->pos + this->forward, this->up);
 		
 	}
-
 	else if (this->flyMode == 1)
 	{
 		this->ProcessKeyboard(keys, dt);
@@ -105,7 +98,32 @@ Vector3 Camera::getPosition() const
 
 Vector3 Camera::getForward() const
 {
-	return this->target;
+	return this->forward;
+}
+
+Vector3 Camera::getRight() const
+{
+	return this->right;
+}
+
+float Camera::getNearDist() const
+{
+	return this->nearD;
+}
+
+float Camera::getFarDist() const
+{
+	return this->farD;
+}
+
+float Camera::getFOV() const
+{
+	return this->fov;
+}
+
+float Camera::getAR() const
+{
+	return this->ar;
 }
 
 void Camera::ProcessKeyboard(bool* keys, float dt)
@@ -125,7 +143,9 @@ void Camera::ProcessKeyboard(bool* keys, float dt)
 		if (keys[D])
 			this->moveLR += velocity;
 		if (keys[F])
+		{
 			this->flyMode = 1;
+		}
 	}
 
 	else if (this->flyMode == 1)
@@ -142,23 +162,25 @@ void Camera::ProcessKeyboard(bool* keys, float dt)
 		if (keys[D])
 			this->pos += this->right * velocity;
 		if (keys[F])
+		{
 			this->flyMode = 0;
+		}
 	}
 }
 
 void Camera::ProcessMouse(Vector2 mouseOffset, float dt)
 {
-	float sensitivity = -1000.0f;
+	float sensitivity = -100.0f;
 
 	// Change the yaw and pitch depending on the mouse offset since the last frame
 	yaw += mouseOffset.x * sensitivity * dt;
 	pitch += mouseOffset.y * sensitivity * dt;
 
 	// Makes sure the camera doesn't get flipped over
-	if (this->pitch > 89.0f)
-		this->pitch = 89.0f;
-	if (this->pitch < -89.0f)
-		this->pitch = -89.0f;
+	if (this->pitch > 80.0f)
+		this->pitch = 80.0f;
+	if (this->pitch < -80.0f)
+		this->pitch = -80.0f;
 
 	if (this->flyMode == 1)
 	{

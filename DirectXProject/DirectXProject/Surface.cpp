@@ -5,9 +5,7 @@
 Surface::Surface()
 {
 	this->hmd.tempHeightValue = nullptr;
-	this->hmd.vertexData = nullptr;
 	this->hmd.normals = nullptr;
-	this->hmd.indices = nullptr;
 }
 
 Surface::~Surface()
@@ -18,22 +16,10 @@ Surface::~Surface()
 		this->hmd.tempHeightValue = nullptr;
 	}
 
-	if(this->hmd.vertexData != nullptr)
-	{
-		delete[] this->hmd.vertexData;
-		this->hmd.vertexData = nullptr;
-	}
-
 	if (this->hmd.normals != nullptr) 
 	{
 		delete[] this->hmd.normals;
 		this->hmd.normals = nullptr;
-	}
-
-	if (this->hmd.indices != nullptr) 
-	{
-		delete[] this->hmd.indices;
-		this->hmd.indices = nullptr;
 	}
 }
 
@@ -124,7 +110,7 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 		{
 			for (int j = 0; j < this->hmd.width; j++)
 			{
-				v[index].position = this->hmd.vertexData[index];
+				v[index].position = this->hmd.vertexData[i][j];
 				//v[index].position.y = 25.5f;
 				
 				normalFile >> v[index].normal.x;
@@ -151,7 +137,7 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 		{
 			for (int j = 0; j < this->hmd.width; j++)
 			{
-				v[index].position = this->hmd.vertexData[index];
+				v[index].position = this->hmd.vertexData[i][j];
 				//v[index].position.y = 25.5f;
 				v[index].texCoords.x = (float)j / ((float)this->hmd.width - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the x-axis
 				v[index].texCoords.y = (float)i / ((float)this->hmd.height - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the y-axis
@@ -190,7 +176,7 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 	return true;
 }
 
-Vector3 Surface::CreateVertexNormal(Vector3* pos) //fråga Dew
+Vector3 Surface::CreateVertexNormal(Vector3* pos)
 {
 	Vector3 p0p1 = pos[1] - pos[0];
 	Vector3 p0p2 = pos[2] - pos[0];
@@ -203,48 +189,26 @@ Vector3 Surface::CreateVertexNormal(Vector3* pos) //fråga Dew
 
 bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 {
-	int nrOfIndices = (this->hmd.height - 1) * (this->hmd.width - 1) * 2 * 3;
-	this->hmd.indices = new DWORD[nrOfIndices];
-	int index = 0;
-
-	for(int i = 0; i < this->hmd.height - 1; i++)
-	{
-		for(int j = 0; j < this->hmd.width - 1; j++)
-		{
-			this->hmd.indices[index] = (i * (this->hmd.width)) + j;
-			this->hmd.indices[index + 1] = ((i + 1) * (this->hmd.width) + j);
-			this->hmd.indices[index + 2] = (i * (this->hmd.width) + j + 1);
-
-			this->hmd.indices[index + 3] = this->hmd.indices[index + 2];
-			this->hmd.indices[index + 4] = this->hmd.indices[index + 1];
-			this->hmd.indices[index + 5] = ((i + 1) * (this->hmd.width) + j + 1);
-
-			index += 6;
-		}
-	}
-	/*
 	for (int i = 0; i < this->hmd.height - 1; i++)
 	{
 		for (int j = 0; j < this->hmd.width - 1; j++)
 		{
-			this->hmd.indices[index] = (i * (this->hmd.width)) + j;
-			this->hmd.indices[index + 1] = (i * (this->hmd.width) + j + 1);
-			this->hmd.indices[index + 2] = ((i + 1) * (this->hmd.width) + j);
+			hmd.indices.push_back((i * (this->hmd.width)) + j);
+			hmd.indices.push_back((i + 1) * (this->hmd.width) + j);
+			hmd.indices.push_back(i * (this->hmd.width) + j + 1);
 
-			this->hmd.indices[index + 3] = this->hmd.indices[index + 2];
-			this->hmd.indices[index + 4] = this->hmd.indices[index + 1];
-			this->hmd.indices[index + 5] = ((i + 1) * (this->hmd.width) + j + 1);
-
-			index += 6;
+			hmd.indices.push_back(i * (this->hmd.width) + j + 1);
+			hmd.indices.push_back((i + 1) * (this->hmd.width) + j);
+			hmd.indices.push_back((i + 1) * (this->hmd.width) + j + 1);
 		}
 	}
-	*/
+
 	// Describe the index buffer
 	D3D11_BUFFER_DESC indexBufferDesc;
 	memset(&indexBufferDesc, 0, sizeof(indexBufferDesc));
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = nrOfIndices * sizeof(DWORD);
+	indexBufferDesc.ByteWidth = hmd.indices.size() * sizeof(DWORD);
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;
@@ -252,7 +216,7 @@ bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 	// Set the index buffer data
 	D3D11_SUBRESOURCE_DATA indexData;
 
-	indexData.pSysMem = this->hmd.indices;
+	indexData.pSysMem = this->hmd.indices.data();
 	hr = gDevice->CreateBuffer(&indexBufferDesc, &indexData, &gIndexBuffer);
 	if (FAILED(hr))
 	{
@@ -387,7 +351,6 @@ void Surface::CreateHMVertices() //Creates the vertice points for the heightmap.
 {
 	//The number of vertices used is determined by the height and width of the heightmap we use
 	int index = 0;
-	this->hmd.vertexData = new Vector3[this->hmd.height * this->hmd.width];
 	
 	//Calculate the number of faces
 	this->hmd.numFaces = (this->hmd.width - 1) * (this->hmd.height - 1) * 2;
@@ -395,19 +358,20 @@ void Surface::CreateHMVertices() //Creates the vertice points for the heightmap.
 	//Save the vertex coordinates to hmd, we divide the y-value (the height) with 10.0f to make the surface look a bit smoother
 	for (int i = 0; i < this->hmd.height; i++)
 	{
+		std::vector<Vector3> temp;
+
 		for (int j = 0; j < this->hmd.width; j++)
 		{
-			this->hmd.vertexData[index].x = j;
-			this->hmd.vertexData[index].y = this->hmd.tempHeightValue[index] / 10.0f;
-			this->hmd.vertexData[index].z = i; //(this->hmd.height - 1) - i;
+			temp.push_back(Vector3(j, this->hmd.tempHeightValue[index] / 10.0f, i));
 			index++;
 		}
+		this->hmd.vertexData.push_back(temp);
 	}
 }
 
 void Surface::CreateNormalBMP(std::vector<Vertex> v, int nrOfVertices)
 {
-	// Thinking in quads in the coming code with the corners numbered as illustrated bellow.
+	/*// Thinking in quads in the coming code with the corners numbered as illustrated bellow.
 	//   0________1
 	//    |      |
 	//    |      |
@@ -565,10 +529,49 @@ void Surface::CreateNormalBMP(std::vector<Vertex> v, int nrOfVertices)
 	delete[] data;
 	data = NULL;
 
-	///////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////*/
 }
 
 float* Surface::heightValueList()
 {
 	return this->hmd.tempHeightValue;
+}
+
+bool Surface::setIndexBuffer(ID3D11Device* gDevice, std::vector<DWORD> indices)
+{
+	if (indices != std::vector<DWORD>())
+	{
+		hmd.indices = indices;
+
+		// Describe the index buffer
+		D3D11_BUFFER_DESC indexBufferDesc;
+		memset(&indexBufferDesc, 0, sizeof(indexBufferDesc));
+
+		indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		indexBufferDesc.ByteWidth = indices.size() * sizeof(DWORD);
+		indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		indexBufferDesc.CPUAccessFlags = 0;
+		indexBufferDesc.MiscFlags = 0;
+
+		// Set the index buffer data
+		D3D11_SUBRESOURCE_DATA indexData;
+
+		indexData.pSysMem = indices.data();
+		hr = gDevice->CreateBuffer(&indexBufferDesc, &indexData, &gIndexBuffer);
+		if (FAILED(hr))
+		{
+			MessageBox(0, "Surface Set Index Buffer - Failed", "Error", MB_OK);
+			return false;
+		}
+	}
+}
+
+std::vector<DWORD>& Surface::getIndexData()
+{
+	return this->hmd.indices;
+}
+
+std::vector<std::vector<Vector3>>& Surface::getVertexData()
+{
+	return this->hmd.vertexData;
 }

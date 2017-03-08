@@ -12,6 +12,7 @@
 #include "Surface.h"
 #include "Spotlight.h"
 #include "Picking.h"
+#include "FrustumCulling.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -97,6 +98,8 @@ private:
 	Matrix wvp;
 	Matrix boxWorld;
 	Matrix boxRotation;
+	Matrix staticCamView;
+	Matrix staticCamProj;
 	
 	// Vectors
 	Vector2 mouseOffset;
@@ -112,6 +115,7 @@ private:
 	Time time;
 	Input input;
 	Spotlight spotLight;
+	FrustumCulling fc;
 
 	// Variables
 	float dt;

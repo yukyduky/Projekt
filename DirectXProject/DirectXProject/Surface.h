@@ -28,6 +28,11 @@ public:
 	void Render(ID3D11DeviceContext* gDevCon);
 	void Release();
 	float* heightValueList();
+	
+	bool setIndexBuffer(ID3D11Device* gDevice, std::vector<DWORD> indices);
+
+	std::vector<DWORD>& getIndexData();
+	std::vector<std::vector<Vector3>>& getVertexData();
 
 private:
 	// Functions
@@ -53,9 +58,9 @@ private:
 		int height;
 		int numFaces;
 		float* tempHeightValue;
-		Vector3* vertexData;
 		Vector3* normals;
-		DWORD* indices;
+		std::vector<DWORD> indices;
+		std::vector<std::vector<Vector3>> vertexData;
 	};
 
 	HeightMapData hmd;
