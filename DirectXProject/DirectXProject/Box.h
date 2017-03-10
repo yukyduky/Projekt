@@ -44,6 +44,7 @@ private:
 	ID3D11ShaderResourceView* gDiffuseMap;
 	ID3D11ShaderResourceView* gNormalMap;
 	ID3D11ShaderResourceView* gSpecularMap;
+	ID3D11ShaderResourceView* gDisplaceMap;
 
 	// Variables
 	UINT stride;

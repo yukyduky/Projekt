@@ -48,6 +48,9 @@ bool DeferredRenderer::InitScene()
 	if (!CreateRasterizerState())
 		return false;
 
+	if (!CreateRasterizerState(true))
+		return false;
+
 	if (!gm.InitScene(gDevice))
 		return false;
 
@@ -56,7 +59,12 @@ bool DeferredRenderer::InitScene()
 
 void DeferredRenderer::Update()
 {
-	gm.Update(gDevice);
+	gm.Update(gDevice, &changeFillMode);
+	//if (changeFillMode)
+	//{
+	//	CreateRasterizerState(wireframe);
+	//	wireframe = !wireframe;
+	//}
 }
 
 bool DeferredRenderer::Render()
@@ -98,7 +106,7 @@ bool DeferredRenderer::CreateShaders()
 	// Create the GeoPass Shaders
 	if (!GeoShader.CreateShaders(gDevice, fileNameGeoVertex, fileNameGeoPixel, geoInputDesc, GEO_INPUT_DESC_SIZE))
 		return false;
-	if (!GeoShader.CreateTessShaders(gDevice, fileNameGeoHull, fileNameGeoDomain))
+	if (!GeoShader.CreateTessShaders(gDevice, fileNameGeoHull, fileNameGeoDomain, fileNameGeoGeometry))
 		return false;
 
 	// Create the LightPass Shaders
@@ -124,7 +132,7 @@ bool DeferredRenderer::CreateRasterizerState()
 {
 	D3D11_RASTERIZER_DESC rastDesc;
 	memset(&rastDesc, 0, sizeof(D3D11_RASTERIZER_DESC));
-	rastDesc.CullMode = D3D11_CULL_BACK;
+	rastDesc.CullMode = D3D11_CULL_NONE;
 	rastDesc.FillMode = D3D11_FILL_SOLID;
 	rastDesc.FrontCounterClockwise = false;
 	rastDesc.DepthBias = 0;
@@ -132,6 +140,29 @@ bool DeferredRenderer::CreateRasterizerState()
 	rastDesc.SlopeScaledDepthBias = 0;
 
 	hr = gDevice->CreateRasterizerState(&rastDesc, &gDefaultRasterizer);
+	if (FAILED(hr))
+	{
+		MessageBox(0, "Create Default Rasterizer - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+bool DeferredRenderer::CreateRasterizerState(bool wireframe)
+{
+	D3D11_RASTERIZER_DESC rastDesc;
+	memset(&rastDesc, 0, sizeof(D3D11_RASTERIZER_DESC));
+	rastDesc.CullMode = D3D11_CULL_NONE;
+	if (wireframe)
+		rastDesc.FillMode = D3D11_FILL_WIREFRAME;
+	else
+		rastDesc.FillMode = D3D11_FILL_SOLID;
+	rastDesc.FrontCounterClockwise = false;
+	rastDesc.DepthBias = 0;
+	rastDesc.DepthBiasClamp = 0;
+	rastDesc.SlopeScaledDepthBias = 0;
+
+	hr = gDevice->CreateRasterizerState(&rastDesc, &gWireframeRasterizer);
 	if (FAILED(hr))
 	{
 		MessageBox(0, "Create Default Rasterizer - Failed", "Error", MB_OK);
@@ -392,6 +423,8 @@ bool DeferredRenderer::PreDrawing()
 
 	// Set the Rasterizerstate to the default state
 	gDevCon->RSSetState(gDefaultRasterizer);
+	// For wireframe debugging
+	//gDevCon->RSSetState(gWireframeRasterizer);
 
 	Color bgColor(255, 0, 255, 1.0f);
 	// Clear the backbuffer
@@ -412,6 +445,7 @@ bool DeferredRenderer::PreDrawing()
 	gDevCon->OMSetRenderTargets(NUM_DEFERRED_OUTPUTS, gDeferredRTV, gDepthStencilView);
 	// Set the texture sampler for the current pixel shader
 	gDevCon->PSSetSamplers(0, 1, &gAnisoSampler);
+	gDevCon->DSSetSamplers(0, 1, &gAnisoSampler);
 
 	return true;
 }
@@ -429,7 +463,12 @@ bool DeferredRenderer::PostDrawing()
 
 	// Set the normal texture for the current pixel shader
 	gDevCon->PSSetShaderResources(0, NUM_DEFERRED_OUTPUTS, gDeferredSRV);
+	gDevCon->DSSetShaderResources(0, NUM_DEFERRED_OUTPUTS, gDeferredSRV);
 	gDevCon->PSSetShaderResources(4, 1, &gSpotShadowMap);
+	gDevCon->DSSetShaderResources(4, 1, &gSpotShadowMap);
+
+
+	gDevCon->RSSetState(gDefaultRasterizer);
 
 	// Draw the final texture over the whole screen
 	gDevCon->Draw(4, 0);

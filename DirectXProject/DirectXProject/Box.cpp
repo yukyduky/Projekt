@@ -33,10 +33,11 @@ void Box::Render(ID3D11DeviceContext* gDevCon)
 	// Set the vertex buffer
 	gDevCon->IASetVertexBuffers(0, 1, &gVertBuffer, &stride, &offset);
 	// Set Primitive Topology
-	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 	// Update the pixel shader with the textures
 	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
 	gDevCon->PSSetShaderResources(1, 1, &gNormalMap);
+	gDevCon->DSSetShaderResources(1, 1, &gDisplaceMap);
 	gDevCon->PSSetShaderResources(2, 1, &gSpecularMap);
 	// Draw the indexed vertices
 	gDevCon->DrawIndexed(36, 0, 0);
@@ -79,6 +80,14 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 	if (FAILED(hr))
 	{
 		MessageBox(0, "Create box specular texture from file - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	// Load displacement map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate3\\displace.png", nullptr, &gDisplaceMap, NULL);
+	if (FAILED(hr))
+	{
+		MessageBox(0, "Create box displacement texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
 

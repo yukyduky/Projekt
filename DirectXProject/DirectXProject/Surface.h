@@ -29,6 +29,11 @@ public:
 	void Release();
 	float* heightValueList();
 
+	ID3D11RasterizerState *getRaz()
+	{
+		return rasterizer;
+	}
+
 private:
 	// Functions
 	bool LoadTextures(ID3D11Device* gDevice);
@@ -37,6 +42,7 @@ private:
 	bool CreateIndexBuffer(ID3D11Device* gDevice);
 	bool CreateVertexBuffer(ID3D11Device* gDevice, void* ptrV, int vertexDataSize, int stride);
 	Vector4 Surface::CreateTBNMatrixData(Vector3* posTBNData, Vector3 norTBNData, Vector2* uvTBNData);
+	bool CreateRasteriserState(ID3D11Device *gDevice);
 
 
 	struct Vertex
@@ -64,6 +70,8 @@ private:
 	void CreateHMVertices();
 	void CreateNormalBMP(std::vector<Vertex> v, int nrOfVertices);
 	
+	//Rasterizer
+	ID3D11RasterizerState *rasterizer;
 
 	// COMS
 	ID3D11Buffer* gIndexBuffer;

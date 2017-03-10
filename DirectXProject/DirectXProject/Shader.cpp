@@ -5,6 +5,10 @@
 Shader::Shader()
 {
 }
+Shader::Shader(bool tess)
+{
+	tesselation = tess;
+}
 
 
 Shader::~Shader()
@@ -17,10 +21,12 @@ void Shader::SetShaders(ID3D11DeviceContext * gDevCon)
 	SetPixelShader(gDevCon);
 	SetInputlayout(gDevCon);
 
-	if (gHullShader != nullptr && gDomainShader != nullptr)
+	//TESSELATION
+	if (true)
 	{
-		SetHullShader(gDevCon);
+		SetHullShader(gDevCon);	
 		SetDomainShader(gDevCon);
+		SetGeometryShader(gDevCon);
 	}
 }
 
@@ -40,10 +46,12 @@ bool Shader::CreateShaders(ID3D11Device* gDevice, const wchar_t* fileNameVertex,
 		return false;
 	}
 
+	tesselation = false;
+
 	return true;
 }
 
-bool Shader::CreateTessShaders(ID3D11Device * gDevice, const wchar_t * fileNameHull, const wchar_t * fileNameDomain)
+bool Shader::CreateTessShaders(ID3D11Device * gDevice, const wchar_t * fileNameHull, const wchar_t * fileNameDomain, const wchar_t * fileNameGeometry)
 {
 	// Create Hull Shader
 	if (!CreateHullShader(gDevice, fileNameHull))
@@ -59,6 +67,15 @@ bool Shader::CreateTessShaders(ID3D11Device * gDevice, const wchar_t * fileNameH
 		return false;
 	}
 
+	// Create Geometry Shader
+	if (!CreateGeometryShader(gDevice, fileNameGeometry))
+	{
+		MessageBox(0, "Geometry Shader Initialization - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	tesselation = true;
+
 	return true;
 }
 
@@ -66,6 +83,9 @@ void Shader::Release()
 {
 	gVertexShader->Release();
 	gPixelShader->Release();
+	gHullShader->Release();
+	gDomainShader->Release();
+	gGeometyrShader->Release();
 	gVertexLayout->Release();
 }
 
@@ -154,7 +174,7 @@ bool Shader::CreateHullShader(ID3D11Device * gDevice, const wchar_t * fileName)
 	hr = gDevice->CreateHullShader(pHS->GetBufferPointer(), pHS->GetBufferSize(), nullptr, &gHullShader);
 	if (FAILED(hr))
 	{
-		MessageBox(0, "Pixel Shader - Failed", "Error", MB_OK);
+		MessageBox(0, "Hull Shader - Failed", "Error", MB_OK);
 		return false;
 	}
 
@@ -170,7 +190,7 @@ bool Shader::CreateDomainShader(ID3D11Device * gDevice, const wchar_t * fileName
 		fileName,			// filename
 		nullptr,			// optional macros
 		nullptr,			// optional include files
-		"PS",				// entry point
+		"DS",				// entry point
 		"ds_5_0",			// shader model (target)
 		0,					// shader compile options
 		0,					// effect compile options
@@ -184,11 +204,41 @@ bool Shader::CreateDomainShader(ID3D11Device * gDevice, const wchar_t * fileName
 	hr = gDevice->CreateDomainShader(pDS->GetBufferPointer(), pDS->GetBufferSize(), nullptr, &gDomainShader);
 	if (FAILED(hr))
 	{
-		MessageBox(0, "Pixel Shader - Failed", "Error", MB_OK);
+		MessageBox(0, "Domain Shader - Failed", "Error", MB_OK);
 		return false;
 	}
 
 	pDS->Release();
+
+	return true;
+}
+
+bool Shader::CreateGeometryShader(ID3D11Device * gDevice, const wchar_t * fileName)
+{
+	ID3DBlob* pGS = nullptr;
+	D3DCompileFromFile(
+		fileName,			// filename
+		nullptr,			// optional macros
+		nullptr,			// optional include files
+		"GS",				// entry point
+		"gs_5_0",			// shader model (target)
+		0,					// shader compile options
+		0,					// effect compile options
+		&pGS,				// double pointer to ID3DBlob		
+		nullptr				// pointer for Error Blob messages.
+							// how to use the Error blob, see here
+							// https://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
+	);
+
+	// Create Pixel shader
+	hr = gDevice->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &gGeometyrShader);
+	if (FAILED(hr))
+	{
+		MessageBox(0, "Geometry Shader - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	pGS->Release();
 
 	return true;
 }
@@ -224,6 +274,11 @@ void Shader::SetHullShader(ID3D11DeviceContext* gDevCon) const
 void Shader::SetDomainShader(ID3D11DeviceContext * gDevCon) const
 {
 	gDevCon->DSSetShader(gDomainShader, nullptr, 0);
+}
+
+void Shader::SetGeometryShader(ID3D11DeviceContext * gDevCon) const
+{
+	gDevCon->GSSetShader(gGeometyrShader, nullptr, 0);
 }
 
 void Shader::SetInputlayout(ID3D11DeviceContext* gDevCon) const

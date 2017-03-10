@@ -66,7 +66,7 @@ public:
 	// Initialize the scene
 	bool InitScene(ID3D11Device* gDevice);
 	// Update
-	void Update(ID3D11Device* gDevice);
+	void Update(ID3D11Device* gDevice, bool *fillMode);
 	// Render Box
 	bool Render(ID3D11DeviceContext* gDevCon);
 	bool CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderResourceView** gSpotShadowMap);
@@ -81,6 +81,7 @@ private:
 	//COMS 
 	ID3D11Buffer* gGeoObjBuffer;
 	ID3D11Buffer* gLightLightBuffer;
+	ID3D11Buffer* gTesselationBuffer;
 	ID3D11SamplerState* gShadowSampler;
 
 	// Functions
@@ -145,9 +146,16 @@ private:
 		GeneralLightAttrb genLight;
 	};
 
+	struct cbTesselation
+	{
+		float tessVarible;
+		Vector3 camPos;
+	};
+
 	// Constant Buffers
 	cbGeoObject cbGeoObj;
 	cbLightLighting cbLightLight;
+	cbTesselation cbTess;
 
 	// Error handling
 	HRESULT hr;
