@@ -4,6 +4,7 @@
 
 #include <d3d11.h>
 #include <SimpleMath.h>
+#include "Input.h"
 #include "globals.h"
 
 using namespace DirectX;
@@ -16,7 +17,7 @@ public:
 	~Camera();
 	
 	void InitScene();
-	void Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValues);
+	void Update(InputVars inVars, float dt, float* heightValues);
 
 	Matrix getViewMatrix() const;
 	Matrix getProjMatrix() const;
@@ -30,7 +31,7 @@ public:
 
 private:
 	// Functions
-	void ProcessKeyboard(bool* keys, float dt);
+	void ProcessKeyboard(InputVars inVars, float dt);
 	void ProcessMouse(Vector2 mouseOffset, float dt);
 
 	// Matrices
@@ -58,11 +59,9 @@ private:
 	float farD;
 	float fov;
 	float ar;
-	
 	int flyMode;
 	float moveLR;
-	float moveBF;
-	
+	float moveBF;	
 };
 
 #endif

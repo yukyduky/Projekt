@@ -12,7 +12,7 @@ const int SHADOW_INPUT_DESC_SIZE = 1;
 
 const int NUM_DEFERRED_OUTPUTS = 4;
 
-const int NUM_KEYS = 7;
+const int NUM_KEYS = 10;
 enum KEYS { W, A, S, D, ESC, SPACE, CTRL, MB, UP, F };
 enum LIGHT_TYPE { SPOTLIGHT, DIRECTLIGHT, POINTLIGHT };
 enum NODE_TYPE { NODE, LEAF };

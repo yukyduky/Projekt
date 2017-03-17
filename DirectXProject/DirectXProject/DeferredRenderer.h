@@ -4,6 +4,7 @@
 
 #include <d3d11.h>
 #include <SimpleMath.h>
+#include "Input.h"
 #include "GameManager.h"
 #include "Shader.h"
 #include "globals.h"
@@ -19,7 +20,7 @@ public:
 
 	bool InitializeDirectX(HWND hwnd);
 	bool InitScene();
-	void Update();
+	void Update(InputVars inVars);
 	bool Render();
 	void Release();
 

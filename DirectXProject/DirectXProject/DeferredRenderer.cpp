@@ -54,9 +54,9 @@ bool DeferredRenderer::InitScene()
 	return true;
 }
 
-void DeferredRenderer::Update()
+void DeferredRenderer::Update(InputVars inVars)
 {
-	gm.Update(gDevice);
+	gm.Update(gDevice, inVars);
 }
 
 bool DeferredRenderer::Render()

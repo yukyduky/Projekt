@@ -32,12 +32,12 @@ void Camera::InitScene()
 
 }
 
-void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValues)
+void Camera::Update(InputVars inVars, float dt, float* heightValues)
 {
 	if (this->flyMode == 0)
 	{
-		this->ProcessKeyboard(keys, dt);
-		this->ProcessMouse(mouseOffset, dt);
+		this->ProcessKeyboard(inVars, dt);
+		this->ProcessMouse(inVars.mouseOffset, dt);
 
 		this->rotationMatrix = XMMatrixRotationRollPitchYaw(XMConvertToRadians(this->pitch), XMConvertToRadians(this->yaw), 0);
 
@@ -73,8 +73,8 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 	}
 	else if (this->flyMode == 1)
 	{
-		this->ProcessKeyboard(keys, dt);
-		this->ProcessMouse(mouseOffset, dt);
+		this->ProcessKeyboard(inVars, dt);
+		this->ProcessMouse(inVars.mouseOffset, dt);
 
 		// Update the view matrix
 		this->view = XMMatrixLookAtLH(this->pos, this->pos + this->forward, this->up);
@@ -126,7 +126,7 @@ float Camera::getAR() const
 	return this->ar;
 }
 
-void Camera::ProcessKeyboard(bool* keys, float dt)
+void Camera::ProcessKeyboard(InputVars inVars, float dt)
 {
 	float velocity = 0;
 
@@ -134,34 +134,33 @@ void Camera::ProcessKeyboard(bool* keys, float dt)
 	{
 		velocity = 10.0f * dt;
 
-		if (keys[W])
+		if (inVars.isKeyPressed[W])
 			this->moveBF += velocity;
-		if (keys[A])
+		if (inVars.isKeyPressed[A])
 			this->moveLR -= velocity;
-		if (keys[S])
+		if (inVars.isKeyPressed[S])
 			this->moveBF -= velocity;
-		if (keys[D])
+		if (inVars.isKeyPressed[D])
 			this->moveLR += velocity;
-		if (keys[F])
+		if (inVars.wasKeyPressed[F])
 		{
 			this->flyMode = 1;
 		}
 	}
-
 	else if (this->flyMode == 1)
 	{
 		velocity = 100.0f * dt;
 
 		// Change the position according to the key pressed
-		if (keys[W])
+		if (inVars.isKeyPressed[W])
 			this->pos += this->forward * velocity;
-		if (keys[A])
+		if (inVars.isKeyPressed[A])
 			this->pos -= this->right * velocity;
-		if (keys[S])
+		if (inVars.isKeyPressed[S])
 			this->pos -= this->forward * velocity;
-		if (keys[D])
+		if (inVars.isKeyPressed[D])
 			this->pos += this->right * velocity;
-		if (keys[F])
+		if (inVars.wasKeyPressed[F])
 		{
 			this->flyMode = 0;
 		}

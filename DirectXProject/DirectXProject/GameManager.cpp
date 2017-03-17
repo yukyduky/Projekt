@@ -17,9 +17,6 @@ GameManager::GameManager() : fc(cam.getNearDist(), cam.getFarDist(), cam.getFOV(
 	rotBoxZ = 0.0f;
 	transBox = 0.0f;
 
-	for (int i = 0; i < NUM_KEYS; i++)
-		keys[i] = false;
-
 	pointLight.pos = Vector3(0.0f, 10.0f, 0.0f);
 	pointLight.attenuation = Vector3(1.0f, 0.05f, 0.0f);
 	pointLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -82,21 +79,21 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	return true;
 }
 
-void GameManager::Update(ID3D11Device* gDevice)
+void GameManager::Update(ID3D11Device* gDevice, InputVars inVars)
 {
 	// Get time since last frame
 	dt = float(time.GetFrameTime());
 
 	// Handle keyboard & mouse
-	input.HandleInput(keys, mouseOffset);
+	//input.HandleInput(keys, mouseOffset);
 
 	// Update the camera
-	cam.Update(keys, mouseOffset, dt, surface.heightValueList());
+	cam.Update(inVars, dt, surface.heightValueList());
 	// Update the view matrix
 	view = cam.getViewMatrix();
 	proj = cam.getProjMatrix();
 
-	if (keys[UP])
+	if (inVars.isKeyPressed[UP])
 	{
 		view = staticCamView;
 		proj = staticCamProj;
@@ -113,7 +110,7 @@ void GameManager::Update(ID3D11Device* gDevice)
 	// Update the camera position for the general light attributes
 	genLight.cameraPos = cam.getPosition();
 	// Update Flashlight
-	if(keys[CTRL])
+	if(inVars.isKeyPressed[CTRL])
 		UpdateFlashLight(cam.getPosition(), cam.getForward());
 
 	// Update the lights
@@ -123,10 +120,10 @@ void GameManager::Update(ID3D11Device* gDevice)
 	cbLightLight.genLight = genLight;
 
 	// Update the world matrices
-	UpdateWorlds();
+	UpdateWorlds(inVars);
 
 	//Picking the boxes
-	mouse.pickBoxes(keys[MB], *Boxes, cam, boxWorld, boxRotation, gDevice);
+	mouse.pickBoxes(inVars.isKeyPressed[MB], *Boxes, cam, boxWorld, boxRotation, gDevice);
 }
 
 bool GameManager::Render(ID3D11DeviceContext* gDevCon)
@@ -270,27 +267,27 @@ bool GameManager::MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer** gBuffer
 	return true;
 }
 
-void GameManager::UpdateWorlds()
+void GameManager::UpdateWorlds(InputVars inVars)
 {
-	UpdateBox();
+	UpdateBox(inVars);
 }
 
-void GameManager::UpdateBox()
+void GameManager::UpdateBox(InputVars inVars)
 {
 	Matrix rotate;
 	Matrix translate;
 
-	if (keys[SPACE] && keys[CTRL])
+	if (inVars.isKeyPressed[SPACE] && inVars.isKeyPressed[CTRL])
 	{
 		rotBoxZ += 0.5f * dt;
 		if (rotBoxZ >= 6.28)
 			rotBoxZ = 0;
 	}
-	else if (keys[CTRL])
+	else if (inVars.isKeyPressed[CTRL])
 	{
 		transBox += 0.5f * dt;
 	}
-	else if (keys[SPACE])
+	else if (inVars.isKeyPressed[SPACE])
 	{
 		rotBoxY += 0.5f * dt;
 		if (rotBoxY >= 6.28)

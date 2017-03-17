@@ -1,76 +1,110 @@
 #include "Input.h"
 
 
-
 Input::Input()
 {
+	for (int i = 0; i < NUM_KEYS; i++)
+	{
+		inVars.isKeyPressed[i] = false;
+		inVars.wasKeyPressed[i] = false;
+	}
 }
-
 
 Input::~Input()
 {
 }
 
-void Input::HandleInput(bool* keys, Vector2 &mouseOffset)
+void Input::HandleKeyDown()
 {
-	ProcessKeyboard(keys);
-	ProcessMouse(mouseOffset);
+	if (GetAsyncKeyState(VK_W) != 0 && !inVars.isKeyPressed[W])
+	{
+		inVars.wasKeyPressed[W] = true;
+		inVars.isKeyPressed[W] = true;
+	}
+	else if (GetAsyncKeyState(VK_A) != 0 && !inVars.isKeyPressed[A])
+	{
+		inVars.wasKeyPressed[A] = true;
+		inVars.isKeyPressed[A] = true;
+	}
+	else if (GetAsyncKeyState(VK_S) != 0 && !inVars.isKeyPressed[S])
+	{
+		inVars.wasKeyPressed[S] = true;
+		inVars.isKeyPressed[S] = true;
+	}
+	else if (GetAsyncKeyState(VK_D) != 0 && !inVars.isKeyPressed[D])
+	{
+		inVars.wasKeyPressed[D] = true;
+		inVars.isKeyPressed[D] = true;
+	}
+	else if (GetAsyncKeyState(VK_ESCAPE) != 0 && !inVars.isKeyPressed[ESC])
+	{
+		inVars.wasKeyPressed[ESC] = true;
+		inVars.isKeyPressed[ESC] = true;
+	}
+	else if (GetAsyncKeyState(VK_SPACE) != 0 && !inVars.isKeyPressed[SPACE])
+	{
+		inVars.wasKeyPressed[SPACE] = true;
+		inVars.isKeyPressed[SPACE] = true;
+	}
+	else if (GetAsyncKeyState(VK_CONTROL) != 0 && !inVars.isKeyPressed[CTRL])
+	{
+		inVars.wasKeyPressed[CTRL] = true;
+		inVars.isKeyPressed[CTRL] = true;
+	}
+	else if (GetAsyncKeyState(VK_DOWN) != 0 && !inVars.isKeyPressed[MB])
+	{
+		inVars.wasKeyPressed[MB] = true;
+		inVars.isKeyPressed[MB] = true;
+	}
+	else if (GetAsyncKeyState(VK_UP) != 0 && !inVars.isKeyPressed[UP])
+	{
+		inVars.isKeyPressed[UP] = true;
+		inVars.wasKeyPressed[UP] = true;
+	}
+	else if (GetAsyncKeyState(VK_F) != 0 && !inVars.isKeyPressed[F])
+	{
+		inVars.wasKeyPressed[F] = true;
+		inVars.isKeyPressed[F] = true;
+	}
 }
 
-void Input::ProcessKeyboard(bool* keys)
+void Input::HandleKeyUp()
 {
-	if (GetAsyncKeyState(VK_W) != 0 && !keys[W])
-		keys[W] = true;
-	else if (GetAsyncKeyState(VK_W) == 0 && keys[W])
-		keys[W] = false;
-	if (GetAsyncKeyState(VK_A) != 0 && !keys[A])
-		keys[A] = true;
-	else if (GetAsyncKeyState(VK_A) == 0 && keys[A])
-		keys[A] = false;
-	if (GetAsyncKeyState(VK_S) != 0 && !keys[S])
-		keys[S] = true;
-	else if (GetAsyncKeyState(VK_S) == 0 && keys[S])
-		keys[S] = false;
-	if (GetAsyncKeyState(VK_D) != 0 && !keys[D])
-		keys[D] = true;
-	else if (GetAsyncKeyState(VK_D) == 0 && keys[D])
-		keys[D] = false;
-	if (GetAsyncKeyState(VK_ESCAPE) != 0 && !keys[ESC])
-		keys[ESC] = true;
-	else if (GetAsyncKeyState(VK_ESCAPE) == 0 && keys[ESC])
-		keys[ESC] = false;
-	if (GetAsyncKeyState(VK_SPACE) != 0 && !keys[SPACE])
-		keys[SPACE] = true;
-	else if (GetAsyncKeyState(VK_SPACE) == 0 && keys[SPACE])
-		keys[SPACE] = false;
-	if (GetAsyncKeyState(VK_CONTROL) != 0 && !keys[CTRL])
-		keys[CTRL] = true;
-	else if (GetAsyncKeyState(VK_CONTROL) == 0 && keys[CTRL])
-		keys[CTRL] = false;
-	if (GetAsyncKeyState(VK_DOWN) != 0 && !keys[MB])
-		keys[MB] = true;
-	else if (GetAsyncKeyState(VK_DOWN) == 0 && keys[MB])
-		keys[MB] = false;
-	if (GetAsyncKeyState(VK_UP) != 0 && !keys[UP])
-		keys[UP] = true;
-	else if (GetAsyncKeyState(VK_UP) == 0 && keys[UP])
-		keys[UP] = false;
-	if (GetAsyncKeyState(VK_F) != 0 && !keys[F])
-		keys[F] = true;
-	else if (GetAsyncKeyState(VK_F) == 0 && keys[F])
-		keys[F] = false;
+	if (GetAsyncKeyState(VK_W) == 0 && inVars.isKeyPressed[W])
+		inVars.isKeyPressed[W] = false;
+	else if (GetAsyncKeyState(VK_A) == 0 && inVars.isKeyPressed[A])
+		inVars.isKeyPressed[A] = false;
+	else if (GetAsyncKeyState(VK_S) == 0 && inVars.isKeyPressed[S])
+		inVars.isKeyPressed[S] = false;
+	else if (GetAsyncKeyState(VK_D) == 0 && inVars.isKeyPressed[D])
+		inVars.isKeyPressed[D] = false;
+	else if (GetAsyncKeyState(VK_ESCAPE) == 0 && inVars.isKeyPressed[ESC])
+		inVars.isKeyPressed[ESC] = false;
+	else if (GetAsyncKeyState(VK_SPACE) == 0 && inVars.isKeyPressed[SPACE])
+		inVars.isKeyPressed[SPACE] = false;
+	else if (GetAsyncKeyState(VK_CONTROL) == 0 && inVars.isKeyPressed[CTRL])
+		inVars.isKeyPressed[CTRL] = false;
+	else if (GetAsyncKeyState(VK_DOWN) == 0 && inVars.isKeyPressed[MB])
+		inVars.isKeyPressed[MB] = false;
+	else if (GetAsyncKeyState(VK_UP) == 0 && inVars.isKeyPressed[UP])
+		inVars.isKeyPressed[UP] = false;
+	else if (GetAsyncKeyState(VK_F) == 0 && inVars.isKeyPressed[F])
+		inVars.isKeyPressed[F] = false;
 }
 
-void Input::ProcessMouse(Vector2 &mouseOffset)
+void Input::HandleMouse(int xPos, int yPos)
 {
-	POINT p;
+	inVars.mouseOffset.x = WIDTH / 2 - xPos;
+	inVars.mouseOffset.y = HEIGHT / 2 - yPos;
+}
 
-	// Gets the cursors current screen position
-	GetCursorPos(&p);
-	// Converts from screen to window coords
-	ScreenToClient(GetActiveWindow(), &p);
+void Input::ResetWasKeyPressed()
+{
+	for (int i = 0; i < NUM_KEYS; i++)
+		inVars.wasKeyPressed[i] = false;
+}
 
-	// Calculates the offset from the center of the window
-	mouseOffset.x = (WIDTH / 2) - p.x;
-	mouseOffset.y = (HEIGHT / 2) - p.y;
+InputVars& Input::getInputVariables()
+{
+	return inVars;
 }

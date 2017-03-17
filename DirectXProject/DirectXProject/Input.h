@@ -11,18 +11,29 @@
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
+struct InputVars
+{
+	bool isKeyPressed[NUM_KEYS];
+	bool wasKeyPressed[NUM_KEYS];
+	Vector2 mouseOffset;
+};
+
 class Input
 {
 public:
 	Input();
 	~Input();
 
-	void HandleInput(bool* keys, Vector2 &mouseOffset);
+	void HandleKeyDown();
+	void HandleKeyUp();
+	void HandleMouse(int xPos, int yPos);
+	void ResetWasKeyPressed();
+
+	InputVars& getInputVariables();
 
 private:
-	// Functions
-	void ProcessKeyboard(bool* keys);
-	void ProcessMouse(Vector2 &mouseOffset);
+	// Variables
+	InputVars inVars;
 };
 
 #endif

@@ -67,7 +67,7 @@ public:
 	// Initialize the scene
 	bool InitScene(ID3D11Device* gDevice);
 	// Update
-	void Update(ID3D11Device* gDevice);
+	void Update(ID3D11Device* gDevice, InputVars inVars);
 	// Render Box
 	bool Render(ID3D11DeviceContext* gDevCon);
 	bool CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderResourceView** gSpotShadowMap);
@@ -87,8 +87,8 @@ private:
 	// Functions
 	bool CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize);
 	bool MapBuffer(ID3D11DeviceContext* gDevCon, ID3D11Buffer** gBuffer, void* cbPtr, int structSize);
-	void UpdateWorlds();
-	void UpdateBox();
+	void UpdateWorlds(InputVars inVars);
+	void UpdateBox(InputVars inVars);
 	void UpdateFlashLight(Vector3 position, Vector3 forward);
 
 	// Matrices
@@ -113,13 +113,11 @@ private:
 	Surface surface;
 	Camera cam;
 	Time time;
-	Input input;
 	Spotlight spotLight;
 	FrustumCulling fc;
 
 	// Variables
 	float dt;
-	bool keys[NUM_KEYS];
 	float rotBoxY;
 	float rotBoxZ;
 	float transBox;

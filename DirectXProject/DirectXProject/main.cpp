@@ -1,8 +1,11 @@
 #include <windows.h>
 #include "WindowManager.h"
 #include "DeferredRenderer.h"
+#include "Input.h"
 #include <crtdbg.h>
 
+void EventLoop(MSG& msg, bool& run, Input& input);
+void UpdateRender(InputVars& inVars, DeferredRenderer& dr);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
@@ -11,7 +14,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	WindowManager wm;
 	DeferredRenderer dr;
+	Input input;
 
+	bool run = true;
 
 	POINT p = { WIDTH / 2, HEIGHT / 2 };
 
@@ -45,29 +50,23 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	ClientToScreen(wm.getWinHandle(), &p);
 
 	SetCursorPos(p.x, p.y);
+
+	
 	
 	// Game Loop!
-	while (true)
+	while (run)
 	{
 		// Handles window messages
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
-			if (msg.message == WM_QUIT)
-				break;
+		EventLoop(msg, run, input);
 
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else
-		{
-			// Update & Render
-			dr.Update();
-			if (!dr.Render())
-				return 0;
+		// Update & Render
+		UpdateRender(input.getInputVariables(), dr);
 
-			// Sets the cursor position every frame to make sure it doesnt leave the window
-			SetCursorPos(p.x, p.y);
-		}
+		// Resets the single keypress checker
+		input.ResetWasKeyPressed();
+
+		// Sets the cursor position every frame to make sure it doesnt leave the window
+		SetCursorPos(p.x, p.y);
 	}
 
 	// Release the memory
@@ -75,4 +74,40 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	//DestroyWindow(wm.getWinHandle());
 
 	return (int)msg.wParam;
+}
+
+void EventLoop(MSG& msg, bool& run, Input& input)
+{
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+	{
+		if (msg.message == WM_QUIT)
+		{
+			run = false;
+			break;
+		}
+		else if (msg.message == WM_KEYDOWN)
+		{
+			input.HandleKeyDown();
+		}
+		else if (msg.message == WM_KEYUP)
+		{
+			input.HandleKeyUp();
+		}
+		else if (msg.message == WM_MOUSEMOVE)
+		{
+			int xPos = LOWORD(msg.lParam);
+			int yPos = HIWORD(msg.lParam);
+
+			input.HandleMouse(xPos, yPos);
+		}
+
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+void UpdateRender(InputVars& inVars, DeferredRenderer& dr)
+{
+	dr.Update(inVars);
+	dr.Render();
 }
