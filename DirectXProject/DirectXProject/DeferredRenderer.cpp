@@ -34,7 +34,7 @@ bool DeferredRenderer::InitScene()
 		return false;
 
 	// Create the deferred RTV and bind the textures and SRVs to it
-	if (!BindTextureToRTVAndSRV(gDeferredTex, gDeferredRTV, gDeferredSRV))
+	if (!BindTextureToRTVAndSRV(gDeferredTex, gDeferredRTV, gDeferredSRV, NUM_DEFERRED_OUTPUTS))
 		return false;
 
 	// Create the vertex buffer for the screen quad
@@ -48,9 +48,13 @@ bool DeferredRenderer::InitScene()
 	if (!CreateRasterizerState())
 		return false;
 
-	if (!gm.InitScene(gDevice))
+	if (!gm.InitScene(gDevice, gDevCon))
 		return false;
 
+	// Initialize blur class
+	if (!Bluring.InitScene(gDevice, gDevCon))
+		return false;
+	
 	return true;
 }
 
@@ -63,6 +67,9 @@ bool DeferredRenderer::Render()
 {
 	// Prepare to run the GeoPass and store all the geometry data
 	PreDrawing();
+
+	// Set BlurSRV to pixelshader
+	Bluring.SetVerticalBlurSRV(gDevCon);
 
 	// Draw the geometry
 	gm.Render(gDevCon);
@@ -80,16 +87,19 @@ void DeferredRenderer::Release()
 	gSwapChain->Release();
 	gDepthStencilView->Release();
 	gDepthStencilBuffer->Release();
-	gAnisoSampler->Release();
-	gVertBuffer->Release();
-	gFinalRTV->Release();
 	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
 	{
 		gDeferredTex[i]->Release();
 		gDeferredSRV[i]->Release();
 		gDeferredRTV[i]->Release();
 	}
+	gFinalRTV->Release();
+	gAnisoSampler->Release();
+	gVertBuffer->Release();
+	gSpotShadowMap->Release();
+	gDefaultRasterizer->Release();
 
+	Bluring.Release();
 	gm.Release();
 }
 
@@ -169,7 +179,7 @@ bool DeferredRenderer::CreateSampler()
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
@@ -313,7 +323,7 @@ void DeferredRenderer::SetViewPort()
 	gDevCon->RSSetViewports(1, &viewport);
 }
 
-bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11RenderTargetView** gRTV, ID3D11ShaderResourceView** gSRV)
+bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11RenderTargetView** gRTV, ID3D11ShaderResourceView** gSRV, const int nrOfOutputs)
 {
 	// Describe the texture
 	D3D11_TEXTURE2D_DESC texDesc;
@@ -331,7 +341,7 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 
 	// Create one texture per rendertarget
-	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
+	for (int i = 0; i < nrOfOutputs; i++)
 	{
 		hr = gDevice->CreateTexture2D(&texDesc, nullptr, &gTexure[i]);
 		if (FAILED(hr))
@@ -349,7 +359,7 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 	rtvDesc.Texture2D.MipSlice = 0;
 
 	// Create one rtv per output from the pixel shader
-	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
+	for (int i = 0; i < nrOfOutputs; i++)
 	{
 		hr = gDevice->CreateRenderTargetView(gTexure[i], &rtvDesc, &gRTV[i]);
 		if (FAILED(hr))
@@ -368,7 +378,7 @@ bool DeferredRenderer::BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11R
 	srvDesc.Texture2D.MipLevels = 1;
 
 	// Create one srv per texture to be loaded into the next pixel shader
-	for (int i = 0; i < NUM_DEFERRED_OUTPUTS; i++)
+	for (int i = 0; i < nrOfOutputs; i++)
 	{
 		hr = gDevice->CreateShaderResourceView(gTexure[i], &srvDesc, &gSRV[i]);
 		if (FAILED(hr))
@@ -425,6 +435,27 @@ bool DeferredRenderer::CreateVertexBuffer()
 
 bool DeferredRenderer::PreDrawing()
 {
+	////////////////////////////////////////////////////////
+	//Set blur shaders, vertexbuffer and sampler state so that we can create the blurred image of box diffuse
+	Bluring.SetDiffuseGlowPassShaders(gDevCon);
+	Bluring.SetVertexBuffer(gDevCon);
+	Bluring.SetSamplerState(gDevCon);
+	Bluring.SetDiffuseGlowRTV(gDevCon);
+	gm.CreateGlowMap(gDevCon);
+	gDevCon->Draw(4, 0);
+	
+	//Prepare for horizontalBlurPass
+	Bluring.SetHorizontalBlurShaders(gDevCon);
+	Bluring.SetHorizontalBlurRTV(gDevCon);
+	Bluring.SetDiffuseGlowSRV(gDevCon);
+	gDevCon->Draw(4, 0);
+
+	//Prepare for verticalBlurPass
+	Bluring.SetVerticalBlurShaders(gDevCon);
+	Bluring.SetVerticalBlurRTV(gDevCon);
+	Bluring.SetHorizontalBlurSRV(gDevCon);
+	gDevCon->Draw(4, 0);
+
 	// Create the shadowmaps
 	gm.CreateShadowMap(gDevCon, &gSpotShadowMap);
 
@@ -467,7 +498,7 @@ bool DeferredRenderer::PostDrawing()
 
 	// Set the normal texture for the current pixel shader
 	gDevCon->PSSetShaderResources(0, NUM_DEFERRED_OUTPUTS, gDeferredSRV);
-	gDevCon->PSSetShaderResources(4, 1, &gSpotShadowMap);
+	gDevCon->PSSetShaderResources(5, 1, &gSpotShadowMap);
 
 	// Draw the final texture over the whole screen
 	gDevCon->Draw(4, 0);

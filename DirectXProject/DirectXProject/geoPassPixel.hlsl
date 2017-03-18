@@ -1,6 +1,7 @@
 Texture2D DiffuseMap : register(t0);
 Texture2D NormalMap : register(t1);
 Texture2D SpecularMap : register(t2);
+Texture2D BlurredDiffuseMap : register(t7);
 SamplerState AnisoSampler : register(s0);
 
 struct PS_IN
@@ -18,6 +19,7 @@ struct PS_OUT
 	float4 diffuse			: SV_TARGET1;
 	float4 specular			: SV_TARGET2;
 	float4 position			: SV_TARGET3;
+	float4 blurredDiffuse	: SV_TARGET4;
 };
 
 PS_OUT PS(PS_IN input)
@@ -31,6 +33,8 @@ PS_OUT PS(PS_IN input)
 	// Sample the normal map in tangent space and decompress
 	float3 normal_T = NormalMap.Sample(AnisoSampler, input.texCoord).rgb;
 	normal_T = (normal_T * 2.0f) - 1.0f;
+	// Sample the blurred diffuse texture
+	float3 blurredDiffuse = BlurredDiffuseMap.Sample(AnisoSampler, input.texCoord).rgb;
 
 	// Create the bitangent
 	float3 bitangent_W = cross(input.normal_W, input.tangent_W.xyz) * input.tangent_W.w;
@@ -44,6 +48,7 @@ PS_OUT PS(PS_IN input)
 	output.diffuse = float4(diffuse, 1.0f);
 	output.specular = float4(specular);
 	output.position = float4(input.position_W, 1.0f);
+	output.blurredDiffuse = float4(blurredDiffuse, 1.0f);
 
 	return output;
 }

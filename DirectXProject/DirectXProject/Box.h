@@ -18,8 +18,10 @@ public:
 
 	bool InitScene(ID3D11Device* gDevice, Vector3 startPos, float width);
 	void Render(ID3D11DeviceContext* gDevCon);
+	bool CreateGlowMap(ID3D11DeviceContext* gDevCon);
 	void Release();
-	
+	void SetDiffuseMap(ID3D11ShaderResourceView* gDiffuseMap);
+
 	void setOffset(UINT offset);
 
 private:
@@ -36,7 +38,10 @@ private:
 	ID3D11Buffer* gVertBuffer;
 	ID3D11ShaderResourceView* gDiffuseMap;
 	ID3D11ShaderResourceView* gNormalMap;
+	ID3D11ShaderResourceView* gNormalMapEmpty;
 	ID3D11ShaderResourceView* gSpecularMap;
+	ID3D11ShaderResourceView* gGlowMap;
+
 
 	// Variables
 	UINT stride;

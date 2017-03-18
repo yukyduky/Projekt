@@ -26,14 +26,6 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	pointLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	pointLight.specPower = 50.0f;
 
-	/*spotLight.pos = Vector3(0.0f, 0.0f, -3.0f);
-	spotLight.dir = Vector3(0.0f, 0.0f, 1.0f);
-	spotLight.angle = 100.0f;
-	spotLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	spotLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
-	spotLight.attenuation = Vector3(1.0f, 0.1f, 0.0f);
-	spotLight.specPower = 50.0f;*/
-
 	directLight.pos = Vector3(0.0f, 2.0f, -2.0f);
 	directLight.dir = Vector3(0.0f, 0.0f, 1.0f);
 	directLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -41,13 +33,16 @@ GameManager::GameManager() // : pointLight(POINTLIGHT, Vector3(0.0f, 0.0f, -10.0
 	directLight.specPower = 50.0f;
 
 	gShadowSampler = spotLight.getSampler();
+
+	gClearSRV = nullptr;
+
 }
 
 GameManager::~GameManager()
 {
 }
 
-bool GameManager::InitScene(ID3D11Device* gDevice)
+bool GameManager::InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon)
 {
 	// Create the gGeoObjBuffer for the shaders
 	if (!CreateConstBuffer(gDevice, &gGeoObjBuffer, sizeof(cbGeoObject)))
@@ -57,7 +52,7 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	if (!CreateConstBuffer(gDevice, &gLightLightBuffer, sizeof(cbLightLighting)))
 		return false;
 
-	// Initialize the box
+	// Initialize the boxes
 	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
 		return false;
 
@@ -139,6 +134,9 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	// Set the constant buffer for the current vertex shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 
+	//Clear the BlurredMapDiffuse resource for the surface pass.
+	gDevCon->PSSetShaderResources(3, 1, &gClearSRV);
+
 	// Render
 	surface.Render(gDevCon);
 
@@ -188,10 +186,17 @@ void GameManager::Release()
 {
 	gGeoObjBuffer->Release();
 	gLightLightBuffer->Release();
-
+	
 	box.Release();
 	box2.Release();
 	surface.Release();
+	spotLight.Release();
+}
+
+void GameManager::SetBoxDiffuseMap(ID3D11ShaderResourceView* gDiffuseMap)
+{
+	this->box.SetDiffuseMap(gDiffuseMap);
+	this->box2.SetDiffuseMap(gDiffuseMap);
 }
 
 Matrix GameManager::getMatrixWVP() const
@@ -207,6 +212,14 @@ Matrix GameManager::getMatrixWorld() const
 PointLight GameManager::getPointLight() const
 {
 	return pointLight;
+}
+
+bool GameManager::CreateGlowMap(ID3D11DeviceContext* gDevCon)
+{
+	if (!this->box.CreateGlowMap(gDevCon))
+		return false;
+
+	return true;
 }
 
 bool GameManager::CreateConstBuffer(ID3D11Device * gDevice, ID3D11Buffer ** gBuffer, int bufferSize)
@@ -265,10 +278,10 @@ void GameManager::UpdateBox()
 		if (rotBoxZ >= 6.28)
 			rotBoxZ = 0;
 	}
-	else if (keys[CTRL])
+	/*else if (keys[CTRL])
 	{
 		transBox += 0.5f * dt;
-	}
+	}*/
 	else if (keys[SPACE])
 	{
 		rotBoxY += 0.5f * dt;

@@ -65,8 +65,6 @@ void Camera::Update(bool* keys, Vector2 mouseOffset, float dt, float* heightValu
 		
 		//////////////////////////////////////////////////////////
 		int index = (int)this->pos.x + (int)this->pos.z * 256;
-		//int index = (int)this->pos.x + (11 - (int)this->pos.z) * 12;
-
 		this->pos.y = (heightValues[index] / 10.0f) + 5.0f;
 		
 		//////////////////////////////////////////////////////////
@@ -132,7 +130,7 @@ void Camera::ProcessKeyboard(bool* keys, float dt)
 
 	else if (this->flyMode == 1)
 	{
-		velocity = 100.0f * dt;
+		velocity = 5.0f * dt;
 
 		// Change the position according to the key pressed
 		if (keys[W])

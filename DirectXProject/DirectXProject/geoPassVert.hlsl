@@ -19,6 +19,8 @@ struct VS_OUT
 	float3 normal_W		: NORMALW;
 	float2 texCoord		: TEXCOORD;
 	float4 tangent_W	: TANGENTW;
+
+	
 };
 
 VS_OUT VS(VS_IN input)
@@ -34,6 +36,8 @@ VS_OUT VS(VS_IN input)
 
 	// Do nothing with the texture coords
 	output.texCoord = input.texCoord;
+
+
 
 	return output;
 }

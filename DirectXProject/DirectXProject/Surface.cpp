@@ -69,6 +69,7 @@ void Surface::Render(ID3D11DeviceContext* gDevCon)
 	// Update the pixel shader with the textures
 	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
 	gDevCon->PSSetShaderResources(1, 1, &gNormalMap);
+	gDevCon->PSSetShaderResources(7, 1, &gBlurredDiffuse);
 	// Draw the indexed vertices
 	gDevCon->DrawIndexed(this->hmd.numFaces * 3, 0, 0);
 }
@@ -78,27 +79,36 @@ void Surface::Release()
 	gIndexBuffer->Release();
 	gVertBuffer->Release();
 	gDiffuseMap->Release();
-	//gNormalMap->Release();
+	gNormalMap->Release();
+	gBlurredDiffuse->Release();
 }
 
 bool Surface::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\surface.png", nullptr, &gDiffuseMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\diffuse.png", nullptr, &gDiffuseMap, NULL);
 	if (FAILED(hr))
 	{
 		MessageBox(0, "Create surface diffuse texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
-	/*
+	
 	// Load normal map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\normalmapreal.png", nullptr, &gNormalMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\normal.png", nullptr, &gNormalMap, NULL);
 	if (hr != S_OK)
 	{
 		MessageBox(0, "Create surface normal texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
-	*/
+
+	// Load blurred map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\surface\\blurred.png", nullptr, &gBlurredDiffuse, NULL);
+	if (hr != S_OK)
+	{
+		MessageBox(0, "Create surface blurred texture from file - Failed", "Error", MB_OK);
+		return false;
+	}
+	
 	return true;
 }
 
@@ -222,23 +232,7 @@ bool Surface::CreateIndexBuffer(ID3D11Device* gDevice)
 			index += 6;
 		}
 	}
-	/*
-	for (int i = 0; i < this->hmd.height - 1; i++)
-	{
-		for (int j = 0; j < this->hmd.width - 1; j++)
-		{
-			this->hmd.indices[index] = (i * (this->hmd.width)) + j;
-			this->hmd.indices[index + 1] = (i * (this->hmd.width) + j + 1);
-			this->hmd.indices[index + 2] = ((i + 1) * (this->hmd.width) + j);
-
-			this->hmd.indices[index + 3] = this->hmd.indices[index + 2];
-			this->hmd.indices[index + 4] = this->hmd.indices[index + 1];
-			this->hmd.indices[index + 5] = ((i + 1) * (this->hmd.width) + j + 1);
-
-			index += 6;
-		}
-	}
-	*/
+	
 	// Describe the index buffer
 	D3D11_BUFFER_DESC indexBufferDesc;
 	memset(&indexBufferDesc, 0, sizeof(indexBufferDesc));

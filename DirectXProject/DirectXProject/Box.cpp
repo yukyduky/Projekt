@@ -42,13 +42,33 @@ void Box::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->DrawIndexed(36, 0, 0);
 }
 
+bool Box::CreateGlowMap(ID3D11DeviceContext* gDevCon)
+{
+	//Update the pixel shader with textures
+	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
+	gDevCon->PSSetShaderResources(1, 1, &gGlowMap);
+
+	return true;
+}
+
 void Box::Release()
 {
 	gIndexBuffer->Release();
 	gVertBuffer->Release();
 	gDiffuseMap->Release();
 	gNormalMap->Release();
+	if (gNormalMapEmpty != nullptr) 
+	{
+		gNormalMapEmpty->Release();
+	}
 	gSpecularMap->Release();
+	gGlowMap->Release();
+}
+
+void Box::SetDiffuseMap(ID3D11ShaderResourceView* gDiffuseMap)
+{
+	this->gDiffuseMap = gDiffuseMap;
 }
 
 void Box::setOffset(UINT offset)
@@ -59,7 +79,7 @@ void Box::setOffset(UINT offset)
 bool Box::LoadTextures(ID3D11Device* gDevice)
 {
 	// Load diffuse map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\diffuse.png", nullptr, &gDiffuseMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\diffuse2.png", nullptr, &gDiffuseMap, NULL);
 	if (FAILED(hr))
 	{
 		MessageBox(0, "Create box diffuse texture from file - Failed", "Error", MB_OK);
@@ -67,7 +87,7 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 	}
 
 	// Load normal map texture from file
-	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\normal.png", nullptr, &gNormalMap, NULL);
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate\\normaltest.png", nullptr, &gNormalMap, NULL);
 	if (FAILED(hr))
 	{
 		MessageBox(0, "Create box normal texture from file - Failed", "Error", MB_OK);
@@ -79,6 +99,14 @@ bool Box::LoadTextures(ID3D11Device* gDevice)
 	if (FAILED(hr))
 	{
 		MessageBox(0, "Create box specular texture from file - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	// Load glow map texture from file
+	hr = CreateWICTextureFromFile(gDevice, L"Textures\\crate2\\glowmap.png", nullptr, &gGlowMap, NULL);
+	if (FAILED(hr))
+	{
+		MessageBox(0, "Create box glow map texture from file - Failed", "Error", MB_OK);
 		return false;
 	}
 
