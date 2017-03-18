@@ -41,6 +41,8 @@ bool Surface::InitScene(ID3D11Device* gDevice)
 	if (!LoadTextures(gDevice))
 		return false;
 
+	CreateRasteriserState(gDevice);
+
 	return true;
 }
 
@@ -51,7 +53,7 @@ void Surface::Render(ID3D11DeviceContext* gDevCon)
 	// Set the vertex buffer
 	gDevCon->IASetVertexBuffers(0, 1, &gVertBuffer, &stride, &offset);
 	// Set Primitive Topology
-	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 	// Update the pixel shader with the textures
 	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
 	gDevCon->PSSetShaderResources(1, 1, &gNormalMap);
@@ -530,6 +532,27 @@ void Surface::CreateNormalBMP(std::vector<Vertex> v, int nrOfVertices)
 	data = NULL;
 
 	///////////////////////////////////////////////////////////////////////////////////*/
+}
+
+bool Surface::CreateRasteriserState(ID3D11Device* gDevice)
+{
+	D3D11_RASTERIZER_DESC rastDesc;
+	memset(&rastDesc, 0, sizeof(D3D11_RASTERIZER_DESC));
+	rastDesc.CullMode = D3D11_CULL_BACK;
+	rastDesc.FillMode = D3D11_FILL_WIREFRAME;
+	rastDesc.FrontCounterClockwise = false;
+	rastDesc.DepthBias = 0;
+	rastDesc.DepthBiasClamp = 0;
+	rastDesc.SlopeScaledDepthBias = 0;
+
+	hr = gDevice->CreateRasterizerState(&rastDesc, &rasterizer);
+	if (FAILED(hr))
+	{
+		MessageBox(0, "Create Default Rasterizer - Failed", "Error", MB_OK);
+		return false;
+	}
+
+	return true;
 }
 
 float* Surface::heightValueList()

@@ -23,8 +23,8 @@ GameManager::GameManager() : fc(cam.getNearDist(), cam.getFarDist(), cam.getFOV(
 	pointLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	pointLight.specPower = 50.0f;
 
-	directLight.pos = Vector3(0.0f, 2.0f, -2.0f);
-	directLight.dir = Vector3(0.0f, 0.0f, 1.0f);
+	directLight.pos = Vector3(0.0f, 7.0f, 20.0f);
+	directLight.dir = Vector3(0.0f, -1.0f, 1.0f);
 	directLight.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	directLight.ambient = Vector3(0.1f, 0.1f, 0.1f);
 	directLight.specPower = 50.0f;
@@ -49,6 +49,10 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	if (!CreateConstBuffer(gDevice, &gLightLightBuffer, sizeof(cbLightLighting)))
 		return false;
 
+	// Create the gTesselationBuffer for the shaders
+	if (!CreateConstBuffer(gDevice, &gTesselationBuffer, sizeof(cbTesselation)))
+		return false;
+
 	// Initialize the box
 	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
 		return false;
@@ -56,7 +60,7 @@ bool GameManager::InitScene(ID3D11Device* gDevice)
 	if (!box2.InitScene(gDevice, Vector3(-0.5f, 10.0f, -0.5f), 8.0f))
 		return false;
 
-	if (!box3.InitScene(gDevice, Vector3(-3.5f, 1.0f, -0.5f), 3.0f))
+	if (!box3.InitScene(gDevice, Vector3(-30.0f, -29.0f, 10.0f), 30.0f))
 		return false;
 
 	if (!box4.InitScene(gDevice, Vector3(6.5f, 5.0f, 10.5f), 3.0f))
@@ -134,10 +138,20 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	cbGeoObj.wvp = wvp.Transpose();
 	cbGeoObj.world = boxWorld.Transpose();
 
+	//Tesselation buffer for the Boxes
+	cbTess.tessVarible = 3.0f;
+	cbTess.camPos = cam.getPosition();
+	if (!MapBuffer(gDevCon, &gTesselationBuffer, &cbTess, sizeof(cbTesselation)))
+		return false;
+
 	if (!MapBuffer(gDevCon, &gGeoObjBuffer, &cbGeoObj, sizeof(cbGeoObj)))
 		return false;
 	// Set the constant buffer for the current vertex shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
+	gDevCon->DSSetConstantBuffers(0, 1, &gGeoObjBuffer);
+	gDevCon->HSSetConstantBuffers(1, 1, &gTesselationBuffer);
+	gDevCon->DSSetConstantBuffers(1, 1, &gTesselationBuffer);
+	gDevCon->GSSetConstantBuffers(1, 1, &gTesselationBuffer);
 
 	// Render
 	box.Render(gDevCon);
@@ -151,10 +165,17 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	cbGeoObj.wvp = wvp.Transpose();
 	cbGeoObj.world = staticWorld.Transpose();
 
+	//Updating the tesselation buffer
+	cbTess.tessVarible = 1.0f;
+	if (!MapBuffer(gDevCon, &gTesselationBuffer, &cbTess, sizeof(cbTesselation)))
+		return false;
+
 	if (!MapBuffer(gDevCon, &gGeoObjBuffer, &cbGeoObj, sizeof(cbGeoObj)))
 		return false;
 	// Set the constant buffer for the current vertex shader
 	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
+	gDevCon->HSSetConstantBuffers(1, 1, &gTesselationBuffer);
+	gDevCon->DSSetConstantBuffers(1, 1, &gTesselationBuffer);
 
 	// Render
 	surface.Render(gDevCon);
@@ -166,6 +187,13 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->PSSetConstantBuffers(0, 1, &gLightLightBuffer);
 	// Set the shadow sampler for the light pass
 	gDevCon->PSSetSamplers(0, 1, &gShadowSampler);
+
+	//Tesselation buffer
+	cbTess.tessVarible = 2.0f;
+	if (!MapBuffer(gDevCon, &gTesselationBuffer, &cbTess, sizeof(cbTesselation)))
+		return false;
+	gDevCon->HSSetConstantBuffers(1, 1, &gTesselationBuffer);
+	gDevCon->DSSetConstantBuffers(1, 1, &gTesselationBuffer);
 
 	return true;
 }
@@ -205,9 +233,12 @@ void GameManager::Release()
 {
 	gGeoObjBuffer->Release();
 	gLightLightBuffer->Release();
+	gTesselationBuffer->Release();
 
 	box.Release();
 	box2.Release();
+	box3.Release();
+	box4.Release();
 	surface.Release();
 	spotLight.Release();
 }

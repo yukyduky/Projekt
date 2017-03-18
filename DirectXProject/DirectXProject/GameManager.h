@@ -82,6 +82,7 @@ private:
 	//COMS 
 	ID3D11Buffer* gGeoObjBuffer;
 	ID3D11Buffer* gLightLightBuffer;
+	ID3D11Buffer* gTesselationBuffer;
 	ID3D11SamplerState* gShadowSampler;
 
 	// Functions
@@ -147,9 +148,16 @@ private:
 		GeneralLightAttrb genLight;
 	};
 
+	struct cbTesselation
+	{
+		float tessVarible;
+		Vector3 camPos;
+	};
+
 	// Constant Buffers
 	cbGeoObject cbGeoObj;
 	cbLightLighting cbLightLight;
+	cbTesselation cbTess;
 
 	// Error handling
 	HRESULT hr;

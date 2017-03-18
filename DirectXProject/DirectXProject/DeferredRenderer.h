@@ -30,6 +30,7 @@ private:
 	void SetGeoShaders();
 	void SetLightShaders();
 	bool CreateRasterizerState();
+	bool CreateRasterizerState(bool wireframe);
 	bool CreateSampler();
 	bool CreateSwapChain(HWND hwnd);
 	bool CreateBackBufferRTV();
@@ -54,6 +55,7 @@ private:
 	ID3D11Buffer* gVertBuffer;
 	ID3D11ShaderResourceView* gSpotShadowMap;
 	ID3D11RasterizerState* gDefaultRasterizer;
+	ID3D11RasterizerState* gWireframeRasterizer;
 
 	// Objects
 	GameManager gm;
@@ -65,10 +67,13 @@ private:
 	const wchar_t* fileNameGeoPixel = L"geoPassPixel.hlsl";
 	const wchar_t* fileNameGeoHull = L"geoPassHull.hlsl";
 	const wchar_t* fileNameGeoDomain = L"geoPassDomain.hlsl";
+	const wchar_t* fileNameGeoGeometry = L"geoPassGeometry.hlsl";
 	const wchar_t* fileNameLightVertex = L"lightPassVert.hlsl";
 	const wchar_t* fileNameLightPixel = L"lightPassPixel.hlsl";
 	UINT vertBufferStride;
 	UINT vertBufferOffset;
+	bool changeFillMode = false;
+	bool wireframe = false;
 
 	const D3D11_INPUT_ELEMENT_DESC geoInputDesc[GEO_INPUT_DESC_SIZE] =
 	{

@@ -90,6 +90,7 @@ float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 	float4 lighting = CalcLight(normal, diffuse, pos, specular, shadow);
 
 	return lighting;
+	//return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular)
