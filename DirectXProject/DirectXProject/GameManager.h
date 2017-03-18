@@ -28,19 +28,6 @@ struct PointLight
 	float specPower;
 };
 
-/*struct SpotLight
-{
-	Vector3 pos;
-	float pad0;
-	Vector3 dir;
-	float angle;
-	Vector4 diffuse;
-	Vector3 ambient;
-	float pad1;
-	Vector3 attenuation;
-	float specPower;
-};*/
-
 struct DirectLight
 {
 	Vector3 pos;
@@ -65,7 +52,7 @@ public:
 	~GameManager();
 
 	// Initialize the scene
-	bool InitScene(ID3D11Device* gDevice);
+	bool InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon);
 	// Update
 	void Update(ID3D11Device* gDevice, InputVars inVars);
 	// Render Box
@@ -73,10 +60,13 @@ public:
 	bool CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderResourceView** gSpotShadowMap);
 	// Release the memory
 	void Release();
+	void SetBoxDiffuseMap(ID3D11ShaderResourceView* gDiffuseMap);
 
 	Matrix getMatrixWVP() const;
 	Matrix getMatrixWorld() const;
 	PointLight getPointLight() const;
+
+	bool CreateGlowMap(ID3D11DeviceContext* gDevCon);
 
 private:
 	//COMS 
@@ -84,6 +74,9 @@ private:
 	ID3D11Buffer* gLightLightBuffer;
 	ID3D11Buffer* gTesselationBuffer;
 	ID3D11SamplerState* gShadowSampler;
+	
+	ID3D11ShaderResourceView* gClearSRV;
+
 
 	// Functions
 	bool CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize);
@@ -112,13 +105,16 @@ private:
 	Box box4;
 	Box* Boxes[4] = { &box, &box2 , &box3 , &box4};
 	Surface surface;
+	Box box2;
 	Camera cam;
 	Time time;
+	Input input;
 	Spotlight spotLight;
 	FrustumCulling fc;
 
 	// Variables
 	float dt;
+	bool keys[NUM_KEYS];
 	float rotBoxY;
 	float rotBoxZ;
 	float transBox;

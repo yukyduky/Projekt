@@ -28,6 +28,7 @@ void ShadowMap::Release()
 {
 	gShadowSampler->Release();
 	gDepthBiasRasterizer->Release();
+	ShadowShader.Release();
 }
 
 ID3D11SamplerState* ShadowMap::getSampler() const

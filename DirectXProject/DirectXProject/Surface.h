@@ -83,6 +83,7 @@ private:
 	ID3D11Buffer* gVertBuffer;
 	ID3D11ShaderResourceView* gDiffuseMap;
 	ID3D11ShaderResourceView* gNormalMap;
+	ID3D11ShaderResourceView* gBlurredDiffuse;
 
 	// Variables
 	UINT stride;

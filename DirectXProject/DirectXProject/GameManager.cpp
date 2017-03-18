@@ -31,6 +31,9 @@ GameManager::GameManager() : fc(cam.getNearDist(), cam.getFarDist(), cam.getFOV(
 
 	gShadowSampler = spotLight.getSampler();
 
+	gClearSRV = nullptr;
+
+
 	staticCamView = XMMatrixLookAtLH(Vector3(128.0f, 200.0f, 115.0f), Vector3(128.0f, -1.0f, 115.0f), Vector3(0.0f, 0.0f, 1.0f));
 	staticCamProj = XMMatrixPerspectiveFovLH(XMConvertToRadians(72), (float)WIDTH / HEIGHT, 1.0f, 1000.0f);
 }
@@ -39,7 +42,7 @@ GameManager::~GameManager()
 {
 }
 
-bool GameManager::InitScene(ID3D11Device* gDevice)
+bool GameManager::InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon)
 {
 	// Create the gGeoObjBuffer for the shaders
 	if (!CreateConstBuffer(gDevice, &gGeoObjBuffer, sizeof(cbGeoObject)))
@@ -177,6 +180,9 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->HSSetConstantBuffers(1, 1, &gTesselationBuffer);
 	gDevCon->DSSetConstantBuffers(1, 1, &gTesselationBuffer);
 
+	//Clear the BlurredMapDiffuse resource for the surface pass.
+	gDevCon->PSSetShaderResources(3, 1, &gClearSRV);
+
 	// Render
 	surface.Render(gDevCon);
 
@@ -243,6 +249,12 @@ void GameManager::Release()
 	spotLight.Release();
 }
 
+void GameManager::SetBoxDiffuseMap(ID3D11ShaderResourceView* gDiffuseMap)
+{
+	this->box.SetDiffuseMap(gDiffuseMap);
+	this->box2.SetDiffuseMap(gDiffuseMap);
+}
+
 Matrix GameManager::getMatrixWVP() const
 {
 	return wvp;
@@ -258,7 +270,15 @@ PointLight GameManager::getPointLight() const
 	return pointLight;
 }
 
-bool GameManager::CreateConstBuffer(ID3D11Device* gDevice, ID3D11Buffer** gBuffer, int bufferSize)
+bool GameManager::CreateGlowMap(ID3D11DeviceContext* gDevCon)
+{
+	if (!this->box.CreateGlowMap(gDevCon))
+		return false;
+
+	return true;
+}
+
+bool GameManager::CreateConstBuffer(ID3D11Device * gDevice, ID3D11Buffer ** gBuffer, int bufferSize)
 {
 	// Describes the constant buffer
 	D3D11_BUFFER_DESC cbBufferDesc;

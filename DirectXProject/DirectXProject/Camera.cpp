@@ -59,8 +59,6 @@ void Camera::Update(InputVars inVars, float dt, float* heightValues)
 		
 		//////////////////////////////////////////////////////////
 		int index = (int)this->pos.x + (int)this->pos.z * 256;
-		//int index = (int)this->pos.x + (11 - (int)this->pos.z) * 12;
-
 		this->pos.y = (heightValues[index] / 10.0f) + 5.0f;
 		
 		//////////////////////////////////////////////////////////
@@ -149,7 +147,7 @@ void Camera::ProcessKeyboard(InputVars inVars, float dt)
 	}
 	else if (this->flyMode == 1)
 	{
-		velocity = 100.0f * dt;
+		velocity = 5.0f * dt;
 
 		// Change the position according to the key pressed
 		if (inVars.isKeyPressed[W])

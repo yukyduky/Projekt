@@ -8,6 +8,7 @@
 #include "GameManager.h"
 #include "Shader.h"
 #include "globals.h"
+#include "Blur.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -36,7 +37,7 @@ private:
 	bool CreateBackBufferRTV();
 	bool CreateDepthStencilView();
 	void SetViewPort();
-	bool BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11RenderTargetView** gRTV, ID3D11ShaderResourceView** gSRV);
+	bool BindTextureToRTVAndSRV(ID3D11Texture2D** gTexure, ID3D11RenderTargetView** gRTV, ID3D11ShaderResourceView** gSRV, const int nrOfOutputs);
 	bool CreateVertexBuffer();
 	bool PreDrawing();
 	bool PostDrawing();
@@ -59,6 +60,7 @@ private:
 
 	// Objects
 	GameManager gm;
+	Blur Bluring;	
 	Shader GeoShader;
 	Shader LightShader;
 

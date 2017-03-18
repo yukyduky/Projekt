@@ -58,12 +58,13 @@ Texture2D texNormal		: register(t0);
 Texture2D texDiffuse	: register(t1);
 Texture2D texSpecular	: register(t2);
 Texture2D texPosition	: register(t3);
-Texture2D texShadowMap	: register(t4);
+Texture2D texBlurred	: register(t4);
+Texture2D texShadowMap	: register(t5);
 
-void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular);
+void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float3 blurred);
 void SampleShadowMaps(in float2 shadowCoords, out float shadow, in float depth);
 void TransformSpaces(in float4 pos_W, out float4 lightSpace);
-float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float shadow);
+float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float shadow, in float3 blurred);
 
 float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 {
@@ -71,11 +72,12 @@ float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 	float3 diffuse;
 	float3 pos;
 	float3 specular;
+	float3 blurred;
 	float shadow;
 	float4 posLight;
 
 	// Load the data from all the textures
-	LoadGeoPassData(position_S.xy, normal, diffuse, pos, specular);
+	LoadGeoPassData(position_S.xy, normal, diffuse, pos, specular, blurred);
 
 	// Transform the world pos into the light's NDC space and decompress for sampling
 	TransformSpaces(float4(pos, 1.0f), posLight);
@@ -87,20 +89,30 @@ float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 	SampleShadowMaps(shadowCoords, shadow, depth);
 
 	// Calculate lightning
-	float4 lighting = CalcLight(normal, diffuse, pos, specular, shadow);
+	float4 lighting = CalcLight(normal, diffuse, pos, specular, shadow, blurred);
 
+
+	//float4 test;
+	//int3 test2 = int3(position_S.xy, 0.0f);
+	
+	//test = float4(texBlurred.Load(test2).xyz, 0.0f);
+
+	//return test;
 	return lighting;
 	//return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular)
+void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float3 blurred)
 {
 	int3 texCoords = int3(screenCoords, 0.0f);
 
 	normal = texNormal.Load(texCoords).xyz;
 	diffuse = texDiffuse.Load(texCoords).xyz;
+	//diffuse += texBlurred.Load(texCoords).xyz * 10;
+	//diffuse = saturate(diffuse);
 	pos = texPosition.Load(texCoords).xyz;
 	specular = texSpecular.Load(texCoords).xyz;
+	blurred = texBlurred.Load(texCoords).xyz;
 }
 
 void SampleShadowMaps(in float2 shadowCoords, out float shadow, in float depth)
@@ -123,7 +135,7 @@ void TransformSpaces(in float4 pos_W, out float4 lightSpace)
 	lightSpace.y = ((1.0f - lightSpace.y) / 2.0f);
 }
 
-float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float shadow)
+float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 specular, in float shadow, in float3 blurred)
 {
 	float3 pointLighting = float3(0.0f, 0.0f, 0.0f);
 	float3 spotLighting = float3(0.0f, 0.0f, 0.0f);
@@ -158,7 +170,7 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 		spec *= specular;
 
 		// Add the ambient and the specular
-		pointLighting = finalColor + finalAmbient + spec;
+		pointLighting = blurred * 0.5f + finalColor + finalAmbient + spec;
 	}
 	for (int i = 0; i < NUM_SPOTLIGHTS; i++)
 	{
@@ -191,7 +203,7 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 		spec *= specular;
 
 		// Add the ambient and the specular, if the pixel is in shadow then shadow = 0.0f, otherwise shadow = 1.0f
-		spotLighting = finalColor * shadow + finalAmbient + spec * shadow;
+		spotLighting = blurred * 0.5f + finalColor * shadow + finalAmbient + spec * shadow;
 	}
 	for (int i = 0; i < NUM_DIRECTLIGHTS; i++)
 	{
@@ -216,7 +228,7 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 		spec *= specular;
 
 		// Add the ambient and the specular
-		directLighting = finalColor + finalAmbient + spec;
+		directLighting = blurred * 0.5f + finalColor + finalAmbient + spec;
 	}
 	
 	// Combine all the different lightsources and clamp it
