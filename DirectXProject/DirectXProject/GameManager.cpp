@@ -91,9 +91,6 @@ void GameManager::Update(ID3D11Device* gDevice, InputVars inVars)
 	// Get time since last frame
 	dt = float(time.GetFrameTime());
 
-	// Handle keyboard & mouse
-	//input.HandleInput(keys, mouseOffset);
-
 	// Update the camera
 	cam.Update(inVars, dt, surface.heightValueList());
 	// Update the view matrix
@@ -150,7 +147,6 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	if (!MapBuffer(gDevCon, &gGeoObjBuffer, &cbGeoObj, sizeof(cbGeoObj)))
 		return false;
 	// Set the constant buffer for the current vertex shader
-	gDevCon->VSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 	gDevCon->DSSetConstantBuffers(0, 1, &gGeoObjBuffer);
 	gDevCon->HSSetConstantBuffers(1, 1, &gTesselationBuffer);
 	gDevCon->DSSetConstantBuffers(1, 1, &gTesselationBuffer);
@@ -181,7 +177,7 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->DSSetConstantBuffers(1, 1, &gTesselationBuffer);
 
 	//Clear the BlurredMapDiffuse resource for the surface pass.
-	gDevCon->PSSetShaderResources(3, 1, &gClearSRV);
+	//gDevCon->PSSetShaderResources(3, 1, &gClearSRV);
 
 	// Render
 	surface.Render(gDevCon);
@@ -219,6 +215,8 @@ bool GameManager::CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderReso
 	// Render
 	box.Render(gDevCon);
 	box2.Render(gDevCon);
+	box3.Render(gDevCon);
+	box4.Render(gDevCon);
 
 	// Update the world matrix for static objects
 	spotLight.setWorld(staticWorld);

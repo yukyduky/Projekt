@@ -105,7 +105,6 @@ private:
 	Box box4;
 	Box* Boxes[4] = { &box, &box2 , &box3 , &box4};
 	Surface surface;
-	Box box2;
 	Camera cam;
 	Time time;
 	Input input;

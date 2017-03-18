@@ -2,13 +2,13 @@
 
 
 Camera::Camera() : up(Vector3(0.0f, 1.0f, 0.0f)), forward(Vector3(0.0f, 0.0f, 1.0f)), right(Vector3(1.0f, 0.0f, 0.0f)),
-					nearD(1.0f), farD(30.0f), fov(72), ar(float(WIDTH / HEIGHT))
+					nearD(1.0f), farD(40.0f), fov(72), ar(float(WIDTH / HEIGHT))
 {
 	this->worldUp = Vector3(0.0f, 1.0f, 0.0f);
 	this->worldForward = Vector3(0.0f, 0.0f, 1.0f);
 	this->worldRight = Vector3(1.0f, 0.0f, 0.0f);
 	// Position
-	this->pos = Vector3(100.0f, 30.0f, 10.0f);
+	this->pos = Vector3(2.0f, 20.0f, 2.0f);
 
 	// Set the view matrix
 	this->view = XMMatrixLookAtLH(pos, forward, up);
@@ -130,7 +130,7 @@ void Camera::ProcessKeyboard(InputVars inVars, float dt)
 
 	if (this->flyMode == 0)
 	{
-		velocity = 10.0f * dt;
+		velocity = 100.0f * dt;
 
 		if (inVars.isKeyPressed[W])
 			this->moveBF += velocity;
@@ -147,7 +147,7 @@ void Camera::ProcessKeyboard(InputVars inVars, float dt)
 	}
 	else if (this->flyMode == 1)
 	{
-		velocity = 5.0f * dt;
+		velocity = 100.0f * dt;
 
 		// Change the position according to the key pressed
 		if (inVars.isKeyPressed[W])

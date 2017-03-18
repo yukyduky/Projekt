@@ -48,7 +48,6 @@ private:
 	ID3D11ShaderResourceView* gNormalMapEmpty;
 	ID3D11ShaderResourceView* gSpecularMap;
 	ID3D11ShaderResourceView* gGlowMap;
-
 	ID3D11ShaderResourceView* gDisplaceMap;
 
 	// Variables

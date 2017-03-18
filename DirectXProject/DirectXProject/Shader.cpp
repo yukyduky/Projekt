@@ -83,9 +83,12 @@ void Shader::Release()
 {
 	gVertexShader->Release();
 	gPixelShader->Release();
-	gHullShader->Release();
-	gDomainShader->Release();
-	gGeometyrShader->Release();
+	if (gHullShader != nullptr)
+		gHullShader->Release();
+	if (gDomainShader != nullptr)
+		gDomainShader->Release();
+	if (gGeometyrShader != nullptr)
+		gGeometyrShader->Release();
 	gVertexLayout->Release();
 }
 

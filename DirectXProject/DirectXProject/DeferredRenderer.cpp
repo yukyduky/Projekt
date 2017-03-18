@@ -51,7 +51,7 @@ bool DeferredRenderer::InitScene()
 	if (!CreateRasterizerState(true))
 		return false;
 
-	if (!gm.InitScene(gDevice))
+	if (!gm.InitScene(gDevice, gDevCon))
 		return false;
 
 	// Initialize blur class
@@ -492,10 +492,7 @@ bool DeferredRenderer::PostDrawing()
 
 	// Set the normal texture for the current pixel shader
 	gDevCon->PSSetShaderResources(0, NUM_DEFERRED_OUTPUTS, gDeferredSRV);
-	gDevCon->DSSetShaderResources(0, NUM_DEFERRED_OUTPUTS, gDeferredSRV);
-	gDevCon->PSSetShaderResources(4, 1, &gSpotShadowMap);
-	gDevCon->DSSetShaderResources(4, 1, &gSpotShadowMap);
-
+	gDevCon->PSSetShaderResources(5, 1, &gSpotShadowMap);
 
 	gDevCon->RSSetState(gDefaultRasterizer);
 

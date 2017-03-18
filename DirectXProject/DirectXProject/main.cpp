@@ -51,8 +51,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	SetCursorPos(p.x, p.y);
 
-	
-	
 	// Game Loop!
 	while (run)
 	{
