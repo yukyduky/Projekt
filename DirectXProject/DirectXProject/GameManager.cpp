@@ -212,7 +212,7 @@ bool GameManager::CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderReso
 
 	// Render
 	for (int i = 0; i < NUM_BOXES; i++)
-		box[i].Render(gDevCon);
+		box[i].RenderShadow(gDevCon);
 
 	// Update the world matrix for static objects
 	spotLight.setWorld(staticWorld);

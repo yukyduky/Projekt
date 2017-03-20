@@ -18,6 +18,7 @@ public:
 
 	bool InitScene(ID3D11Device* gDevice, Vector3 startPos, float width);
 	void Render(ID3D11DeviceContext* gDevCon);
+	void RenderShadow(ID3D11DeviceContext * gDevCon);
 	bool CreateGlowMap(ID3D11DeviceContext* gDevCon);
 	void Release();
 	void SetDiffuseMap(ID3D11ShaderResourceView* gDiffuseMap);

@@ -43,6 +43,22 @@ void Box::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->DrawIndexed(36, 0, 0);
 }
 
+void Box::RenderShadow(ID3D11DeviceContext* gDevCon)
+{
+	// Set the index buffer
+	gDevCon->IASetIndexBuffer(gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	// Set the vertex buffer
+	gDevCon->IASetVertexBuffers(0, 1, &gVertBuffer, &stride, &offset);
+	// Set Primitive Topology
+	gDevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// Update the pixel shader with the textures
+	gDevCon->PSSetShaderResources(0, 1, &gDiffuseMap);
+	gDevCon->PSSetShaderResources(1, 1, &gNormalMap);
+	gDevCon->PSSetShaderResources(2, 1, &gSpecularMap);
+	// Draw the indexed vertices
+	gDevCon->DrawIndexed(36, 0, 0);
+}
+
 bool Box::CreateGlowMap(ID3D11DeviceContext* gDevCon)
 {
 	//Update the pixel shader with textures
