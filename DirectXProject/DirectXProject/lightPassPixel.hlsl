@@ -92,14 +92,7 @@ float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 	float4 lighting = CalcLight(normal, diffuse, pos, specular, shadow, blurred);
 
 
-	//float4 test;
-	//int3 test2 = int3(position_S.xy, 0.0f);
-	
-	//test = float4(texBlurred.Load(test2).xyz, 0.0f);
-
-	//return test;
 	return lighting;
-	//return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffuse, out float3 pos, out float3 specular, out float3 blurred)
@@ -108,8 +101,6 @@ void LoadGeoPassData(in float2 screenCoords, out float3 normal, out float3 diffu
 
 	normal = texNormal.Load(texCoords).xyz;
 	diffuse = texDiffuse.Load(texCoords).xyz;
-	//diffuse += texBlurred.Load(texCoords).xyz * 10;
-	//diffuse = saturate(diffuse);
 	pos = texPosition.Load(texCoords).xyz;
 	specular = texSpecular.Load(texCoords).xyz;
 	blurred = texBlurred.Load(texCoords).xyz;
@@ -235,4 +226,5 @@ float4 CalcLight(in float3 normal, in float3 diffuse, in float3 pos, in float3 s
 	float3 lighting = saturate(pointLighting + spotLighting + directLighting);
 
 	return float4(lighting, 1.0f);
+	//return float4(shadow, shadow, shadow, 1.0f);
 }

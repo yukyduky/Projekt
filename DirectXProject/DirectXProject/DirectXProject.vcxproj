@@ -159,7 +159,6 @@
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DeferredRenderer.cpp" />
-    <ClCompile Include="Directlight.cpp" />
     <ClCompile Include="FrustumCulling.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -167,7 +166,6 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Picking.cpp" />
-    <ClCompile Include="Pointlight.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
@@ -401,14 +399,12 @@
     <ClInclude Include="Box.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DeferredRenderer.h" />
-    <ClInclude Include="Directlight.h" />
     <ClInclude Include="FrustumCulling.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="Pointlight.h" />
     <ClInclude Include="Picking.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="Shader.h" />

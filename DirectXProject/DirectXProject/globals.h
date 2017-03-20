@@ -12,7 +12,7 @@ const int SHADOW_INPUT_DESC_SIZE = 1;
 const int BLUR_INPUT_DESC_SIZE = 2;
 
 const int NUM_DEFERRED_OUTPUTS = 5;
-
+const int NUM_BOXES = 4;
 const int NUM_KEYS = 10;
 enum KEYS { W, A, S, D, ESC, SPACE, CTRL, MB, UP, F };
 enum LIGHT_TYPE { SPOTLIGHT, DIRECTLIGHT, POINTLIGHT };

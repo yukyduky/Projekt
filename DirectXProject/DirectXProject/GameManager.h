@@ -99,11 +99,12 @@ private:
 	Vector2 mouseOffset;
 
 	// Objects
-	Box box;
-	Box box2;
-	Box box3;
-	Box box4;
-	Box* Boxes[4] = { &box, &box2 , &box3 , &box4};
+	//Box box;
+	//Box box2;
+	//Box box3;
+	//Box box4;
+	//Box* Boxes[4] = { &box, &box2 , &box3 , &box4};
+	Box box[4];
 	Surface surface;
 	Camera cam;
 	Time time;

@@ -57,16 +57,16 @@ bool GameManager::InitScene(ID3D11Device* gDevice, ID3D11DeviceContext* gDevCon)
 		return false;
 
 	// Initialize the box
-	if (!box.InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
+	if (!box[0].InitScene(gDevice, Vector3(-1.0f, -1.0f, -1.0f), 2.0f))
 		return false;
 
-	if (!box2.InitScene(gDevice, Vector3(-0.5f, 10.0f, -0.5f), 8.0f))
+	if (!box[1].InitScene(gDevice, Vector3(-0.5f, 10.0f, -0.5f), 8.0f))
 		return false;
 
-	if (!box3.InitScene(gDevice, Vector3(-30.0f, -29.0f, 10.0f), 30.0f))
+	if (!box[2].InitScene(gDevice, Vector3(-30.0f, -29.0f, 10.0f), 30.0f))
 		return false;
 
-	if (!box4.InitScene(gDevice, Vector3(6.5f, 5.0f, 10.5f), 3.0f))
+	if (!box[3].InitScene(gDevice, Vector3(6.5f, 5.0f, 10.5f), 3.0f))
 		return false;
 
 	// Initialize the surface
@@ -104,9 +104,9 @@ void GameManager::Update(ID3D11Device* gDevice, InputVars inVars)
 	}
 
 	// Calculate the cameras frustum
-	fc.CalcFrustum(cam.getPosition(), cam.getForward(), cam.getRight());
+	//fc.CalcFrustum(cam.getPosition(), cam.getForward(), cam.getRight());
 	// Set the index buffer for the surface according to the data gather from the quadtree
-	surface.setIndexBuffer(gDevice, fc.getDrawData());
+	//surface.setIndexBuffer(gDevice, fc.getDrawData());
 
 	// Update the spotlights
 	spotLight.Update();
@@ -127,7 +127,7 @@ void GameManager::Update(ID3D11Device* gDevice, InputVars inVars)
 	UpdateWorlds(inVars);
 
 	//Picking the boxes
-	mouse.pickBoxes(inVars.isKeyPressed[MB], *Boxes, cam, boxWorld, boxRotation, gDevice);
+	mouse.pickBoxes(inVars.isKeyPressed[MB], box, cam, boxWorld, boxRotation, gDevice);
 }
 
 bool GameManager::Render(ID3D11DeviceContext* gDevCon)
@@ -153,10 +153,8 @@ bool GameManager::Render(ID3D11DeviceContext* gDevCon)
 	gDevCon->GSSetConstantBuffers(1, 1, &gTesselationBuffer);
 
 	// Render
-	box.Render(gDevCon);
-	box2.Render(gDevCon);
-	box3.Render(gDevCon);
-	box4.Render(gDevCon);
+	for (int i = 0; i < NUM_BOXES; i++)
+		box[i].Render(gDevCon);
 
 	// Update the Matrices
 	wvp = staticWorld * view * proj;
@@ -213,10 +211,8 @@ bool GameManager::CreateShadowMap(ID3D11DeviceContext* gDevCon, ID3D11ShaderReso
 		return false;
 
 	// Render
-	box.Render(gDevCon);
-	box2.Render(gDevCon);
-	box3.Render(gDevCon);
-	box4.Render(gDevCon);
+	for (int i = 0; i < NUM_BOXES; i++)
+		box[i].Render(gDevCon);
 
 	// Update the world matrix for static objects
 	spotLight.setWorld(staticWorld);
@@ -239,18 +235,17 @@ void GameManager::Release()
 	gLightLightBuffer->Release();
 	gTesselationBuffer->Release();
 
-	box.Release();
-	box2.Release();
-	box3.Release();
-	box4.Release();
+	for (int i = 0; i < NUM_BOXES; i++)
+		box[i].Release();
+
 	surface.Release();
 	spotLight.Release();
 }
 
 void GameManager::SetBoxDiffuseMap(ID3D11ShaderResourceView* gDiffuseMap)
 {
-	this->box.SetDiffuseMap(gDiffuseMap);
-	this->box2.SetDiffuseMap(gDiffuseMap);
+	for (int i = 0; i < NUM_BOXES; i++)
+		box[i].SetDiffuseMap(gDiffuseMap);
 }
 
 Matrix GameManager::getMatrixWVP() const
@@ -270,7 +265,7 @@ PointLight GameManager::getPointLight() const
 
 bool GameManager::CreateGlowMap(ID3D11DeviceContext* gDevCon)
 {
-	if (!this->box.CreateGlowMap(gDevCon))
+	if (!this->box[0].CreateGlowMap(gDevCon))
 		return false;
 
 	return true;

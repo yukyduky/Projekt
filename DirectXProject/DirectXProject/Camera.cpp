@@ -2,13 +2,13 @@
 
 
 Camera::Camera() : up(Vector3(0.0f, 1.0f, 0.0f)), forward(Vector3(0.0f, 0.0f, 1.0f)), right(Vector3(1.0f, 0.0f, 0.0f)),
-					nearD(1.0f), farD(40.0f), fov(72), ar(float(WIDTH / HEIGHT))
+					nearD(1.0f), farD(1000.0f), fov(72), ar(float(WIDTH / HEIGHT))
 {
 	this->worldUp = Vector3(0.0f, 1.0f, 0.0f);
 	this->worldForward = Vector3(0.0f, 0.0f, 1.0f);
 	this->worldRight = Vector3(1.0f, 0.0f, 0.0f);
 	// Position
-	this->pos = Vector3(2.0f, 20.0f, 2.0f);
+	this->pos = Vector3(2.0f, 40.0f, 2.0f);
 
 	// Set the view matrix
 	this->view = XMMatrixLookAtLH(pos, forward, up);
@@ -18,7 +18,7 @@ Camera::Camera() : up(Vector3(0.0f, 1.0f, 0.0f)), forward(Vector3(0.0f, 0.0f, 1.
 	this->yaw = 0.0f;
 	this->pitch = 0.0f;
 
-	this->flyMode = 0;
+	this->flyMode = 1;
 	this->moveLR = 0.0f;
 	this->moveBF = 0.0f;
 }
