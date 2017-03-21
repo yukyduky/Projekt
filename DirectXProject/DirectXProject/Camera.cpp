@@ -39,11 +39,13 @@ void Camera::Update(InputVars inVars, float dt, float* heightValues)
 		this->ProcessKeyboard(inVars, dt);
 		this->ProcessMouse(inVars.mouseOffset, dt);
 
+		// Create the rotation matrix using the yaw and pitch, no roll needed
 		this->rotationMatrix = XMMatrixRotationRollPitchYaw(XMConvertToRadians(this->pitch), XMConvertToRadians(this->yaw), 0);
-
+		// Create the 'look-at' forward, the direction the camera is looking at
 		this->forward = XMVector3TransformCoord(this->worldForward, this->rotationMatrix);
 		this->forward.Normalize();
 
+		// Create the rotation matrix around the Y axis
 		Matrix rotateYTempMatrix;
 		rotateYTempMatrix = XMMatrixRotationY(XMConvertToRadians(this->yaw));
 
@@ -56,12 +58,13 @@ void Camera::Update(InputVars inVars, float dt, float* heightValues)
 
 		this->pos += this->moveLR * this->right;
 		this->pos += this->moveBF * this->target;
+
+		///////////////////////////////////////////////////////
 		
-		//////////////////////////////////////////////////////////
 		int index = (int)this->pos.x + (int)this->pos.z * 256;
 		this->pos.y = (heightValues[index] / 10.0f) + 5.0f;
-		
-		//////////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////
 
 		this->moveLR = 0.0f;
 		this->moveBF = 0.0f;

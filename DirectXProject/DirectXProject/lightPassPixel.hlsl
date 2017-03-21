@@ -91,7 +91,6 @@ float4 PS(float4 position_S : SV_POSITION) : SV_TARGET
 	// Calculate lightning
 	float4 lighting = CalcLight(normal, diffuse, pos, specular, shadow, blurred);
 
-
 	return lighting;
 }
 

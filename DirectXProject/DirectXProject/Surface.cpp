@@ -123,7 +123,6 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 			for (int j = 0; j < this->hmd.width; j++)
 			{
 				v[index].position = this->hmd.vertexData[i][j];
-				//v[index].position.y = 25.5f;
 				
 				normalFile >> v[index].normal.x;
 				getchar();
@@ -134,7 +133,7 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 				
 				v[index].texCoords.x = (float)j / ((float)this->hmd.width - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the x-axis
 				v[index].texCoords.y = (float)i / ((float)this->hmd.height - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the y-axis
-				v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent. (Borde fixas ordentligt om vi får tid)
+				v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent.
 
 				index++;
 			}
@@ -150,10 +149,9 @@ bool Surface::CreateVertexData(ID3D11Device* gDevice)
 			for (int j = 0; j < this->hmd.width; j++)
 			{
 				v[index].position = this->hmd.vertexData[i][j];
-				//v[index].position.y = 25.5f;
 				v[index].texCoords.x = (float)j / ((float)this->hmd.width - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the x-axis
 				v[index].texCoords.y = (float)i / ((float)this->hmd.height - 1); //Give each vertex a tex-coordinate between 0 - 1.0 on the y-axis
-				v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent. (Borde fixas ordentligt om vi får tid)
+				v[index].tangent = Vector4(1.0f, 0.0f, 0.0f, 0.0f); //Assign each vertex a standard tangent.
 
 				index++;
 			}
@@ -383,7 +381,7 @@ void Surface::CreateHMVertices() //Creates the vertice points for the heightmap.
 
 void Surface::CreateNormalBMP(std::vector<Vertex> v, int nrOfVertices)
 {
-	/*// Thinking in quads in the coming code with the corners numbered as illustrated bellow.
+	// Thinking in quads in the coming code with the corners numbered as illustrated bellow.
 	//   0________1
 	//    |      |
 	//    |      |
@@ -494,7 +492,6 @@ void Surface::CreateNormalBMP(std::vector<Vertex> v, int nrOfVertices)
 	//close normalFile since all the normals have been saved at this point.
 	normalFile.close();
 	
-	///////////////////////////////////////////////////////////////////////////
 	//Save the normals to a BMP so we can use it as a normalmap
 	char* data;
 	data = new char[this->hmd.width * this->hmd.height * 3];
@@ -540,8 +537,6 @@ void Surface::CreateNormalBMP(std::vector<Vertex> v, int nrOfVertices)
 
 	delete[] data;
 	data = NULL;
-
-	///////////////////////////////////////////////////////////////////////////////////*/
 }
 
 bool Surface::CreateRasteriserState(ID3D11Device* gDevice)
