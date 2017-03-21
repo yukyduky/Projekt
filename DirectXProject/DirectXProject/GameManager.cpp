@@ -104,9 +104,9 @@ void GameManager::Update(ID3D11Device* gDevice, InputVars inVars)
 	}
 
 	// Calculate the cameras frustum
-	//fc.CalcFrustum(cam.getPosition(), cam.getForward(), cam.getRight());
+	fc.CalcFrustum(cam.getPosition(), cam.getForward(), cam.getRight());
 	// Set the index buffer for the surface according to the data gather from the quadtree
-	//surface.setIndexBuffer(gDevice, fc.getDrawData());
+	surface.setIndexBuffer(gDevice, fc.getDrawData());
 
 	// Update the spotlights
 	spotLight.Update();

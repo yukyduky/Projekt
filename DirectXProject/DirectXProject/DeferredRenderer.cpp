@@ -1,7 +1,6 @@
 #include "DeferredRenderer.h"
 
 
-
 DeferredRenderer::DeferredRenderer()
 {
 }
@@ -432,7 +431,7 @@ bool DeferredRenderer::PreDrawing()
 {
 	////////////////////////////////////////////////////////
 	//Set blur shaders, vertexbuffer and sampler state so that we can create the blurred image of box diffuse
-	/*Bluring.SetDiffuseGlowPassShaders(gDevCon);
+	Bluring.SetDiffuseGlowPassShaders(gDevCon);
 	Bluring.SetVertexBuffer(gDevCon);
 	Bluring.SetSamplerState(gDevCon);
 	Bluring.SetDiffuseGlowRTV(gDevCon);
@@ -449,7 +448,7 @@ bool DeferredRenderer::PreDrawing()
 	Bluring.SetVerticalBlurShaders(gDevCon);
 	Bluring.SetVerticalBlurRTV(gDevCon);
 	Bluring.SetHorizontalBlurSRV(gDevCon);
-	gDevCon->Draw(4, 0);*/
+	gDevCon->Draw(4, 0);
 
 	// Create the shadowmaps
 	gm.CreateShadowMap(gDevCon, &gSpotShadowMap);

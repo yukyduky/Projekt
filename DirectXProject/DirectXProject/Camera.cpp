@@ -2,7 +2,7 @@
 
 
 Camera::Camera() : up(Vector3(0.0f, 1.0f, 0.0f)), forward(Vector3(0.0f, 0.0f, 1.0f)), right(Vector3(1.0f, 0.0f, 0.0f)),
-					nearD(1.0f), farD(1000.0f), fov(72), ar(float(WIDTH / HEIGHT))
+					nearD(1.0f), farD(40.0f), fov(72), ar(float(WIDTH / HEIGHT))
 {
 	this->worldUp = Vector3(0.0f, 1.0f, 0.0f);
 	this->worldForward = Vector3(0.0f, 0.0f, 1.0f);
@@ -18,7 +18,7 @@ Camera::Camera() : up(Vector3(0.0f, 1.0f, 0.0f)), forward(Vector3(0.0f, 0.0f, 1.
 	this->yaw = 0.0f;
 	this->pitch = 0.0f;
 
-	this->flyMode = 1;
+	this->flyMode = 0;
 	this->moveLR = 0.0f;
 	this->moveBF = 0.0f;
 }
@@ -130,7 +130,7 @@ void Camera::ProcessKeyboard(InputVars inVars, float dt)
 
 	if (this->flyMode == 0)
 	{
-		velocity = 100.0f * dt;
+		velocity = 10.0f * dt;
 
 		if (inVars.isKeyPressed[W])
 			this->moveBF += velocity;
